@@ -1,10 +1,18 @@
 import hero from "../../assets/images/hero.png";
 
-function Home() {
+function HomePage() {
   return (
-    <div className="flex-grow">
-      {/* Hero Section */}
-      <div>
+    /* Hero Section */
+    <div
+      style={{
+        backgroundImage: `url(${hero})`,
+        backgroundSize: "100% 100%",
+        backgroundPosition: "center",
+        opacity: "100%",
+        minHeight: "calc(100vh - 72px - 40px)",
+      }}
+    >
+      <div className="p-3">
         <div className="container my-5 opacity-75">
           <div className="row justify-content-center">
             <div className="card bg-black col-10 p-3">
@@ -41,20 +49,8 @@ function Home() {
           </div>
         </div>
       </div>
-
-      {/* Background Image */}
-      <div
-        className="position-absolute top-0 left-0 w-100 h-100 shadow"
-        style={{
-          backgroundImage: `url(${hero})`,
-          backgroundSize: "100% 100%",
-          backgroundPosition: "center",
-          opacity: "100%",
-          zIndex: "-1",
-        }}
-      ></div>
     </div>
   );
 }
 
-export default Home;
+export default HomePage;

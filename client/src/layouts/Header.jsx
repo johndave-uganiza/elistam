@@ -1,9 +1,18 @@
+import { useState } from "react";
 import { NavLink, Link, Navigate, useNavigate } from "react-router-dom";
 
 function Header() {
   const navigate = useNavigate();
+  const [collapse, setCollapse] = useState(false);
+
+  function toggleNavigation() {
+    setCollapse(!collapse);
+  }
   return (
-    <nav className="navbar navbar-expand-md bg-primary" data-bs-theme="dark">
+    <nav
+      className="navbar navbar-expand-md bg-primary show"
+      data-bs-theme="dark"
+    >
       <div className="container-fluid">
         <NavLink className="navbar-brand" to="/">
           eListam
@@ -11,15 +20,11 @@ function Header() {
         <button
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarColor01"
-          aria-controls="navbarColor01"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          onClick={toggleNavigation}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarColor01">
+        <div className={`collapse navbar-collapse ${collapse ? "show" : ""}`}>
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
               <NavLink className="nav-link" to="/">
@@ -53,12 +58,6 @@ function Header() {
               onClick={() => navigate("/login")}
             >
               Login
-              {/* <a
-                className="text-black fw-bold text-decoration-none"
-                to="/login"
-              >
-                Login
-              </a> */}
             </button>
           </div>
         </div>
