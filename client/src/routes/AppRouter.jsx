@@ -1,25 +1,25 @@
 import { Route, Routes } from "react-router-dom";
-import HomePage from "../pages/home/HomePage";
-import DashboardPage from "../pages/dashboard/DashboardPage";
-import LoginPage from "../pages/login/LoginPage";
-import BasketPage from "../pages/basket/BasketPage";
-import ProductsPage from "../pages/products/ProductsPage";
+import Home from "../pages/home/Home";
+import Dashboard from "../pages/dashboard/Dashboard";
+import Login from "../pages/auth/Login";
+import BasketItems from "../pages/basket/BasketItems";
+import ProductList from "../pages/products/ProductList";
 import { ProductsProvider } from "../context/ProductsContext";
 import { BasketProvider } from "../context/BasketContext";
-import AddToBasketPage from "../pages/add-to-basket/AddToBasketPage";
-import TransactionsPage from "../pages/transactions/TransactionsPage";
+import AddToBasket from "../pages/basket/AddToBasket";
+import Transactions from "../pages/transactions/Transactions";
 
 function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
 
       <Route
         path="/dashboard"
         element={
           // <AuthPage>
-          <DashboardPage />
+          <Dashboard />
           // </AuthPage>
         }
       />
@@ -29,7 +29,7 @@ function AppRouter() {
         element={
           <ProductsProvider>
             <BasketProvider>
-              <ProductsPage />
+              <ProductList />
             </BasketProvider>
           </ProductsProvider>
         }
@@ -39,7 +39,7 @@ function AppRouter() {
         path="/add-to-basket"
         element={
           <BasketProvider>
-            <AddToBasketPage />
+            <AddToBasket />
           </BasketProvider>
         }
       />
@@ -48,12 +48,12 @@ function AppRouter() {
         path="/basket"
         element={
           <BasketProvider>
-            <BasketPage />
+            <BasketItems />
           </BasketProvider>
         }
       />
 
-      <Route path="/transactions" element={<TransactionsPage />} />
+      <Route path="/transactions" element={<Transactions />} />
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { BasketContext } from "../../context/BasketContext";
 
-function BasketPage() {
+function BasketItems() {
   const { basketItems } = useContext(BasketContext);
 
   function getTotalBasketPrice() {
@@ -49,7 +49,7 @@ function BasketPage() {
                   className="overflow-scroll overflow-x-hidden"
                   style={{ height: "180px" }}
                 >
-                  <table class="table">
+                  <table className="table">
                     <thead>
                       <tr>
                         <th scope="col">#</th>
@@ -62,15 +62,7 @@ function BasketPage() {
                     <tbody>
                       <tr>
                         <th scope="row">1</th>
-                        <td>
-                          {/* <img
-                            src={basketItems[0].thumbnail}
-                            className="img-fluid rounded-start"
-                            style={{ height: "32px" }}
-                            alt="..."
-                          /> */}
-                          Product-1
-                        </td>
+                        <td>Product-1</td>
                         <td>11</td>
                         <td>11</td>
                         <td>111</td>
@@ -158,4 +150,4 @@ function BasketPage() {
   );
 }
 
-export default BasketPage;
+export default BasketItems;

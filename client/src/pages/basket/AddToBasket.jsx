@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BasketContext } from "../../context/BasketContext";
 
-function AddToBasketPage() {
+function AddToBasket() {
   const location = useLocation();
   const navigate = useNavigate();
   const { title, price, thumbnail, category, stock } =
@@ -112,4 +112,4 @@ function AddToBasketPage() {
   );
 }
 
-export default AddToBasketPage;
+export default AddToBasket;

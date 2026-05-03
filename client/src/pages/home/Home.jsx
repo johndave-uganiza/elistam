@@ -1,6 +1,6 @@
 import hero from "../../assets/images/hero.png";
 
-function HomePage() {
+function Home() {
   return (
     /* Hero Section */
     <div
@@ -53,4 +53,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default Home;

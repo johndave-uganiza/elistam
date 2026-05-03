@@ -14,7 +14,7 @@ import EditProductForm from "../../components/EditProductForm";
 import { productsSortBy } from "../../data/productsSortBy";
 import DeleteProductForm from "../../components/DeleteProductForm";
 
-function ProductsPage() {
+function ProductList() {
   const navigate = useNavigate();
   const { basketItems, setBasketItems } = useContext(BasketContext);
 
@@ -203,4 +203,4 @@ function ProductsPage() {
   );
 }
 
-export default ProductsPage;
+export default ProductList;
