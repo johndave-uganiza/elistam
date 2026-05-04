@@ -146,41 +146,24 @@ function ProductList() {
   }
 
   return (
-    <div>
-      <div className="container-fluid my-3 px-sm-5">
-        <h3>List of Products</h3>
-        <ProductsToolbar
-          handleAddProductClick={handleAddProductClick}
-          handleSearchInput={handleSearchInput}
-          handleSortByChange={handleSortByChange}
-          products={products}
-          sortBy={sortBy}
-        />
-
-        <AddProductForm
-          showAddProductForm={showAddProductForm}
-          setShowAddProductForm={setShowAddProductForm}
-        />
-
-        <EditProductForm
-          showEditProductForm={showEditProductForm}
-          setShowEditProductForm={setShowEditProductForm}
-          currentProductItem={currentProductItem}
-          handleUpdateProduct={handleUpdateProduct}
-          productDetailForm={productDetailForm}
-          setProductDetailForm={setProductDetailForm}
-        />
-
-        <DeleteProductForm
-          showDeleteProductForm={showDeleteProductForm}
-          setShowDeleteProductForm={setShowDeleteProductForm}
-          currentProductItem={currentProductItem}
-          handleRemoveProduct={handleRemoveProduct}
-          productDetailForm={productDetailForm}
-          setProductDetailForm={setProductDetailForm}
-        />
-
-        <div className="row justify-content-around gap-1 g-5">
+    <div className="p-0">
+      <div className="container-fluid">
+        <div className="row mb-2 p-3">
+          <div className="p-0 d-sm-flex justify-content-between align-items-center">
+            <h3 className="">List of Products</h3>
+            <h6 className="">Total Products:{products?.length}</h6>
+          </div>
+        </div>
+        <div className="row py-2 mb-2 p-3">
+          <ProductsToolbar
+            handleAddProductClick={handleAddProductClick}
+            handleSearchInput={handleSearchInput}
+            handleSortByChange={handleSortByChange}
+            products={products}
+            sortBy={sortBy}
+          />
+        </div>
+        <div className="row justify-content-center p-3 gap-5">
           {mutatedProducts?.length > 0
             ? mutatedProducts.map((productItem, index) => {
                 return (
@@ -199,6 +182,29 @@ function ProductList() {
             : null}
         </div>
       </div>
+
+      <AddProductForm
+        showAddProductForm={showAddProductForm}
+        setShowAddProductForm={setShowAddProductForm}
+      />
+
+      <EditProductForm
+        showEditProductForm={showEditProductForm}
+        setShowEditProductForm={setShowEditProductForm}
+        currentProductItem={currentProductItem}
+        handleUpdateProduct={handleUpdateProduct}
+        productDetailForm={productDetailForm}
+        setProductDetailForm={setProductDetailForm}
+      />
+
+      <DeleteProductForm
+        showDeleteProductForm={showDeleteProductForm}
+        setShowDeleteProductForm={setShowDeleteProductForm}
+        currentProductItem={currentProductItem}
+        handleRemoveProduct={handleRemoveProduct}
+        productDetailForm={productDetailForm}
+        setProductDetailForm={setProductDetailForm}
+      />
     </div>
   );
 }

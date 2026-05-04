@@ -5,30 +5,22 @@ function ProductsToolbar({
   handleAddProductClick,
   handleSearchInput,
   handleSortByChange,
-  products,
+  // products,
   sortBy,
 }) {
   return (
-    <div>
-      <div className="row">
-        <div className="col-6">
-          <SearchBar handleSearchInput={handleSearchInput} />
-          <SortDropdown
-            handleSortByChange={handleSortByChange}
-            sortBy={sortBy}
-          />
-        </div>
-        <div className="col-6 d-flex justify-content-end">
-          <div>
-            <h6 className=" py-3">Total Products:{products?.length}</h6>
-            <button
-              onClick={() => handleAddProductClick()}
-              className="btn btn-sm btn-primary p-2"
-            >
-              + Add Product
-            </button>
-          </div>
-        </div>
+    <div className="col-12 p-0 d-flex">
+      <div className="col-6 d-flex align-items-center gap-2">
+        <SearchBar handleSearchInput={handleSearchInput} />
+        <SortDropdown handleSortByChange={handleSortByChange} sortBy={sortBy} />
+      </div>
+      <div className="col-6 text-end p-0">
+        <button
+          onClick={() => handleAddProductClick()}
+          className="btn btn-sm btn-primary"
+        >
+          + Add Product
+        </button>
       </div>
     </div>
   );

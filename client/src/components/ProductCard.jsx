@@ -6,12 +6,12 @@ function ProductCard({
 }) {
   const { title, price, thumbnail, stock } = productItem;
   return (
-    <div className="col-xl-2 col-lg-3 col-md-4 col-sm-5 col-6 card bg-primary-subtle p-1 shadow border border-2 border-primary">
-      <div className="card-header bg-primary text-white fs-7 fw-medium">
+    <div className="col-xl-2 col-lg-3 col-md-3 col-sm-5 col-12 card bg-primary-subtle p-1 shadow border border-2 border-primary">
+      <div className="card-header bg-primary text-white small fw-medium">
         <span>{title}</span>
       </div>
       <div className="card-body d-flex flex-column gap-3 justify-content-center align-items-center mb-2 bg-white">
-        <img className="w-75" src={thumbnail} alt="" />
+        <img className="w-50" src={thumbnail} alt="" />
 
         <div className="align-self-start">
           <div className="d-flex align-items-center">
