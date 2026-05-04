@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { ProductsContext } from "../../context/ProductsContext";
 import ProductCard from "../../components/ProductCard";
 import { BasketContext } from "../../context/BasketContext";
@@ -15,7 +15,7 @@ import { productsSortBy } from "../../data/productsSortBy";
 import DeleteProductForm from "../../components/DeleteProductForm";
 
 function ProductList() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { basketItems, setBasketItems } = useContext(BasketContext);
 
   // const [showToast, setShowToast] = useState(false);
@@ -26,7 +26,7 @@ function ProductList() {
   const { products, setProducts } = useContext(ProductsContext);
   const [searchTextInput, setSearchTextInput] = useState("");
   const [currentProductItem, setCurrentProductItem] = useState(null);
-
+  const [showAddToBasketForm, setShowAddToBasketForm] = useState(false);
   const [productDetailForm, setProductDetailForm] = useState({
     name: "",
     price: "",
@@ -69,7 +69,8 @@ function ProductList() {
   }
 
   function handleAddToBasket(productItem) {
-    navigate("/add-to-basket", { state: { productItem } });
+    // navigate("/add-to-basket", { state: { productItem } });
+    setShowAddToBasketForm(true);
     setCurrentProductItem(productItem);
     // setShowAddToBasketForm(true);
   }
@@ -182,6 +183,12 @@ function ProductList() {
             : null}
         </div>
       </div>
+
+      <AddToBasketForm
+        showAddToBasketForm={showAddToBasketForm}
+        setShowAddToBasketForm={setShowAddToBasketForm}
+        currentProductItem={currentProductItem}
+      />
 
       <AddProductForm
         showAddProductForm={showAddProductForm}

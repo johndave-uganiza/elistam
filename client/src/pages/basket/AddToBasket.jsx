@@ -41,9 +41,10 @@ function AddToBasket() {
           </div>
           <div className="card-body bg-primary col-6 p-3">
             <h4>Order Summary</h4>
+            <hr />
             <form onSubmit={handlePlaceToBasket}>
               <div className="mb-3">
-                <strong>Product Name:</strong>
+                {/* <strong>Product Name:</strong> */}
                 <p className="card-text mb-0">{title}</p>
                 <p className="card-text">
                   <small className="text-body-secondary">
@@ -51,20 +52,15 @@ function AddToBasket() {
                   </small>
                 </p>
               </div>
-              <div className="mb-3">
-                <strong>Total Price:</strong>
-                <p className="card-text">
-                  ${(itemQuantity * price).toFixed(2)}
-                </p>
-              </div>
+
               <div className="d-flex flex-column gap-2 mb-4 col-lg-6 col-md-5 col-8">
-                <strong>Quantity:</strong>
+                <p>Quantity:</p>
                 <div className="input-group mb-3">
                   <button
                     onClick={() => {
                       setItemQuantity((prev) => (prev > 1 ? prev - 1 : prev));
                     }}
-                    className="btn btn-secondary"
+                    className="btn btn-warning"
                     type="button"
                   >
                     -
@@ -84,23 +80,32 @@ function AddToBasket() {
                     onClick={() => {
                       setItemQuantity((prev) => prev + 1);
                     }}
-                    className="btn btn-secondary"
+                    className="btn btn-warning"
                     type="button"
                   >
                     +
                   </button>
                 </div>
               </div>
-
+              <hr />
+              <div className="mb-3">
+                <p className="card-text">
+                  Total: <strong>${(itemQuantity * price).toFixed(2)}</strong>
+                </p>
+              </div>
+              <hr />
               <div className="d-flex gap-2">
                 <button
                   onClick={() => navigate(-1)}
                   type="submit"
-                  className="btn btn-warning fw-bold"
+                  className="btn btn-info fw-medium rounded-5"
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-success fw-bold">
+                <button
+                  type="submit"
+                  className="btn btn-success fw-medium rounded-5"
+                >
                   Place To Basket
                 </button>
               </div>
