@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
 import { ProductsContext } from "../context/ProductsContext";
 
-function EditProductForm({
+function EditItemForm({
   showEditProductForm,
   setShowEditProductForm,
   handleUpdateProduct,
@@ -36,7 +36,7 @@ function EditProductForm({
                 className="modal-title fs-5 text-warning"
                 id="staticBackdropLabel"
               >
-                Edit Product
+                Edit Item
               </h1>
               <button
                 onClick={() => {
@@ -130,4 +130,4 @@ function EditProductForm({
   );
 }
 
-export default EditProductForm;
+export default EditItemForm;

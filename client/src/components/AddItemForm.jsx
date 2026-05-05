@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
 import { ProductsContext } from "../context/ProductsContext";
 
-function AddProductForm({ showAddProductForm, setShowAddProductForm }) {
+function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
   const { products, setProducts } = useContext(ProductsContext);
@@ -55,7 +55,7 @@ function AddProductForm({ showAddProductForm, setShowAddProductForm }) {
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="staticBackdropLabel">
-              Add Product
+              Add Item
             </h1>
             <button
               onClick={() => {
@@ -131,4 +131,4 @@ function AddProductForm({ showAddProductForm, setShowAddProductForm }) {
   );
 }
 
-export default AddProductForm;
+export default AddItemForm;

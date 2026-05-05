@@ -1,5 +1,5 @@
-import Header from "./layouts/Header";
-import Footer from "./layouts/Footer";
+import Header from "./components/layouts/Header";
+import Footer from "./components/layouts/Footer";
 import AppRouter from "./routes/AppRouter";
 
 function App() {

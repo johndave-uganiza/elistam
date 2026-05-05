@@ -2,11 +2,12 @@ import { Route, Routes } from "react-router-dom";
 import Home from "../pages/home/Home";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Login from "../pages/auth/Login";
-import BasketItems from "../pages/basket/BasketItems";
+import Orders from "../pages/orders/Orders";
 import ProductList from "../pages/products/ProductList";
 import { ProductsProvider } from "../context/ProductsContext";
 import { BasketProvider } from "../context/BasketContext";
-import AddToBasket from "../pages/basket/AddToBasket";
+import AddToOrder from "../pages/orders/AddToOrder";
+import Items from "../pages/items/Items";
 import Transactions from "../pages/transactions/Transactions";
 
 function AppRouter() {
@@ -25,6 +26,17 @@ function AppRouter() {
       />
 
       <Route
+        path="/items"
+        element={
+          <ProductsProvider>
+            <BasketProvider>
+              <Items />
+            </BasketProvider>
+          </ProductsProvider>
+        }
+      />
+
+      <Route
         path="/products"
         element={
           <ProductsProvider>
@@ -36,19 +48,19 @@ function AppRouter() {
       />
 
       <Route
-        path="/add-to-basket"
+        path="/add-to-order"
         element={
           <BasketProvider>
-            <AddToBasket />
+            <AddToOrder />
           </BasketProvider>
         }
       />
 
       <Route
-        path="/basket"
+        path="/orders"
         element={
           <BasketProvider>
-            <BasketItems />
+            <Orders />
           </BasketProvider>
         }
       />

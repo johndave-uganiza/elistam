@@ -6,7 +6,8 @@ import { BasketContext } from "../../context/BasketContext";
 import SearchBar from "../../components/SearchBar";
 import SortDropdown from "../../components/SortDropdown";
 import ToastAlert from "../../components/ToastAlert";
-import ProductsToolbar from "../../components/ProductsToolbar";
+import ItemsToolbar from "../../components/ItemsToolbar";
+// import ProductsToolbar from "../../components/ProductsToolbar";
 import AddToOrderForm from "../../components/AddToOrderForm";
 import { Modal } from "bootstrap";
 import { productsSortBy } from "../../data/productsSortBy";
@@ -15,7 +16,7 @@ import AddItemForm from "../../components/AddItemForm";
 import EditItemForm from "../../components/EditItemForm";
 import DeleteItemForm from "../../components/DeleteItemForm";
 
-function ProductList() {
+function Items() {
   // const navigate = useNavigate();
   const { basketItems, setBasketItems } = useContext(BasketContext);
 
@@ -152,12 +153,12 @@ function ProductList() {
       <div className="container-fluid">
         <div className="row mb-2 p-3">
           <div className="p-0 d-flex justify-content-between align-items-center">
-            <h3 className="">Product Catalog</h3>
-            <h6 className="">Total Products:{products?.length}</h6>
+            <h3 className="">List of Items</h3>
+            <h6 className="">Total Items:{products?.length}</h6>
           </div>
         </div>
         <div className="row py-2 mb-2 p-3">
-          <ProductsToolbar
+          <ItemsToolbar
             handleAddProductClick={handleAddProductClick}
             handleSearchInput={handleSearchInput}
             handleSortByChange={handleSortByChange}
@@ -217,4 +218,4 @@ function ProductList() {
   );
 }
 
-export default ProductList;
+export default Items;

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
 import { ProductsContext } from "../context/ProductsContext";
 
-function DeleteProductForm({
+function DeleteItemForm({
   showDeleteProductForm,
   setShowDeleteProductForm,
   currentProductItem,
@@ -34,9 +34,9 @@ function DeleteProductForm({
           <form onSubmit={() => handleRemoveProduct(currentProductItem.id)}>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                <span className="text-danger">Delete Product</span>
+                <span className="text-danger">Delete Item</span>
                 <p className="fs-6">
-                  Are you sure you want to delete the product?
+                  Are you sure you want to delete the item?
                 </p>
               </h1>
               <button
@@ -130,4 +130,4 @@ function DeleteProductForm({
   );
 }
 
-export default DeleteProductForm;
+export default DeleteItemForm;

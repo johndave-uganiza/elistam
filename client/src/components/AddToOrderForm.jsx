@@ -3,7 +3,7 @@ import { Modal } from "bootstrap";
 import { ProductsContext } from "../context/ProductsContext";
 import { BasketContext } from "../context/BasketContext";
 
-function AddToBasketForm({
+function AddToOrderForm({
   showAddToBasketForm,
   setShowAddToBasketForm,
   currentProductItem,
@@ -75,7 +75,7 @@ function AddToBasketForm({
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="staticBackdropLabel">
-              Add To Basket
+              Add To Order
             </h1>
             <button
               onClick={() => {
@@ -106,7 +106,7 @@ function AddToBasketForm({
                   </p>
                 </div>
                 <div className="card-body bg-primary col-6 p-3 rounded">
-                  <h4>Order Summary</h4>
+                  <h4>Order Details</h4>
                   <hr />
                   <form onSubmit={handleAddToBasket}>
                     <div className="mb-3">
@@ -218,4 +218,4 @@ function AddToBasketForm({
   );
 }
 
-export default AddToBasketForm;
+export default AddToOrderForm;
