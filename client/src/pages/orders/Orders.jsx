@@ -14,22 +14,26 @@ function Orders() {
   }
 
   return (
-    <div className="container-fluid my-3 px-sm-5">
-      <div className="row">
-        <h3>Orders</h3>
-        <div className="col-12">
-          <div className="card bg-primary-subtle" style={{ height: "440px" }}>
+    <div className="container-fluid flex-fill d-flex flex-column">
+      <div className="row p-3">
+        <div className="p-0 d-flex justify-content-between align-items-center">
+          <h3 className="">Orders</h3>
+        </div>
+      </div>
+      <div className="row flex-fill mb-3">
+        <div className="col-12 d-flex flex-column">
+          <div className="card bg-primary-subtle flex-fill">
             <div className="card-header bg-black">
-              <h4 className="card-title d-flex justify-content-between align-items-center">
+              <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
                 <span>Checkout Summary</span>
                 <span className="fs-6 align-self-center">
                   Date: {new Date().toLocaleDateString("en-US")}
                 </span>
               </h4>
             </div>
-            <div className="card-body bg-secondary">
-              <form>
-                <div className="row mb-3 ">
+            <div className="card-body bg-secondary d-flex flex-column flex-fill">
+              <form className="flex-fill d-flex flex-column">
+                <div className="row mb-3">
                   <div className="col-auto">
                     <label
                       htmlFor="inputPassword4"
@@ -62,10 +66,10 @@ function Orders() {
                     />
                   </div>
                 </div>
-                <div className="row mb-3">
+                <div className="row flex-fill">
                   <div
                     className="overflow-scroll overflow-x-hidden"
-                    style={{ height: "240px" }}
+                    style={{ maxHeight: "290px" }}
                   >
                     <table className="table">
                       <thead>
@@ -75,6 +79,7 @@ function Orders() {
                           <th scope="col">Quantity</th>
                           <th scope="col">Price</th>
                           <th scope="col">Total</th>
+                          <th scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -84,34 +89,14 @@ function Orders() {
                           <td>11</td>
                           <td>11</td>
                           <td>111</td>
-                        </tr>
-                        <tr>
-                          <th scope="row">2</th>
-                          <td>Product-2</td>
-                          <td>22</td>
-                          <td>22</td>
-                          <td>222</td>
-                        </tr>
-                        <tr>
-                          <th scope="row">3</th>
-                          <td>Product-3</td>
-                          <td>33</td>
-                          <td>33</td>
-                          <td>333</td>
-                        </tr>
-                        <tr>
-                          <th scope="row">2</th>
-                          <td>Product-4</td>
-                          <td>44</td>
-                          <td>44</td>
-                          <td>444</td>
-                        </tr>
-                        <tr>
-                          <th scope="row">3</th>
-                          <td>Product-5</td>
-                          <td>55</td>
-                          <td>55</td>
-                          <td>555</td>
+                          <td>
+                            <button className="btn btn-info btn-sm me-2">
+                              Edit Quantity
+                            </button>
+                            <button className="btn btn-danger btn-sm">
+                              Remove
+                            </button>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
