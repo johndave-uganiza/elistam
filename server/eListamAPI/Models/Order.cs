@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace eListamAPI.Models
 {
@@ -11,6 +12,8 @@ namespace eListamAPI.Models
         public double TotalPrice { get; set; }
         public double TotalQuantity { get; set; }
         public bool IsPosted { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        
         public ICollection<OrderDetail>? OrderDetails { get; set; }
     }
 }

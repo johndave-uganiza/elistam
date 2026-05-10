@@ -7,5 +7,6 @@ namespace eListamAPI.DTOs.Orders
     {
         public DateTime? Date { get; set; }
         public CreateOrderDetailRequest OrderDetail { get; set; } = null!;
+        public string UserId { get; set; } = string.Empty;
     }
 }

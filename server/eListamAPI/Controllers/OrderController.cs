@@ -145,7 +145,16 @@ namespace eListamAPI.Controllers
                 }
                 return BadRequest(apiResponse);
             }
-  
+
+            var applicationUser = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            if (applicationUser == null)
+            {
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                apiResponse.Messages = ["User does not exists!"];
+                return BadRequest(apiResponse);
+            }
+
             var orderDetailRequest = req.OrderDetail;
 
             var existingProduct = await _db.Items
@@ -174,6 +183,8 @@ namespace eListamAPI.Controllers
                     Date = req.Date ?? DateTime.UtcNow,
                     TotalPrice = req.OrderDetail.Price * req.OrderDetail.Quantity,
                     TotalQuantity = req.OrderDetail.Quantity,
+                    UserId = req.UserId,
+                    IsPosted = false,
                     OrderDetails = [new OrderDetail()
                     {
                         ProductId = existingProduct.Id,
@@ -197,14 +208,17 @@ namespace eListamAPI.Controllers
                     Date = order.Date,
                     TotalPrice = order.TotalPrice,
                     TotalQuantity = order.TotalQuantity,
-                    IsPosted = order.IsPosted
+                    IsPosted = order.IsPosted,
+                    UserId = order.UserId
                 };
                 return CreatedAtAction(nameof(GetByIdAsync), new { id = order.Id }, apiResponse);
             }
 
+            // If user has changed, update UserId
+            pendingOrder.UserId = req.UserId;
+            
             // Add order detail for pending order
             var pendingOrderDetails = pendingOrder.OrderDetails;
-         
             var newOrderDetail = new OrderDetail()
             {
                 Quantity = existingProduct.Quantity,
@@ -228,6 +242,7 @@ namespace eListamAPI.Controllers
                 TotalPrice = pendingOrder.TotalPrice,
                 TotalQuantity = pendingOrder.TotalQuantity,
                 IsPosted = pendingOrder.IsPosted,
+                UserId = req.UserId,
                 OrderDetails = pendingOrderDetails?.Select(od => new GetOrderDetailResponse()
                 {
                     Quantity = od.Quantity,
@@ -321,7 +336,7 @@ namespace eListamAPI.Controllers
 
         #region PlaceOrderAsync
         [HttpPost("{id:int}/Place")]
-        public async Task<IActionResult> PlaceOrderAsync(int id)
+        public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
         {
             ApiResponse apiResponse = new ApiResponse();
 
@@ -351,10 +366,11 @@ namespace eListamAPI.Controllers
             {
                 apiResponse.StatusCode = HttpStatusCode.NotFound;
                 apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Order Doesn't Exist!"];
+                apiResponse.Messages = ["Order does not exists!"];
                 return NotFound(apiResponse);
             }
 
+            existingOrder.UserId = req.UserId;
             existingOrder.IsPosted = true;
 
             await _db.SaveChangesAsync();

@@ -2,7 +2,9 @@ using eListamAPI.Data;
 using eListamAPI.Models;
 using eListamAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -27,8 +29,6 @@ builder.Services.AddHttpClient();
 // Add ApplicationDbSeeder
 builder.Services.AddScoped<ApplicationDbSeeder>();
 
-builder.Services.AddControllers();
-
 // Get JWT secret key from appsettings.json
 var key = builder.Configuration.GetValue<string>("Jwt:SecretKey");
 
@@ -49,6 +49,16 @@ builder.Services.AddAuthentication(u =>
         ValidateAudience = false,
         ValidateLifetime = true,
     };
+});
+
+// Configure global Authorization
+builder.Services.AddControllers(options =>
+{
+    var authorizationPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new AuthorizeFilter(authorizationPolicy));
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

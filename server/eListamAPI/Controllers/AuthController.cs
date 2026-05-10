@@ -2,6 +2,7 @@
 using eListamAPI.Data;
 using eListamAPI.DTOs.Auth;
 using eListamAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,14 @@ namespace eListamAPI.Controllers
     [Route("/api/[controller]")]
     public class AuthController : Controller
     {
+        #region Fields
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _db;
         private readonly string _secretKey;
+        #endregion
 
+        #region Constructor
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
@@ -34,109 +38,112 @@ namespace eListamAPI.Controllers
             _db = db;
             _secretKey = configuration.GetValue<string>("Jwt:SecretKey") ?? "";
         }
+        #endregion
 
+        #region Users
         [HttpGet("users")]
         public async Task<IActionResult> Users()
         {
             ApiResponse apiResponse = new ApiResponse();
-            var applicationUsers = _db.ApplicationUsers.ToList();
+            var existingApplicationUsers = _db.ApplicationUsers.ToList();
 
-            if (applicationUsers != null)
+            if (existingApplicationUsers != null)
             {
-                apiResponse.Data = applicationUsers;
+                apiResponse.Data = existingApplicationUsers;
                 apiResponse.StatusCode = HttpStatusCode.OK;
                 apiResponse.IsSuccess = true;
                 return Ok(apiResponse);
             }
-            else
-            {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["No Users Found."];
-                return BadRequest(apiResponse);
-            }
+        
+            apiResponse.StatusCode = HttpStatusCode.BadRequest;
+            apiResponse.IsSuccess = false;
+            apiResponse.Messages = ["No Users Found."];
+            return BadRequest(apiResponse);
         }
+        #endregion
 
+        #region Register
+        [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest model)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             ApiResponse apiResponse = new ApiResponse();
             // Create new Application User if the RegisterDTO model is valid
-            if (ModelState.IsValid)
-            {
-                ApplicationUser newApplicationUser = new ApplicationUser()
-                {
-                    UserName = model.UserName,
-                    Email = model.Email,
-                    NormalizedUserName = model.UserName.ToUpper(),
-                    NormalizedEmail = model.Email.ToUpper()
-                };
-
-                var result = await _userManager.CreateAsync(newApplicationUser, model.Password);
-                if (result.Succeeded)
-                {
-                    // Create roles if not exist
-                    if (!await _roleManager.RoleExistsAsync(Role.Admin))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
-                        await _roleManager.CreateAsync(new IdentityRole(Role.User));
-                    }
-
-                    // Assign the given role
-                    if (model.Role.Equals(Role.Admin, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        await _userManager.AddToRoleAsync(newApplicationUser, Role.Admin);
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(newApplicationUser, Role.User);
-                    }
-
-                    apiResponse.StatusCode = HttpStatusCode.OK;
-                    apiResponse.IsSuccess = true;
-
-                    return Ok(apiResponse);
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        apiResponse.Messages = [error.Description];
-                    }
-                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    apiResponse.IsSuccess = false;
-                    return BadRequest(apiResponse);
-                }
-            }
-            else
+            if (!ModelState.IsValid)
             {
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 apiResponse.IsSuccess = false;
                 foreach (var value in ModelState.Values)
-
+                {
                     foreach (var error in value.Errors)
                     {
                         apiResponse.Messages = [error.ErrorMessage];
                     }
+                }
+
+                return BadRequest(apiResponse);
             }
 
-            return BadRequest(apiResponse);
-        }
+            
+            ApplicationUser newApplicationUser = new ApplicationUser()
+            {
+                UserName = request.UserName,
+                Email = request.Email,
+                NormalizedUserName = request.UserName.ToUpper(),
+                NormalizedEmail = request.Email.ToUpper()
+            };
 
+            var result = await _userManager.CreateAsync(newApplicationUser, request.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    apiResponse.Messages = [error.Description];
+                }
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return BadRequest(apiResponse);
+            }
+            
+            // Create roles if not exist
+            if (!await _roleManager.RoleExistsAsync(Role.Admin))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
+                await _roleManager.CreateAsync(new IdentityRole(Role.User));
+            }
+
+            // Assign the given role
+            if (request.Role.Equals(Role.Admin, StringComparison.CurrentCultureIgnoreCase))
+            {
+                await _userManager.AddToRoleAsync(newApplicationUser, Role.Admin);
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(newApplicationUser, Role.User);
+            }
+
+            apiResponse.StatusCode = HttpStatusCode.OK;
+            apiResponse.IsSuccess = true;
+            return Ok(apiResponse);
+        }
+        #endregion
+
+        #region Login
+        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest model)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             ApiResponse apiResponse = new ApiResponse();
             // Check if model is valid
             if (ModelState.IsValid)
             {
                 // Find user by email
-                var userFromDb = await _userManager.FindByEmailAsync(model.Email);
+                var userFromDb = await _userManager.FindByEmailAsync(request.Email);
 
                 if (userFromDb != null)
                 {
                     // Check if password is valid
-                    bool isPasswordValid = await _userManager.CheckPasswordAsync(userFromDb, model.Password);
+                    bool isPasswordValid = await _userManager.CheckPasswordAsync(userFromDb, request.Password);
                     if (!isPasswordValid)
                     {
                         apiResponse.Data = new object();
@@ -197,5 +204,6 @@ namespace eListamAPI.Controllers
             }
             return BadRequest(apiResponse);
         }
+        #endregion
     }
 }

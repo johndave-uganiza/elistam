@@ -7,5 +7,7 @@ namespace eListamAPI.DTOs.Orders
     {
         public int OrderId { get; set; }
         public bool IsPosted { get; set; }
+        public string UserId { get; set; } = string.Empty;
+
     }
 }

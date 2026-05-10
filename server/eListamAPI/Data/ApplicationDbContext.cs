@@ -14,6 +14,8 @@ namespace eListamAPI.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<TransactionDetail> TransactionDetails { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
     }
