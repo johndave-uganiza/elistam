@@ -1,12 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter, BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootswatch/dist/darkly/bootstrap.min.css";
 
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter basename={import.meta.env.BASE_URL}>
+  // Change to HashRouter to resolve client-side routing issues because GitHub Pages only support static hosting
+  <HashRouter>
     <App />
-  </BrowserRouter>,
+  </HashRouter>,
 );
