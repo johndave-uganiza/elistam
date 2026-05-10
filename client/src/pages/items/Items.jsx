@@ -15,6 +15,7 @@ import { productsSortBy } from "../../data/productsSortBy";
 import AddItemForm from "../../components/AddItemForm";
 import EditItemForm from "../../components/EditItemForm";
 import DeleteItemForm from "../../components/DeleteItemForm";
+import ItemCard from "../../components/ItemCard";
 
 function Items() {
   // const navigate = useNavigate();
@@ -70,18 +71,18 @@ function Items() {
     setSearchTextInput(e.target.value);
   }
 
-  function handleAddToBasket(productItem) {
-    // navigate("/add-to-basket", { state: { productItem } });
-    setShowAddToBasketForm(true);
-    setCurrentProductItem(productItem);
-    // setShowAddToBasketForm(true);
-  }
+  // function handleAddToBasket(productItem) {
+  //   // navigate("/add-to-basket", { state: { productItem } });
+  //   setShowAddToBasketForm(true);
+  //   setCurrentProductItem(productItem);
+  //   // setShowAddToBasketForm(true);
+  // }
 
   function handleAddProductClick() {
     setShowAddProductForm(true);
   }
 
-  function handleEditProduct(productItem) {
+  function handleEditItem(productItem) {
     setCurrentProductItem(productItem);
 
     setProductDetailForm({
@@ -123,7 +124,7 @@ function Items() {
     localStorage.setItem("products", JSON.stringify(updatedProducts));
   }
 
-  function handleDeleteProduct(productItem) {
+  function handleDeleteItem(productItem) {
     setCurrentProductItem(productItem);
 
     setProductDetailForm({
@@ -168,17 +169,17 @@ function Items() {
         </div>
         <div className="row justify-content-center p-3 gap-5">
           {mutatedProducts?.length > 0
-            ? mutatedProducts.map((productItem, index) => {
+            ? mutatedProducts.map((item, index) => {
                 return (
-                  <ProductCard
-                    productItem={productItem}
+                  <ItemCard
+                    item={item}
                     key={index}
                     basketItems={basketItems}
                     setBasketItems={setBasketItems}
                     // setShowToast={setShowToast}
-                    handleAddToBasket={handleAddToBasket}
-                    handleEditProduct={handleEditProduct}
-                    handleDeleteProduct={handleDeleteProduct}
+                    // handleAddToBasket={handleAddToBasket}
+                    handleEditItem={handleEditItem}
+                    handleDeleteItem={handleDeleteItem}
                   />
                 );
               })

@@ -71,10 +71,10 @@ function Orders() {
                     className="overflow-scroll overflow-x-hidden"
                     style={{ maxHeight: "290px" }}
                   >
-                    <table className="table">
+                    <table className="table table-hover">
                       <thead>
                         <tr>
-                          <th scope="col">#</th>
+                          <th scope="col">Order #</th>
                           <th scope="col">Name</th>
                           <th scope="col">Quantity</th>
                           <th scope="col">Price</th>
@@ -83,21 +83,19 @@ function Orders() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <th scope="row">1</th>
-                          <td>Product-1</td>
-                          <td>11</td>
-                          <td>11</td>
-                          <td>111</td>
-                          <td>
-                            <button className="btn btn-info btn-sm me-2">
-                              Edit Quantity
-                            </button>
-                            <button className="btn btn-danger btn-sm">
-                              Remove
-                            </button>
-                          </td>
-                        </tr>
+                        {basketItems.map((item) => (
+                          <tr>
+                            <th scope="row">{item.id}</th>
+                            <td>{item.title}</td>
+                            <td>{item.quantity}</td>
+                            <td>{item.price}</td>
+                            <td>{item.quantity * item.price}</td>
+                            <td>
+                              <a className="me-3 text-danger">Delete</a>
+                              <a className="me-3 text-success">Edit</a>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>

@@ -56,59 +56,59 @@ function AddToOrderForm({
 
   function handleAddToBasket(e) {
     e.preventDefault();
-    const productItemWithQuantity = {
-      ...location.state.productItem,
+    const newOrder = {
+      ...currentProductItem,
       quantity: itemQuantity,
     };
 
-    const newBasketItems = [...basketItems, productItemWithQuantity];
+    const newBasketItems = [...basketItems, newOrder];
 
     setBasketItems(newBasketItems);
     localStorage.setItem("basket", JSON.stringify(newBasketItems));
-
+    bsModalRef.current.hide();
     // navigate("/basket");
   }
 
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h1 className="modal-title fs-5" id="staticBackdropLabel">
-              Add To Order
-            </h1>
-            <button
-              onClick={() => {
-                bsModalRef.current.hide();
-                setShowAddToBasketForm(false);
-              }}
-              type="button"
-              className="btn-close"
-            ></button>
-          </div>
-          <div className="modal-body">
-            <div className="card shadow border bg-primary-subtle">
-              <div className="d-flex">
-                <div className="col-6 text-dark d-flex flex-column align-items-center p-3">
-                  <h4 className=" text-center">
-                    <strong>{currentProductItem?.title}</strong>
-                  </h4>
-                  <div className="text-center">
-                    <img
-                      src={currentProductItem?.thumbnail}
-                      className="w-75"
-                    ></img>
+        <form onSubmit={handleAddToBasket}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Add To Order
+              </h1>
+              <button
+                onClick={() => {
+                  bsModalRef.current.hide();
+                  setShowAddToBasketForm(false);
+                }}
+                type="button"
+                className="btn-close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="card shadow border bg-primary-subtle">
+                <div className="d-flex">
+                  <div className="col-6 text-dark d-flex flex-column align-items-center p-3">
+                    <h4 className=" text-center">
+                      <strong>{currentProductItem?.title}</strong>
+                    </h4>
+                    <div className="text-center">
+                      <img
+                        src={currentProductItem?.thumbnail}
+                        className="w-75"
+                      ></img>
+                    </div>
+                    <p className="card-text text-black">
+                      <small className="text-black">
+                        Stock: {currentProductItem?.stock}
+                      </small>
+                    </p>
                   </div>
-                  <p className="card-text text-black">
-                    <small className="text-black">
-                      Stock: {currentProductItem?.stock}
-                    </small>
-                  </p>
-                </div>
-                <div className="card-body bg-primary col-6 p-3 rounded">
-                  <h4>Order Details</h4>
-                  <hr />
-                  <form onSubmit={handleAddToBasket}>
+                  <div className="card-body bg-primary col-6 p-3 rounded">
+                    <h4>Order Details</h4>
+                    <hr />
                     <div className="mb-3">
                       {/* <strong>Product Name:</strong> */}
                       <p className="card-text mb-0 small">
@@ -188,31 +188,31 @@ function AddToOrderForm({
                         Place To Basket
                       </button>
                     </div> */}
-                  </form>
+                  </div>
                 </div>
               </div>
             </div>
+            <div className="modal-footer">
+              <button
+                onClick={() => {
+                  bsModalRef.current.hide();
+                  setShowAddToBasketForm(false);
+                }}
+                type="button"
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                // form="addProductForm"
+                type="submit"
+                className="btn btn-primary"
+              >
+                Add
+              </button>
+            </div>
           </div>
-          <div className="modal-footer">
-            <button
-              onClick={() => {
-                bsModalRef.current.hide();
-                setShowAddToBasketForm(false);
-              }}
-              type="button"
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              form="addProductForm"
-              type="submit"
-              className="btn btn-primary"
-            >
-              Add
-            </button>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );

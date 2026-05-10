@@ -1,5 +1,6 @@
-function ProductCard({ product, handleAddToBasket }) {
-  const { title, price, thumbnail, stock } = product;
+function ItemCard({ item, handleEditItem, handleDeleteItem }) {
+  console.log("item", item);
+  const { title, price, thumbnail, stock } = item;
   return (
     <div className="col-xl-2 col-lg-3 col-md-3 col-sm-5 col-12 card bg-primary-subtle p-1 shadow border border-2 border-primary">
       <div className="card-header bg-primary text-white small fw-medium">
@@ -23,17 +24,27 @@ function ProductCard({ product, handleAddToBasket }) {
         </div>
       </div>
       <div className="d-flex flex-column gap-2">
-        <button
-          onClick={() => {
-            handleAddToBasket(product);
-          }}
-          className="btn btn-success btn-lg border shadow form-control text-white fw-medium"
-        >
-          Add to Basket
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            onClick={() => {
+              handleDeleteItem(item);
+            }}
+            className="btn btn-danger btn-sm border shadow form-control text-white fw-medium"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => {
+              handleEditItem(item);
+            }}
+            className="btn btn-warning btn-sm border shadow form-control text-white fw-medium"
+          >
+            Edit
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default ProductCard;
+export default ItemCard;

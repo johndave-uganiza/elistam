@@ -167,10 +167,10 @@ function ProductList() {
         </div>
         <div className="row justify-content-center p-3 gap-5">
           {mutatedProducts?.length > 0
-            ? mutatedProducts.map((productItem, index) => {
+            ? mutatedProducts.map((product, index) => {
                 return (
                   <ProductCard
-                    productItem={productItem}
+                    product={product}
                     key={index}
                     basketItems={basketItems}
                     setBasketItems={setBasketItems}
