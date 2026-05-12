@@ -6,6 +6,7 @@ namespace eListamAPI.Models
     {
         [Key]
         public int Id { get; set; }
+        public int OrderId { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public double TotalPrice { get; set; }

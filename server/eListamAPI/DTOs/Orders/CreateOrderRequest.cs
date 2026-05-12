@@ -6,7 +6,7 @@ namespace eListamAPI.DTOs.Orders
     public class CreateOrderRequest
     {
         public DateTime? Date { get; set; }
-        public CreateOrderDetailRequest OrderDetail { get; set; } = null!;
+        public int ProductId { get; set; }
         public string UserId { get; set; } = string.Empty;
     }
 }

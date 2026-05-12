@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace eListamAPI.Models
+namespace eListamAPI.DTOs.Transactions
 {
-    public class TransactionDetail
+    public class GetTransactionDetailResponse
     {
-        [Key]
         public int Id { get; set; }
         public int TransactionId { get; set; }
         public int ProductId { get; set; }
@@ -13,6 +12,5 @@ namespace eListamAPI.Models
         public double Price { get; set; }
         public double Quantity { get; set; }
         public string Image { get; set; } = string.Empty;
-        public Transaction Transaction { get; set; } = null!;
     }
 }

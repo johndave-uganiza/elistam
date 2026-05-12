@@ -94,5 +94,34 @@ namespace eListamAPI.Controllers
             return Ok(apiResponse);
         }
         #endregion
+
+        #region DeleteAsync
+        [HttpDelete("{id:int}")]
+        [ActionName(nameof(DeleteAsync))]
+        public async Task<IActionResult> DeleteAsync(int id, DeleteOrderDetailRequest req)
+        {
+            ApiResponse apiResponse = new ApiResponse();
+
+            var pendingOrderDetail = await _db.OrderDetails.FirstOrDefaultAsync(
+                p => p.Id == id &&
+                    id == req.Id &&
+                    p.OrderId == req.OrderId);
+
+            if (pendingOrderDetail == null)
+            {
+                apiResponse.StatusCode = HttpStatusCode.NotFound;
+                apiResponse.Messages = ["There is no pending Order Detail!"];
+                return NotFound(apiResponse);
+            }
+
+            _db.OrderDetails.Remove(pendingOrderDetail);
+            await _db.SaveChangesAsync();
+
+            apiResponse.StatusCode = HttpStatusCode.OK;
+            apiResponse.IsSuccess = true;
+            apiResponse.Data = pendingOrderDetail;
+            return Ok(apiResponse);
+        }
+        #endregion
     }
 }

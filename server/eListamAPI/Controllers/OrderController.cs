@@ -47,6 +47,7 @@ namespace eListamAPI.Controllers
                 OrderNumber = o.OrderNumber,
                 TotalPrice = o.TotalPrice,
                 TotalQuantity = o.TotalQuantity,
+                UserId = o.UserId,
                 OrderDetails = o.OrderDetails?.Select(od => new GetOrderDetailResponse()
                 {
                     Description = od.Description,
@@ -155,10 +156,8 @@ namespace eListamAPI.Controllers
                 return BadRequest(apiResponse);
             }
 
-            var orderDetailRequest = req.OrderDetail;
-
             var existingProduct = await _db.Items
-                .FirstOrDefaultAsync(p => p.Id == orderDetailRequest.ProductId && p.Quantity > 0);
+                .FirstOrDefaultAsync(p => p.Id == req.ProductId && p.Quantity > 0);
 
             if (existingProduct == null)
             {
@@ -181,8 +180,8 @@ namespace eListamAPI.Controllers
                 {
                     OrderNumber = Guid.NewGuid().ToString(),
                     Date = req.Date ?? DateTime.UtcNow,
-                    TotalPrice = req.OrderDetail.Price * req.OrderDetail.Quantity,
-                    TotalQuantity = req.OrderDetail.Quantity,
+                    TotalPrice = existingProduct.Price * existingProduct.Quantity,
+                    TotalQuantity = existingProduct.Quantity,
                     UserId = req.UserId,
                     IsPosted = false,
                     OrderDetails = [new OrderDetail()
@@ -229,7 +228,7 @@ namespace eListamAPI.Controllers
                 ProductId = existingProduct.Id
             };
 
-            pendingOrder.OrderDetails?.Add(newOrderDetail);
+            await _db.OrderDetails.AddAsync(newOrderDetail);
             await _db.SaveChangesAsync();
 
             apiResponse.StatusCode = HttpStatusCode.Created;
@@ -334,6 +333,31 @@ namespace eListamAPI.Controllers
         }
         #endregion
 
+        #region DeleteAsync
+        [HttpDelete("{id:int}")]
+        [ActionName(nameof(DeleteAsync))]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            ApiResponse apiResponse = new ApiResponse();
+
+            var pendingOrder = await _db.Orders.FirstOrDefaultAsync(p => p.Id == id);
+            if (pendingOrder != null)
+            {
+                _db.Orders.Remove(pendingOrder);
+                await _db.SaveChangesAsync();
+
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.IsSuccess = true;
+                apiResponse.Data = pendingOrder;
+                return Ok(apiResponse);
+            }
+
+            apiResponse.StatusCode = HttpStatusCode.NotFound;
+            apiResponse.Messages = ["There is no pending Order!"];
+            return NotFound(apiResponse);
+        }
+        #endregion
+
         #region PlaceOrderAsync
         [HttpPost("{id:int}/Place")]
         public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
@@ -373,6 +397,29 @@ namespace eListamAPI.Controllers
             existingOrder.UserId = req.UserId;
             existingOrder.IsPosted = true;
 
+            var existingOrderDetails = existingOrder.OrderDetails;
+
+            var newTransaction = new Transaction()
+            {
+                Date = existingOrder.Date,
+                IsPosted = existingOrder.IsPosted,
+                OrderId = existingOrder.Id,
+                OrderNumber = existingOrder.OrderNumber,
+                TotalPrice = existingOrder.TotalPrice,
+                TotalQuantity = existingOrder.TotalQuantity,
+                UserId = req.UserId,
+                TransactionDetails = existingOrderDetails?.Select(od => new TransactionDetail()
+                {
+                    Description = od.Description,
+                    Image = od.Image,
+                    Name = od.Name,
+                    Price = od.Price,
+                    ProductId = od.ProductId,
+                    Quantity = od.Quantity,
+                }).ToList()
+            };
+
+            await _db.Transactions.AddAsync(newTransaction);
             await _db.SaveChangesAsync();
 
             // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
@@ -383,7 +430,8 @@ namespace eListamAPI.Controllers
                 Date = existingOrder.Date,
                 TotalPrice = existingOrder.TotalPrice,
                 TotalQuantity = existingOrder.TotalQuantity,
-                IsPosted = existingOrder.IsPosted
+                IsPosted = existingOrder.IsPosted,
+                UserId = existingOrder.UserId
             };
 
             apiResponse.StatusCode = HttpStatusCode.OK;
