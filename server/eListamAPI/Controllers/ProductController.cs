@@ -34,9 +34,9 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetAsync))]
         public async Task<IActionResult> GetAsync()
         {
-            IEnumerable<Product> products = await _db.Items
+            IEnumerable<Item> products = await _db.Items
             .Where(item => item.Quantity > 0)
-            .Select(p => new Product()
+            .Select(p => new Item()
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -46,14 +46,14 @@ namespace eListamAPI.Controllers
                 Image = p.Image
             }).ToListAsync();
 
-            ApiResponse apiResponse = new ApiResponse()
+            ApiResponse response = new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
                 Data = products,
             };
 
-            return Ok(apiResponse);
+            return Ok(response);
         }
         #endregion
 
@@ -62,20 +62,20 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (id <= 0)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Invalid Product Id!"];
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["Invalid Product Id!"];
                 return BadRequest();
             }
 
-            IEnumerable<Product> productFromDb = await _db.Items
+            IEnumerable<Item> productFromDb = await _db.Items
                 .Where(p => p.Id == id)
                 .Where(item => item.Quantity > 0)
-                .Select(p => new Product()
+                .Select(p => new Item()
                 {
                     Id = p.Id,
                     Name = p.Name,
@@ -87,16 +87,16 @@ namespace eListamAPI.Controllers
 
             if (productFromDb == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Product Not Found!"];
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Product Not Found!"];
                 return NotFound();
             }
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            apiResponse.Data = productFromDb;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Data = productFromDb;
+            return Ok(response);
         }
         #endregion
     }

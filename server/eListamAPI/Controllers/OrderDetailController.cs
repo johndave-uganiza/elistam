@@ -36,12 +36,12 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(UpdateAsync))]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderDetailRequest req)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (!ModelState.IsValid)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
 
                 foreach (var value in ModelState.Values)
                 {
@@ -50,17 +50,17 @@ namespace eListamAPI.Controllers
                     {
                         errorMessages.Add(error.ErrorMessage);
                     }
-                    apiResponse.Messages = errorMessages;
+                    response.Messages = errorMessages;
                 }
 
-                return BadRequest(apiResponse);
+                return BadRequest(response);
             }
 
             if (id != req.OrderDetailId || id == 0)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return BadRequest(apiResponse);
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                return BadRequest(response);
             }
 
             var existingOrderDetail = await _db.OrderDetails
@@ -68,9 +68,9 @@ namespace eListamAPI.Controllers
 
             if (existingOrderDetail == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                return NotFound(response);
             }
 
             existingOrderDetail.Quantity = req.Quantity;
@@ -86,12 +86,12 @@ namespace eListamAPI.Controllers
                 Name = existingOrderDetail.Name,
                 OrderDetailId = existingOrderDetail.Id,
                 Price = existingOrderDetail.Price,
-                ProductId = existingOrderDetail.ProductId
+                ProductId = existingOrderDetail.ItemId
             };
-            apiResponse.Data = getOrderDetailResponse;
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            return Ok(apiResponse);
+            response.Data = getOrderDetailResponse;
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         #endregion
 
@@ -100,7 +100,7 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id, DeleteOrderDetailRequest req)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             var pendingOrderDetail = await _db.OrderDetails.FirstOrDefaultAsync(
                 p => p.Id == id &&
@@ -109,18 +109,18 @@ namespace eListamAPI.Controllers
 
             if (pendingOrderDetail == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.Messages = ["There is no pending Order Detail!"];
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.Messages = ["There is no pending Order Detail!"];
+                return NotFound(response);
             }
 
             _db.OrderDetails.Remove(pendingOrderDetail);
             await _db.SaveChangesAsync();
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            apiResponse.Data = pendingOrderDetail;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Data = pendingOrderDetail;
+            return Ok(response);
         }
         #endregion
     }

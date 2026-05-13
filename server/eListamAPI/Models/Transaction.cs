@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace eListamAPI.Models
 {
     public class Transaction
     {
-        [Key]
         public int Id { get; set; }
         public int OrderId { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
@@ -13,6 +13,7 @@ namespace eListamAPI.Models
         public double TotalQuantity { get; set; }
         public bool IsPosted { get; set; }
         public string UserId { get; set; } = string.Empty;
-        public ICollection<TransactionDetail>? TransactionDetails { get; set; }
+        public Order Order { get; set; } = null!;
+        public ICollection<TransactionDetail> TransactionDetails { get; set; } = null!;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using eListamAPI.Data;
-using eListamAPI.DTOs;
+using eListamAPI.DTOs.DummyProducts;
 using eListamAPI.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
@@ -25,7 +25,9 @@ namespace eListamAPI.Services
             _env = env;
             _logger = logger;
         }
-        public async Task Seed()
+
+        #region Seed
+        public async Task SeedAsync()
         {
             if (_db.Items.Any())
                 return;
@@ -49,14 +51,14 @@ namespace eListamAPI.Services
 
             // Check if the directory exists, if not create it
             var directoryPath = Path.Combine(_env.WebRootPath, "images");
-            if(!Directory.Exists(directoryPath))
+            if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
 
             // Download and save the product images to the wwwroot/images directory
             // Iterate the product list
-            foreach(var product in getProducts)
+            foreach (var product in getProducts)
             {
                 // Get the image url from the product
                 var imageUrl = product.ThumbNail;
@@ -74,7 +76,7 @@ namespace eListamAPI.Services
                         // Save the image to the file path
                         await File.WriteAllBytesAsync(filePath, imageBytes);
                     }
-                    catch (Exception ex) 
+                    catch (Exception ex)
                     {
                         var errorMessage = $"Failed to download the image from {imageUrl}";
                         _logger.LogError(ex, errorMessage);
@@ -85,11 +87,12 @@ namespace eListamAPI.Services
 
             await _db.SaveChangesAsync();
         }
+        #endregion
 
-        #region Helpers
-        private async Task<List<DummyProductResponse>> GetProducts()
+        #region GetProducts
+        private async Task<List<GetDummyProductResponse>> GetProducts()
         {
-            var productList = new List<DummyProductResponse>();
+            var productList = new List<GetDummyProductResponse>();
             var request = await _httpClient.GetAsync("https://dummyjson.com/products");
 
             if (request.IsSuccessStatusCode)
@@ -110,7 +113,7 @@ namespace eListamAPI.Services
                 };
 
                 // Deserialize json from string to Product Response DTO
-                productList = JsonSerializer.Deserialize<List<DummyProductResponse>>(products, options);
+                productList = JsonSerializer.Deserialize<List<GetDummyProductResponse>>(products, options);
             }
 
             return productList!;

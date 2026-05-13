@@ -44,14 +44,14 @@ namespace eListamAPI.Controllers
                 Image = p.Image
             }).ToListAsync();
 
-            ApiResponse apiResponse = new ApiResponse()
+            ApiResponse response = new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
                 Data = items,
             };
 
-            return Ok(apiResponse);
+            return Ok(response);
         }
         #endregion
 
@@ -60,15 +60,15 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             var existingItem = await _db.Items.FirstOrDefaultAsync(p => p.Id == id);
             if (existingItem == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Item Not Found!"];
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Item Not Found!"];
+                return NotFound(response);
             }
 
             var itemResponse = new ItemResponse()
@@ -81,10 +81,10 @@ namespace eListamAPI.Controllers
                 Image = existingItem.Image
             };
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            apiResponse.Data = itemResponse;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Data = itemResponse;
+            return Ok(response);
         }
         #endregion
 
@@ -95,16 +95,16 @@ namespace eListamAPI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateAsync([FromForm] ItemCreateRequest model)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
             if (ModelState.IsValid)
             {
 
                 if (model.File == null || model.File.Length == 0)
                 {
-                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    apiResponse.IsSuccess = false;
-                    apiResponse.Messages = ["Image is required!"];
-                    return BadRequest(apiResponse);
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.IsSuccess = false;
+                    response.Messages = ["Image is required!"];
+                    return BadRequest(response);
                 }
 
                 // Combine wwwroot and images path --> wwwroot/images
@@ -143,22 +143,22 @@ namespace eListamAPI.Controllers
 
                 await _db.Items.AddAsync(stock);
                 await _db.SaveChangesAsync();
-                apiResponse.StatusCode = HttpStatusCode.Created;
-                apiResponse.IsSuccess = true;
-                apiResponse.Data = model;
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = stock.Id }, apiResponse);
+                response.StatusCode = HttpStatusCode.Created;
+                response.IsSuccess = true;
+                response.Data = model;
+                return CreatedAtAction(nameof(GetByIdAsync), new { id = stock.Id }, response);
             }
 
-            apiResponse.StatusCode = HttpStatusCode.BadRequest;
-            apiResponse.IsSuccess = false;
+            response.StatusCode = HttpStatusCode.BadRequest;
+            response.IsSuccess = false;
             foreach (var value in ModelState.Values)
             {
                 foreach (var error in value.Errors)
                 {
-                    apiResponse.Messages = [error.ErrorMessage];
+                    response.Messages = [error.ErrorMessage];
                 }
             }
-            return BadRequest(apiResponse);
+            return BadRequest(response);
         }
         #endregion
 
@@ -169,7 +169,7 @@ namespace eListamAPI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateAsync(int id, [FromForm] ItemUpdateRequest model)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (ModelState.IsValid)
             {
@@ -185,27 +185,27 @@ namespace eListamAPI.Controllers
 
                     await _db.SaveChangesAsync();
 
-                    apiResponse.StatusCode = HttpStatusCode.OK;
-                    apiResponse.IsSuccess = true;
-                    apiResponse.Data = productFromDb;
-                    return Ok(apiResponse);
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.IsSuccess = true;
+                    response.Data = productFromDb;
+                    return Ok(response);
                 }
 
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.Messages = ["Item Not Found!"];
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.Messages = ["Item Not Found!"];
+                return NotFound(response);
             }
 
-            apiResponse.StatusCode = HttpStatusCode.BadRequest;
-            apiResponse.IsSuccess = false;
+            response.StatusCode = HttpStatusCode.BadRequest;
+            response.IsSuccess = false;
             foreach (var value in ModelState.Values)
             {
                 foreach (var error in value.Errors)
                 {
-                    apiResponse.Messages = [error.ErrorMessage];
+                    response.Messages = [error.ErrorMessage];
                 }
             }
-            return BadRequest(apiResponse);
+            return BadRequest(response);
         }
         #endregion
 
@@ -214,7 +214,7 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
             
             var existingItem = await _db.Items.FirstOrDefaultAsync(p => p.Id == id);
             if (existingItem != null)
@@ -222,15 +222,15 @@ namespace eListamAPI.Controllers
                 _db.Items.Remove(existingItem);
                 await _db.SaveChangesAsync();
 
-                apiResponse.StatusCode = HttpStatusCode.OK;
-                apiResponse.IsSuccess = true;
-                apiResponse.Data = existingItem;
-                return Ok(apiResponse);
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+                response.Data = existingItem;
+                return Ok(response);
             }
 
-            apiResponse.StatusCode = HttpStatusCode.NotFound;
-            apiResponse.Messages = ["Item Not Found!"];
-            return NotFound(apiResponse);
+            response.StatusCode = HttpStatusCode.NotFound;
+            response.Messages = ["Item Not Found!"];
+            return NotFound(response);
         }
         #endregion
     }

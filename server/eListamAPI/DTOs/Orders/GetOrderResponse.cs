@@ -9,7 +9,6 @@
         public double TotalQuantity { get; set; }
         public bool IsPosted { get; set; }
         public string UserId { get; set; } = string.Empty;
-
-        public IEnumerable<GetOrderDetailResponse>? OrderDetails { get; set; }
+        public IEnumerable<GetOrderDetailResponse> OrderDetails { get; set; } = [];
     }
 }

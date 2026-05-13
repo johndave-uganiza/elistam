@@ -1,6 +1,6 @@
-﻿namespace eListamAPI.DTOs
+﻿namespace eListamAPI.DTOs.DummyProducts
 {
-    public class DummyProductResponse
+    public class GetDummyProductResponse
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

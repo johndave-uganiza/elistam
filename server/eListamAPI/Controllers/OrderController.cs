@@ -40,7 +40,6 @@ namespace eListamAPI.Controllers
             .Where(o => !o.IsPosted)
             .ToListAsync();
 
-
             var getOrderResponse = existingOrders.Select(o => new GetOrderResponse()
             {
                 Id = o.Id,
@@ -48,42 +47,42 @@ namespace eListamAPI.Controllers
                 TotalPrice = o.TotalPrice,
                 TotalQuantity = o.TotalQuantity,
                 UserId = o.UserId,
-                OrderDetails = o.OrderDetails?.Select(od => new GetOrderDetailResponse()
+                OrderDetails = o.OrderDetails.Select(od => new GetOrderDetailResponse()
                 {
                     Description = od.Description,
                     Image = od.Image,
                     Name = od.Name,
                     OrderDetailId = od.Id,
                     Price = od.Price,
-                    ProductId = od.ProductId,
+                    ProductId = od.ItemId,
                     Quantity = od.Quantity
                 })
             });
 
-            ApiResponse apiResponse = new ApiResponse()
+            ApiResponse response = new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
                 Data = getOrderResponse,
             };
 
-            return Ok(apiResponse);
+            return Ok(response);
         }
         #endregion
 
         #region GetByIdAsync
         [HttpGet("{id:int}")]
-        // Mirror the CreatedAtAction Action Name
+        // Mirror the CreatedAtAction Name from CreateAsync
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (id <= 0)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Invalid Product Id!"];
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["Invalid Product Id!"];
                 return BadRequest();
             }
 
@@ -93,9 +92,9 @@ namespace eListamAPI.Controllers
                
             if (existingOrder == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Product Not Found!"];
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Product Not Found!"];
                 return NotFound();
             }
 
@@ -105,22 +104,22 @@ namespace eListamAPI.Controllers
                 OrderNumber = existingOrder.OrderNumber,
                 TotalPrice = existingOrder.TotalPrice,
                 TotalQuantity = existingOrder.TotalQuantity,
-                OrderDetails = existingOrder.OrderDetails?.Select(od => new GetOrderDetailResponse()
+                OrderDetails = existingOrder.OrderDetails.Select(od => new GetOrderDetailResponse()
                 {
                     Description = od.Description,
                     Image = od.Image,
                     Name = od.Name,
                     OrderDetailId = od.Id,
                     Price = od.Price,
-                    ProductId = od.ProductId,
+                    ProductId = od.ItemId,
                     Quantity = od.Quantity
                 })
             };
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            apiResponse.Data = getOrderResponse;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Data = getOrderResponse;
+            return Ok(response);
         }
         #endregion
 
@@ -128,13 +127,13 @@ namespace eListamAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest req)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             #region Validations
             if (!ModelState.IsValid)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
                 foreach (var value in ModelState.Values)
                 {
                     var errorMessages = new List<string>();
@@ -142,18 +141,18 @@ namespace eListamAPI.Controllers
                     {
                         errorMessages.Add(error.ErrorMessage);
                     }
-                    apiResponse.Messages = errorMessages;
+                    response.Messages = errorMessages;
                 }
-                return BadRequest(apiResponse);
+                return BadRequest(response);
             }
 
             var applicationUser = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == req.UserId);
             if (applicationUser == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["User does not exists!"];
-                return BadRequest(apiResponse);
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["User does not exists!"];
+                return BadRequest(response);
             }
 
             var existingProduct = await _db.Items
@@ -161,10 +160,10 @@ namespace eListamAPI.Controllers
 
             if (existingProduct == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Product Not Found!"];
-                return BadRequest(apiResponse);
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["Product Not Found!"];
+                return BadRequest(response);
             }
             #endregion
 
@@ -186,7 +185,7 @@ namespace eListamAPI.Controllers
                     IsPosted = false,
                     OrderDetails = [new OrderDetail()
                     {
-                        ProductId = existingProduct.Id,
+                        ItemId = existingProduct.Id,
                         Name = existingProduct.Name,
                         Description = existingProduct.Description,
                         Price = existingProduct.Price,
@@ -198,9 +197,9 @@ namespace eListamAPI.Controllers
                 await _db.Orders.AddAsync(order);
                 await _db.SaveChangesAsync();
 
-                apiResponse.StatusCode = HttpStatusCode.Created;
-                apiResponse.IsSuccess = true;
-                apiResponse.Data = new GetOrderResponse()
+                response.StatusCode = HttpStatusCode.Created;
+                response.IsSuccess = true;
+                response.Data = new GetOrderResponse()
                 {
                     Id = order.Id,
                     OrderNumber = order.OrderNumber,
@@ -210,7 +209,7 @@ namespace eListamAPI.Controllers
                     IsPosted = order.IsPosted,
                     UserId = order.UserId
                 };
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = order.Id }, apiResponse);
+                return CreatedAtAction(nameof(GetByIdAsync), new { id = order.Id }, response);
             }
 
             // If user has changed, update UserId
@@ -225,15 +224,15 @@ namespace eListamAPI.Controllers
                 Image = existingProduct.Image,
                 Name = existingProduct.Name,
                 Price = existingProduct.Price,
-                ProductId = existingProduct.Id
+                ItemId = existingProduct.Id
             };
 
             await _db.OrderDetails.AddAsync(newOrderDetail);
             await _db.SaveChangesAsync();
 
-            apiResponse.StatusCode = HttpStatusCode.Created;
-            apiResponse.IsSuccess= true;
-            apiResponse.Data = new GetOrderResponse()
+            response.StatusCode = HttpStatusCode.Created;
+            response.IsSuccess= true;
+            response.Data = new GetOrderResponse()
             {
                 Id = pendingOrder.Id,
                 OrderNumber = pendingOrder.OrderNumber,
@@ -242,20 +241,20 @@ namespace eListamAPI.Controllers
                 TotalQuantity = pendingOrder.TotalQuantity,
                 IsPosted = pendingOrder.IsPosted,
                 UserId = req.UserId,
-                OrderDetails = pendingOrderDetails?.Select(od => new GetOrderDetailResponse()
+                OrderDetails = pendingOrderDetails.Select(od => new GetOrderDetailResponse()
                 {
                     Quantity = od.Quantity,
                     Description = od.Description,
                     Image = od.Image,
                     Name = od.Name,
                     Price = od.Price,
-                    ProductId = od.ProductId,
+                    ProductId = od.ItemId,
                     OrderDetailId = od.Id
 
                 })
             };
             
-            return Ok(apiResponse);
+            return Ok(response);
         }
         #endregion
 
@@ -264,12 +263,12 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(UpdateAsync))]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderRequest req)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (!ModelState.IsValid)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
 
                 foreach (var value in ModelState.Values)
                 {
@@ -278,17 +277,17 @@ namespace eListamAPI.Controllers
                     {
                         errorMessages.Add(error.ErrorMessage);
                     }
-                    apiResponse.Messages = errorMessages;
+                    response.Messages = errorMessages;
                 }
 
-                return BadRequest(apiResponse);
+                return BadRequest(response);
             }
 
             if (id != req.OrderId || id == 0)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return BadRequest(apiResponse);
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                return BadRequest(response);
             }
 
             var existingOrder = await _db.Orders
@@ -297,9 +296,9 @@ namespace eListamAPI.Controllers
 
             if (existingOrder == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                return NotFound(response);
             }
 
             existingOrder.Date = req.Date ?? existingOrder.Date;
@@ -307,7 +306,7 @@ namespace eListamAPI.Controllers
             await _db.SaveChangesAsync();
 
             // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
-            apiResponse.Data = new GetOrderResponse()
+            response.Data = new GetOrderResponse()
             {
                 Id = existingOrder.Id,
                 OrderNumber = existingOrder.OrderNumber,
@@ -315,21 +314,21 @@ namespace eListamAPI.Controllers
                 TotalPrice = existingOrder.TotalPrice,
                 TotalQuantity = existingOrder.TotalQuantity,
                 IsPosted = existingOrder.IsPosted,
-                OrderDetails = existingOrder.OrderDetails?.Select(ed => new GetOrderDetailResponse()
+                OrderDetails = existingOrder.OrderDetails.Select(ed => new GetOrderDetailResponse()
                 {
                     Description = ed.Description,
                     Image = ed.Image,
                     Name = ed.Name,
                     OrderDetailId = ed.Id,
                     Price = ed.Price,
-                    ProductId = ed.ProductId,
+                    ProductId = ed.ItemId,
                     Quantity = ed.Quantity
                 })
             };
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         #endregion
 
@@ -338,7 +337,7 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             var pendingOrder = await _db.Orders.FirstOrDefaultAsync(p => p.Id == id);
             if (pendingOrder != null)
@@ -346,15 +345,15 @@ namespace eListamAPI.Controllers
                 _db.Orders.Remove(pendingOrder);
                 await _db.SaveChangesAsync();
 
-                apiResponse.StatusCode = HttpStatusCode.OK;
-                apiResponse.IsSuccess = true;
-                apiResponse.Data = pendingOrder;
-                return Ok(apiResponse);
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+                response.Data = pendingOrder;
+                return Ok(response);
             }
 
-            apiResponse.StatusCode = HttpStatusCode.NotFound;
-            apiResponse.Messages = ["There is no pending Order!"];
-            return NotFound(apiResponse);
+            response.StatusCode = HttpStatusCode.NotFound;
+            response.Messages = ["There is no pending Order!"];
+            return NotFound(response);
         }
         #endregion
 
@@ -362,12 +361,12 @@ namespace eListamAPI.Controllers
         [HttpPost("{id:int}/Place")]
         public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            ApiResponse response = new ApiResponse();
 
             if (!ModelState.IsValid)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
 
                 foreach (var value in ModelState.Values)
                 {
@@ -376,10 +375,10 @@ namespace eListamAPI.Controllers
                     {
                         errorMessages.Add(error.ErrorMessage);
                     }
-                    apiResponse.Messages = errorMessages;
+                    response.Messages = errorMessages;
                 }
 
-                return BadRequest(apiResponse);
+                return BadRequest(response);
             }
 
             var existingOrder = await _db.Orders
@@ -388,10 +387,10 @@ namespace eListamAPI.Controllers
 
             if (existingOrder == null)
             {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Order does not exists!"];
-                return NotFound(apiResponse);
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Order does not exists!"];
+                return NotFound(response);
             }
 
             existingOrder.UserId = req.UserId;
@@ -408,13 +407,13 @@ namespace eListamAPI.Controllers
                 TotalPrice = existingOrder.TotalPrice,
                 TotalQuantity = existingOrder.TotalQuantity,
                 UserId = req.UserId,
-                TransactionDetails = existingOrderDetails?.Select(od => new TransactionDetail()
+                TransactionDetails = existingOrderDetails.Select(od => new TransactionDetail()
                 {
                     Description = od.Description,
                     Image = od.Image,
                     Name = od.Name,
                     Price = od.Price,
-                    ProductId = od.ProductId,
+                    ItemId = od.ItemId,
                     Quantity = od.Quantity,
                 }).ToList()
             };
@@ -423,7 +422,7 @@ namespace eListamAPI.Controllers
             await _db.SaveChangesAsync();
 
             // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
-            apiResponse.Data = new GetOrderResponse()
+            response.Data = new GetOrderResponse()
             {
                 Id = existingOrder.Id,
                 OrderNumber = existingOrder.OrderNumber,
@@ -434,9 +433,9 @@ namespace eListamAPI.Controllers
                 UserId = existingOrder.UserId
             };
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            return Ok(apiResponse);
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         #endregion
     }

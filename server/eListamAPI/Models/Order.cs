@@ -5,7 +5,6 @@ namespace eListamAPI.Models
 {
     public class Order
     {
-        [Key]
         public int Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
         public DateTime Date { get; set; }
@@ -13,7 +12,6 @@ namespace eListamAPI.Models
         public double TotalQuantity { get; set; }
         public bool IsPosted { get; set; }
         public string UserId { get; set; } = string.Empty;
-        
-        public ICollection<OrderDetail>? OrderDetails { get; set; }
+        public ICollection<OrderDetail> OrderDetails { get; set; } = null!;
     }
 }

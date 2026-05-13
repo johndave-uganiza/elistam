@@ -72,7 +72,7 @@ using (var scope = app.Services.CreateScope())
     var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
 
     // Seed dummy products
-    await seeder.Seed();
+    await seeder.SeedAsync();
 }
 
 // Configure the HTTP request pipeline.
@@ -83,6 +83,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
 app.UseAuthentication();
 app.UseAuthorization();
 
