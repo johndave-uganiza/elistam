@@ -1,65 +1,57 @@
 import { useContext, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import { ProductsContext } from "../../context/ProductsContext";
-import ProductCard from "../../components/ProductCard";
-import { BasketContext } from "../../context/BasketContext";
-import SearchBar from "../../components/SearchBar";
-import SortDropdown from "../../components/SortDropdown";
-import ToastAlert from "../../components/ToastAlert";
-import ItemsToolbar from "../../components/ItemsToolbar";
-// import ProductsToolbar from "../../components/ProductsToolbar";
-import AddToOrderForm from "../../components/AddToOrderForm";
+import { ProductContext } from "../../context/ProductContext";
+import ProductCard from "../../components/products/ProductCard";
+import { OrderContext } from "../../context/OrderContext";
+import SearchBar from "../../components/common/SearchBar";
+import SortDropdown from "../../components/common/SortDropdown";
+import ToastAlert from "../../components/common/ToastAlert";
+import ItemsToolbar from "../../components/items/ItemsToolbar";
+import AddToOrderForm from "../../components/products/AddToOrderForm";
 import { Modal } from "bootstrap";
-import { productsSortBy } from "../../data/productsSortBy";
-
-import AddItemForm from "../../components/AddItemForm";
-import EditItemForm from "../../components/EditItemForm";
-import DeleteItemForm from "../../components/DeleteItemForm";
-import ItemCard from "../../components/ItemCard";
+import AddItemForm from "../../components/items/AddItemForm";
+import EditItemForm from "../../components/items/EditItemForm";
+import DeleteItemForm from "../../components/items/DeleteItemForm";
+import ItemCard from "../../components/items/ItemCard";
+import { ItemContext } from "../../context/ItemContext";
 
 function Items() {
   // const navigate = useNavigate();
-  const { basketItems, setBasketItems } = useContext(BasketContext);
+  const { items, setItems } = useContext(ItemContext);
 
   // const [showToast, setShowToast] = useState(false);
-  const [showAddProductForm, setShowAddProductForm] = useState(false);
-  const [showEditProductForm, setShowEditProductForm] = useState(false);
-  const [showDeleteProductForm, setShowDeleteProductForm] = useState(false);
+  const [showAddItemForm, setShowAddItemForm] = useState(false);
+  const [showEditItemForm, setShowEditItemForm] = useState(false);
+  const [showDeleteItemForm, setShowDeleteItemForm] = useState(false);
   const [sortBy, setSortBy] = useState("");
-  const { products, setProducts } = useContext(ProductsContext);
-  const [searchTextInput, setSearchTextInput] = useState("");
-  const [currentProductItem, setCurrentProductItem] = useState(null);
-  const [showAddToBasketForm, setShowAddToBasketForm] = useState(false);
-  const [productDetailForm, setProductDetailForm] = useState({
+  const [searchInput, setSearchInput] = useState("");
+  const [currentItem, setCurrentItem] = useState(null);
+  const [itemDetailForm, setItemDetailForm] = useState({
     name: "",
     price: "",
     quantity: 0,
     expirationDate: "",
   });
 
-  // Filter products
-  const mutatedProducts = products?.filter((productItem) =>
-    productItem.title.includes(searchTextInput),
-  );
+  // Filter items
+  const filteredItems = items.filter((item) => item.name.includes(searchInput));
 
-  // Sort products
-  const { name, price } = productsSortBy;
-
+  // Sort items
+  const { name, price } = sortBy;
   switch (sortBy) {
-    case price.asc.value:
-      mutatedProducts.sort((current, next) => current.price - next.price);
+    case price?.asc.value:
+      filteredItems.sort((current, next) => current.price - next.price);
       break;
-    case price.desc.value:
-      mutatedProducts.sort((current, next) => next.price - current.price);
+    case price?.desc.value:
+      filteredItems.sort((current, next) => next.price - current.price);
       break;
-    case name.asc.value:
-      mutatedProducts.sort((current, next) =>
-        current.title.localeCompare(next.title),
+    case name?.asc.value:
+      filteredItems.sort((current, next) =>
+        current.name.localeCompare(next.name),
       );
       break;
-    case name.desc.value:
-      mutatedProducts.sort((current, next) =>
-        next.title.localeCompare(current.title),
+    case name?.desc.value:
+      filteredItems.sort((current, next) =>
+        next.name.localeCompare(current.name),
       );
       break;
     default:
@@ -68,34 +60,27 @@ function Items() {
 
   function handleSearchInput(e) {
     e.preventDefault();
-    setSearchTextInput(e.target.value);
+    setSearchInput(e.target.value);
   }
 
-  // function handleAddToBasket(productItem) {
-  //   // navigate("/add-to-basket", { state: { productItem } });
-  //   setShowAddToBasketForm(true);
-  //   setCurrentProductItem(productItem);
-  //   // setShowAddToBasketForm(true);
-  // }
-
-  function handleAddProductClick() {
-    setShowAddProductForm(true);
+  function handleAddItem() {
+    setShowAddItemForm(true);
   }
 
-  function handleEditItem(productItem) {
-    setCurrentProductItem(productItem);
+  function handleEditItem(item) {
+    setCurrentItem(item);
 
-    setProductDetailForm({
-      name: productItem.title,
-      price: productItem.price,
-      quantity: productItem.stock,
-      expirationDate: productItem.expirationDate || "",
+    setItemDetailForm({
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      expirationDate: item.expirationDate || "",
     });
 
-    setShowEditProductForm(true);
+    setShowEditItemForm(true);
   }
 
-  function handleUpdateProduct(e) {
+  function handleUpdateItem(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const name = formData.get("name");
@@ -104,48 +89,47 @@ function Items() {
     const expirationDate = new Date(
       formData.get("expirationDate"),
     ).toLocaleDateString("en-US");
-
-    const updatedProducts = products.map((product) => {
-      if (product.id === currentProductItem.id) {
+    const updatedItems = items.map((item) => {
+      if (item.id === currentItem.id) {
         return {
-          ...product,
-          title: name,
+          ...item,
+          name: name,
           price: price,
           stock: quantity,
           expirationDate: expirationDate,
         };
       }
 
-      return product;
+      return item;
     });
 
-    setProducts(updatedProducts);
-    setShowEditProductForm(false);
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
+    setItems(updatedItems);
+    setShowEditItemForm(false);
+    localStorage.setItem("items", JSON.stringify(updatedItems));
   }
 
-  function handleDeleteItem(productItem) {
-    setCurrentProductItem(productItem);
+  function handleDeleteItem(item) {
+    setCurrentItem(item);
 
-    setProductDetailForm({
-      name: productItem.title,
-      price: productItem.price,
-      quantity: productItem.stock,
-      expirationDate: productItem.expirationDate || "",
-    });
+    // setItemDetailForm({
+    //   name: item.name,
+    //   price: item.price,
+    //   quantity: item.stock,
+    //   expirationDate: item.expirationDate || "",
+    // });
 
-    setShowDeleteProductForm(true);
+    setShowDeleteItemForm(true);
   }
 
-  function handleRemoveProduct(productId) {
-    const newProducts = products.filter((product) => product.id !== productId);
-    setProducts(newProducts);
-    localStorage.setItem("products", JSON.stringify(newProducts));
+  // function handleRemoveItem(itemId) {
+  //   const newItems = items.filter((item) => item.Id !== itemId);
+  //   setItems(newItems);
+  //   localStorage.setItem("items", JSON.stringify(newItems));
 
-    setShowDeleteProductForm(false);
-  }
+  //   setShowDeleteItemForm(false);
+  // }
 
-  function handleSortByChange(e) {
+  function handleSortBy(e) {
     setSortBy(e.target.value);
   }
 
@@ -155,27 +139,27 @@ function Items() {
         <div className="row p-3">
           <div className="p-0 d-flex justify-content-between align-items-center">
             <h3 className="">List of Items</h3>
-            <h6 className="">Total Items:{products?.length}</h6>
+            <h6 className="">Total Items:{items?.length}</h6>
           </div>
         </div>
         <div className="row py-2 mb-2 p-3">
           <ItemsToolbar
-            handleAddProductClick={handleAddProductClick}
+            handleAddItem={handleAddItem}
             handleSearchInput={handleSearchInput}
-            handleSortByChange={handleSortByChange}
-            products={products}
+            handleSortBy={handleSortBy}
+            items={items}
             sortBy={sortBy}
           />
         </div>
-        <div className="row justify-content-center p-3 gap-5">
-          {mutatedProducts?.length > 0
-            ? mutatedProducts.map((item, index) => {
+        <div className="row justify-content-between p-3 gap-5">
+          {filteredItems?.length > 0
+            ? filteredItems.map((item, index) => {
                 return (
                   <ItemCard
                     item={item}
                     key={index}
-                    basketItems={basketItems}
-                    setBasketItems={setBasketItems}
+                    items={items}
+                    setItems={setItems}
                     // setShowToast={setShowToast}
                     // handleAddToBasket={handleAddToBasket}
                     handleEditItem={handleEditItem}
@@ -187,33 +171,27 @@ function Items() {
         </div>
       </div>
 
-      <AddToOrderForm
-        showAddToBasketForm={showAddToBasketForm}
-        setShowAddToBasketForm={setShowAddToBasketForm}
-        currentProductItem={currentProductItem}
-      />
-
       <AddItemForm
-        showAddProductForm={showAddProductForm}
-        setShowAddProductForm={setShowAddProductForm}
+        showAddItemForm={showAddItemForm}
+        setShowAddItemForm={setShowAddItemForm}
       />
 
       <EditItemForm
-        showEditProductForm={showEditProductForm}
-        setShowEditProductForm={setShowEditProductForm}
-        currentProductItem={currentProductItem}
-        handleUpdateProduct={handleUpdateProduct}
-        productDetailForm={productDetailForm}
-        setProductDetailForm={setProductDetailForm}
+        showEditItemForm={showEditItemForm}
+        setShowEditItemForm={setShowEditItemForm}
+        currentItem={currentItem}
+        handleUpdateItem={handleUpdateItem}
+        itemDetailForm={itemDetailForm}
+        setItemDetailForm={setItemDetailForm}
+        setCurrentItem={setCurrentItem}
       />
 
       <DeleteItemForm
-        showDeleteProductForm={showDeleteProductForm}
-        setShowDeleteProductForm={setShowDeleteProductForm}
-        currentProductItem={currentProductItem}
-        handleRemoveProduct={handleRemoveProduct}
-        productDetailForm={productDetailForm}
-        setProductDetailForm={setProductDetailForm}
+        showDeleteItemForm={showDeleteItemForm}
+        setShowDeleteItemForm={setShowDeleteItemForm}
+        currentItem={currentItem}
+        setCurrentItem={setCurrentItem}
+        handleDeleteItem={handleDeleteItem}
       />
     </div>
   );

@@ -4,11 +4,12 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Login from "../pages/auth/Login";
 import Orders from "../pages/orders/Orders";
 import ProductList from "../pages/products/ProductList";
-import { ProductsProvider } from "../context/ProductsContext";
-import { BasketProvider } from "../context/BasketContext";
+import { ProductProvider } from "../context/ProductContext";
+import { OrderProvider } from "../context/OrderContext";
 import AddToOrder from "../pages/orders/AddToOrder";
 import Items from "../pages/items/Items";
 import Transactions from "../pages/transactions/Transactions";
+import { ItemProvider } from "../context/ItemContext";
 
 function AppRouter() {
   return (
@@ -28,40 +29,38 @@ function AppRouter() {
       <Route
         path="/items"
         element={
-          <ProductsProvider>
-            <BasketProvider>
-              <Items />
-            </BasketProvider>
-          </ProductsProvider>
+          <ItemProvider>
+            <Items />
+          </ItemProvider>
         }
       />
 
       <Route
         path="/products"
         element={
-          <ProductsProvider>
-            <BasketProvider>
+          <ProductProvider>
+            <OrderProvider>
               <ProductList />
-            </BasketProvider>
-          </ProductsProvider>
+            </OrderProvider>
+          </ProductProvider>
         }
       />
 
       <Route
         path="/add-to-order"
         element={
-          <BasketProvider>
+          <OrderProvider>
             <AddToOrder />
-          </BasketProvider>
+          </OrderProvider>
         }
       />
 
       <Route
         path="/orders"
         element={
-          <BasketProvider>
+          <OrderProvider>
             <Orders />
-          </BasketProvider>
+          </OrderProvider>
         }
       />
 

@@ -1,11 +1,11 @@
 import { useContext } from "react";
-import { BasketContext } from "../../context/BasketContext";
+import { OrderContext } from "../../context/OrderContext";
 
 function Orders() {
-  const { basketItems } = useContext(BasketContext);
+  const { orders } = useContext(OrderContext);
 
   function getTotalBasketPrice() {
-    const total = basketItems.reduce(
+    const total = orders.reduce(
       (prev, current) => prev + current.quantity * current.price,
       0,
     );
@@ -14,18 +14,18 @@ function Orders() {
   }
 
   return (
-    <div className="container-fluid flex-fill d-flex flex-column">
-      <div className="row p-3">
+    <div className="container-fluid flex-fill d-flex flex-column py-3">
+      {/* <div className="row p-3">
         <div className="p-0 d-flex justify-content-between align-items-center">
           <h3 className="">Orders</h3>
         </div>
-      </div>
-      <div className="row flex-fill mb-3">
+      </div> */}
+      <div className="row flex-fill">
         <div className="col-12 d-flex flex-column">
           <div className="card bg-primary-subtle flex-fill">
             <div className="card-header bg-black">
               <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
-                <span>Checkout Summary</span>
+                <span>Orders Summary</span>
                 <span className="fs-6 align-self-center">
                   Date: {new Date().toLocaleDateString("en-US")}
                 </span>
@@ -33,7 +33,7 @@ function Orders() {
             </div>
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
               <form className="flex-fill d-flex flex-column">
-                <div className="row mb-3">
+                <div className="row">
                   <div className="col-auto">
                     <label
                       htmlFor="inputPassword4"
@@ -66,10 +66,11 @@ function Orders() {
                     />
                   </div>
                 </div>
+                <hr />
                 <div className="row flex-fill">
                   <div
                     className="overflow-scroll overflow-x-hidden"
-                    style={{ maxHeight: "290px" }}
+                    style={{ maxHeight: "340px" }}
                   >
                     <table className="table table-hover">
                       <thead>
@@ -83,7 +84,7 @@ function Orders() {
                         </tr>
                       </thead>
                       <tbody>
-                        {basketItems.map((item) => (
+                        {orders.map((item) => (
                           <tr>
                             <th scope="row">{item.id}</th>
                             <td>{item.title}</td>
@@ -100,6 +101,7 @@ function Orders() {
                     </table>
                   </div>
                 </div>
+                <hr />
                 <div className="row">
                   <div className="col-12 d-flex justify-content-between align-items-center">
                     <div className="d-flex gap-3">

@@ -1,4 +1,4 @@
-export const productsSortBy = {
+export const sortBy = {
     defaultSortBy: {
         label: "Sort By",
         value: ""

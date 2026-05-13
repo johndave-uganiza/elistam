@@ -1,12 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Modal } from "bootstrap";
-import { ProductsContext } from "../context/ProductsContext";
-import { BasketContext } from "../context/BasketContext";
+import { ProductContext } from "../../context/ProductContext";
+import { OrderContext } from "../../context/OrderContext";
 
 function AddToOrderForm({
-  showAddToBasketForm,
-  setShowAddToBasketForm,
-  currentProductItem,
+  showAddToOrderForm,
+  setShowAddToOrderForm,
+  currentProduct,
 }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
@@ -18,12 +18,12 @@ function AddToOrderForm({
       bsModalRef.current = new Modal(modalRef.current, { backdrop: "static" });
     }
 
-    if (showAddToBasketForm) {
+    if (showAddToOrderForm) {
       bsModalRef.current.show();
     } else {
       bsModalRef.current.hide();
     }
-  }, [showAddToBasketForm, setShowAddToBasketForm]);
+  }, [showAddToOrderForm, setShowAddToOrderForm]);
 
   // function handleAddProduct(e) {
   //   e.preventDefault();
@@ -38,7 +38,7 @@ function AddToOrderForm({
   //   setProducts([
   //     ...products,
   //     {
-  //       title: name,
+  //       name: name,
   //       price: price,
   //       quantity: quantity,
   //       expirationDate: expirationDate,
@@ -46,27 +46,27 @@ function AddToOrderForm({
   //   ]);
 
   //   bsModalRef.current.hide();
-  //   setShowAddToBasketForm(false);
+  //   setShowAddToOrderForm(false);
   // }
 
   // const location = useLocation();
   // const navigate = useNavigate();
   const [itemQuantity, setItemQuantity] = useState(1);
-  const { basketItems, setBasketItems } = useContext(BasketContext);
+  const { orders, setOrders } = useContext(OrderContext);
 
   function handleAddToBasket(e) {
     e.preventDefault();
     const newOrder = {
-      ...currentProductItem,
+      ...currentProduct,
       quantity: itemQuantity,
     };
 
-    const newBasketItems = [...basketItems, newOrder];
+    const newBasketItems = [...orders, newOrder];
 
-    setBasketItems(newBasketItems);
-    localStorage.setItem("basket", JSON.stringify(newBasketItems));
+    setOrders(newBasketItems);
+    localStorage.setItem("order", JSON.stringify(newBasketItems));
     bsModalRef.current.hide();
-    // navigate("/basket");
+    // navigate("/order");
   }
 
   return (
@@ -75,13 +75,13 @@ function AddToOrderForm({
         <form onSubmit={handleAddToBasket}>
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+              <h1 className="modal-name fs-5" id="staticBackdropLabel">
                 Add To Order
               </h1>
               <button
                 onClick={() => {
                   bsModalRef.current.hide();
-                  setShowAddToBasketForm(false);
+                  setShowAddToOrderForm(false);
                 }}
                 type="button"
                 className="btn-close"
@@ -92,17 +92,14 @@ function AddToOrderForm({
                 <div className="d-flex">
                   <div className="col-6 text-dark d-flex flex-column align-items-center p-3">
                     <h4 className=" text-center">
-                      <strong>{currentProductItem?.title}</strong>
+                      <strong>{currentProduct?.name}</strong>
                     </h4>
                     <div className="text-center">
-                      <img
-                        src={currentProductItem?.thumbnail}
-                        className="w-75"
-                      ></img>
+                      <img src={currentProduct?.image} className="w-75"></img>
                     </div>
                     <p className="card-text text-black">
                       <small className="text-black">
-                        Stock: {currentProductItem?.stock}
+                        Stock: {currentProduct?.quantity}
                       </small>
                     </p>
                   </div>
@@ -112,20 +109,18 @@ function AddToOrderForm({
                     <div className="mb-3">
                       {/* <strong>Product Name:</strong> */}
                       <p className="card-text mb-0 small">
-                        {currentProductItem?.title}
+                        {currentProduct?.name}
                       </p>
                       <p className="card-text">
                         <small className="text-body-secondary">
-                          Category: {currentProductItem?.category}
+                          Category: {currentProduct?.category}
                         </small>
                       </p>
                     </div>
 
                     <div className="d-flex flex-column mb-4 col-lg-12 col-md-5 col-8">
                       <p className="small">Quantity: {itemQuantity}</p>
-                      <p className="small">
-                        Price: ${currentProductItem?.price}
-                      </p>
+                      <p className="small">Price: ${currentProduct?.price}</p>
                       <div className="input-group mb-3">
                         <button
                           onClick={() => {
@@ -165,10 +160,7 @@ function AddToOrderForm({
                       <p className="card-text">
                         Total:{" "}
                         <strong>
-                          $
-                          {(itemQuantity * currentProductItem?.price).toFixed(
-                            2,
-                          )}
+                          ${(itemQuantity * currentProduct?.price).toFixed(2)}
                         </strong>
                       </p>
                     </div>
@@ -196,7 +188,7 @@ function AddToOrderForm({
               <button
                 onClick={() => {
                   bsModalRef.current.hide();
-                  setShowAddToBasketForm(false);
+                  setShowAddToOrderForm(false);
                 }}
                 type="button"
                 className="btn btn-secondary"

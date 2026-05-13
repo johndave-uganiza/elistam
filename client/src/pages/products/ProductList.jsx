@@ -1,63 +1,49 @@
 import { useContext, useState } from "react";
 // import { useNavigate } from "react-router-dom";
-import { ProductsContext } from "../../context/ProductsContext";
-import ProductCard from "../../components/ProductCard";
-import { BasketContext } from "../../context/BasketContext";
-import SearchBar from "../../components/SearchBar";
-import SortDropdown from "../../components/SortDropdown";
-import ToastAlert from "../../components/ToastAlert";
-import ProductsToolbar from "../../components/ProductsToolbar";
-import AddToOrderForm from "../../components/AddToOrderForm";
+import { ProductContext } from "../../context/ProductContext";
+import ProductCard from "../../components/products/ProductCard";
+import { OrderContext } from "../../context/OrderContext";
+import SearchBar from "../../components/common/SearchBar";
+import SortDropdown from "../../components/common/SortDropdown";
+import ToastAlert from "../../components/common/ToastAlert";
+import ProductsToolbar from "../../components/products/ProductsToolbar";
+import AddToOrderForm from "../../components/products/AddToOrderForm";
 import { Modal } from "bootstrap";
-import { productsSortBy } from "../../data/productsSortBy";
-
-import AddItemForm from "../../components/AddItemForm";
-import EditItemForm from "../../components/EditItemForm";
-import DeleteItemForm from "../../components/DeleteItemForm";
 
 function ProductList() {
   // const navigate = useNavigate();
-  const { basketItems, setBasketItems } = useContext(BasketContext);
+  const { orders, setOrders } = useContext(OrderContext);
+  const { products } = useContext(ProductContext);
 
   // const [showToast, setShowToast] = useState(false);
-  const [showAddProductForm, setShowAddProductForm] = useState(false);
-  const [showEditProductForm, setShowEditProductForm] = useState(false);
-  const [showDeleteProductForm, setShowDeleteProductForm] = useState(false);
   const [sortBy, setSortBy] = useState("");
-  const { products, setProducts } = useContext(ProductsContext);
-  const [searchTextInput, setSearchTextInput] = useState("");
-  const [currentProductItem, setCurrentProductItem] = useState(null);
-  const [showAddToBasketForm, setShowAddToBasketForm] = useState(false);
-  const [productDetailForm, setProductDetailForm] = useState({
-    name: "",
-    price: "",
-    quantity: 0,
-    expirationDate: "",
-  });
+  const [searchInput, setSearchInput] = useState("");
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [showAddToOrderForm, setShowAddToOrderForm] = useState(false);
 
   // Filter products
-  const mutatedProducts = products?.filter((productItem) =>
-    productItem.title.includes(searchTextInput),
+  const filteredProducts = products?.filter((product) =>
+    product.name.includes(searchInput),
   );
 
   // Sort products
-  const { name, price } = productsSortBy;
+  const { name, price } = sortBy;
 
   switch (sortBy) {
-    case price.asc.value:
-      mutatedProducts.sort((current, next) => current.price - next.price);
+    case price?.asc.value:
+      filteredProducts.sort((current, next) => current.price - next.price);
       break;
-    case price.desc.value:
-      mutatedProducts.sort((current, next) => next.price - current.price);
+    case price?.desc.value:
+      filteredProducts.sort((current, next) => next.price - current.price);
       break;
-    case name.asc.value:
-      mutatedProducts.sort((current, next) =>
-        current.title.localeCompare(next.title),
+    case name?.asc.value:
+      filteredProducts.sort((current, next) =>
+        current.name.localeCompare(next.name),
       );
       break;
-    case name.desc.value:
-      mutatedProducts.sort((current, next) =>
-        next.title.localeCompare(current.title),
+    case name?.desc.value:
+      filteredProducts.sort((current, next) =>
+        next.name.localeCompare(current.name),
       );
       break;
     default:
@@ -66,84 +52,17 @@ function ProductList() {
 
   function handleSearchInput(e) {
     e.preventDefault();
-    setSearchTextInput(e.target.value);
+    setSearchInput(e.target.value);
   }
 
-  function handleAddToBasket(productItem) {
-    // navigate("/add-to-basket", { state: { productItem } });
-    setShowAddToBasketForm(true);
-    setCurrentProductItem(productItem);
-    // setShowAddToBasketForm(true);
+  function handleAddToOrder(product) {
+    // navigate("/add-to-order", { state: { product } });
+    setShowAddToOrderForm(true);
+    setCurrentProduct(product);
+    // setShowAddToOrderForm(true);
   }
 
-  function handleAddProductClick() {
-    setShowAddProductForm(true);
-  }
-
-  function handleEditProduct(productItem) {
-    setCurrentProductItem(productItem);
-
-    setProductDetailForm({
-      name: productItem.title,
-      price: productItem.price,
-      quantity: productItem.stock,
-      expirationDate: productItem.expirationDate || "",
-    });
-
-    setShowEditProductForm(true);
-  }
-
-  function handleUpdateProduct(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get("name");
-    const price = formData.get("price");
-    const quantity = formData.get("quantity");
-    const expirationDate = new Date(
-      formData.get("expirationDate"),
-    ).toLocaleDateString("en-US");
-
-    const updatedProducts = products.map((product) => {
-      if (product.id === currentProductItem.id) {
-        return {
-          ...product,
-          title: name,
-          price: price,
-          stock: quantity,
-          expirationDate: expirationDate,
-        };
-      }
-
-      return product;
-    });
-
-    setProducts(updatedProducts);
-    setShowEditProductForm(false);
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-  }
-
-  function handleDeleteProduct(productItem) {
-    setCurrentProductItem(productItem);
-
-    setProductDetailForm({
-      name: productItem.title,
-      price: productItem.price,
-      quantity: productItem.stock,
-      expirationDate: productItem.expirationDate || "",
-    });
-
-    setShowDeleteProductForm(true);
-  }
-
-  function handleRemoveProduct(productId) {
-    const newProducts = products.filter((product) => product.id !== productId);
-    setProducts(newProducts);
-    localStorage.setItem("products", JSON.stringify(newProducts));
-
-    setShowDeleteProductForm(false);
-  }
-
-  function handleSortByChange(e) {
+  function handleSortBy(e) {
     setSortBy(e.target.value);
   }
 
@@ -158,26 +77,23 @@ function ProductList() {
         </div>
         <div className="row py-2 mb-2 p-3">
           <ProductsToolbar
-            handleAddProductClick={handleAddProductClick}
             handleSearchInput={handleSearchInput}
-            handleSortByChange={handleSortByChange}
+            handleSortBy={handleSortBy}
             products={products}
             sortBy={sortBy}
           />
         </div>
-        <div className="row justify-content-center p-3 gap-5">
-          {mutatedProducts?.length > 0
-            ? mutatedProducts.map((product, index) => {
+        <div className="row justify-content-between p-3 gap-5">
+          {filteredProducts?.length > 0
+            ? filteredProducts.map((product, index) => {
                 return (
                   <ProductCard
                     product={product}
                     key={index}
-                    basketItems={basketItems}
-                    setBasketItems={setBasketItems}
+                    orders={orders}
+                    setOrders={setOrders}
                     // setShowToast={setShowToast}
-                    handleAddToBasket={handleAddToBasket}
-                    handleEditProduct={handleEditProduct}
-                    handleDeleteProduct={handleDeleteProduct}
+                    handleAddToOrder={handleAddToOrder}
                   />
                 );
               })
@@ -186,32 +102,9 @@ function ProductList() {
       </div>
 
       <AddToOrderForm
-        showAddToBasketForm={showAddToBasketForm}
-        setShowAddToBasketForm={setShowAddToBasketForm}
-        currentProductItem={currentProductItem}
-      />
-
-      <AddItemForm
-        showAddProductForm={showAddProductForm}
-        setShowAddProductForm={setShowAddProductForm}
-      />
-
-      <EditItemForm
-        showEditProductForm={showEditProductForm}
-        setShowEditProductForm={setShowEditProductForm}
-        currentProductItem={currentProductItem}
-        handleUpdateProduct={handleUpdateProduct}
-        productDetailForm={productDetailForm}
-        setProductDetailForm={setProductDetailForm}
-      />
-
-      <DeleteItemForm
-        showDeleteProductForm={showDeleteProductForm}
-        setShowDeleteProductForm={setShowDeleteProductForm}
-        currentProductItem={currentProductItem}
-        handleRemoveProduct={handleRemoveProduct}
-        productDetailForm={productDetailForm}
-        setProductDetailForm={setProductDetailForm}
+        showAddToOrderForm={showAddToOrderForm}
+        setShowAddToOrderForm={setShowAddToOrderForm}
+        currentProduct={currentProduct}
       />
     </div>
   );

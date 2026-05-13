@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
-import { ProductsContext } from "../context/ProductsContext";
+import { ItemContext } from "../../context/ItemContext";
 
-function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
+function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
-  const { products, setProducts } = useContext(ProductsContext);
+  const { items, setItems } = useContext(ItemContext);
 
   useEffect(() => {
     if (!modalRef.current) return;
@@ -14,14 +14,14 @@ function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
       bsModalRef.current = new Modal(modalRef.current, { backdrop: "static" });
     }
 
-    if (showAddProductForm) {
+    if (showAddItemForm) {
       bsModalRef.current.show();
     } else {
       bsModalRef.current.hide();
     }
-  }, [showAddProductForm, setShowAddProductForm]);
+  }, [showAddItemForm, setShowAddItemForm]);
 
-  function handleAddProduct(e) {
+  function hanldeAddItem(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const name = formData.get("name");
@@ -31,8 +31,8 @@ function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
       formData.get("expirationDate"),
     ).toLocaleDateString("en-US");
 
-    const newProducts = [
-      ...products,
+    const newItems = [
+      ...items,
       {
         title: name,
         price: price,
@@ -41,12 +41,12 @@ function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
       },
     ];
 
-    setProducts(newProducts);
+    setItems(newItems);
 
-    localStorage.setItem("products", JSON.stringify(newProducts));
+    localStorage.setItem("items", JSON.stringify(newItems));
 
     bsModalRef.current.hide();
-    setShowAddProductForm(false);
+    setShowAddItemForm(false);
   }
 
   return (
@@ -60,14 +60,14 @@ function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
             <button
               onClick={() => {
                 bsModalRef.current.hide();
-                setShowAddProductForm(false);
+                setShowAddItemForm(false);
               }}
               type="button"
               className="btn-close"
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={handleAddProduct} id="addProductForm">
+            <form onSubmit={hanldeAddItem} id="addProductForm">
               <div className="mb-3">
                 <label className="form-label">Name</label>
                 <input
@@ -110,7 +110,7 @@ function AddItemForm({ showAddProductForm, setShowAddProductForm }) {
             <button
               onClick={() => {
                 bsModalRef.current.hide();
-                setShowAddProductForm(false);
+                setShowAddItemForm(false);
               }}
               type="button"
               className="btn btn-secondary"

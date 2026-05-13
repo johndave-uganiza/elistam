@@ -1,5 +1,5 @@
-import SearchBar from "./SearchBar";
-import SortDropdown from "./SortDropdown";
+import SearchBar from "../common/SearchBar";
+import SortDropdown from "../common/SortDropdown";
 
 function ProductsToolbar({ handleSearchInput, handleSortByChange, sortBy }) {
   return (

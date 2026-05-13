@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BasketContext } from "../../context/BasketContext";
+import { OrderContext } from "../../context/OrderContext";
 
 function AddToBasket() {
   const location = useLocation();
@@ -8,7 +8,7 @@ function AddToBasket() {
   const { title, price, thumbnail, category, stock } =
     location.state.productItem;
   const [itemQuantity, setItemQuantity] = useState(1);
-  const { basketItems, setBasketItems } = useContext(BasketContext);
+  const { orders, setOrders } = useContext(OrderContext);
   function handlePlaceToBasket(e) {
     e.preventDefault();
     const productItemWithQuantity = {
@@ -16,12 +16,12 @@ function AddToBasket() {
       quantity: itemQuantity,
     };
 
-    const newBasketItems = [...basketItems, productItemWithQuantity];
+    const newBasketItems = [...orders, productItemWithQuantity];
 
-    setBasketItems(newBasketItems);
-    localStorage.setItem("basket", JSON.stringify(newBasketItems));
+    setOrders(newBasketItems);
+    localStorage.setItem("order", JSON.stringify(newBasketItems));
 
-    navigate("/basket");
+    navigate("/order");
   }
 
   return (

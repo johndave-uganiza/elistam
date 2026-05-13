@@ -1,11 +1,11 @@
-import { productsSortBy } from "../data/productsSortBy";
-const { name, price, defaultSortBy } = productsSortBy;
-function SortDropdown({ handleSortByChange, sortBy }) {
+import { sortBy } from "../../data/products/sortBy";
+const { name, price, defaultSortBy } = sortBy;
+function SortDropdown({ handleSortBy, sortBy }) {
   return (
     <select
       className="form-select form-select-sm"
-      value={sortBy || ""}
-      onChange={handleSortByChange}
+      onChange={handleSortBy}
+      // value={sortBy || ""}
     >
       <option value={defaultSortBy.value} disabled>
         {defaultSortBy.label}

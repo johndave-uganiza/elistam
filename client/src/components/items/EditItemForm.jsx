@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
-import { ProductsContext } from "../context/ProductsContext";
 
 function EditItemForm({
-  showEditProductForm,
-  setShowEditProductForm,
-  handleUpdateProduct,
-  productDetailForm,
-  setProductDetailForm,
+  showEditItemForm,
+  setShowEditItemForm,
+  handleUpdateItem,
+  itemDetailForm,
+  setItemDetailForm,
 }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
@@ -19,18 +18,18 @@ function EditItemForm({
       bsModalRef.current = new Modal(modalRef.current, { backdrop: "static" });
     }
 
-    if (showEditProductForm) {
+    if (showEditItemForm) {
       bsModalRef.current.show();
     } else {
       bsModalRef.current.hide();
     }
-  }, [showEditProductForm]);
+  }, [showEditItemForm]);
 
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <form onSubmit={handleUpdateProduct}>
+          <form onSubmit={handleUpdateItem}>
             <div className="modal-header">
               <h1
                 className="modal-title fs-5 text-warning"
@@ -40,7 +39,7 @@ function EditItemForm({
               </h1>
               <button
                 onClick={() => {
-                  setShowEditProductForm(false);
+                  setShowEditItemForm(false);
                 }}
                 type="button"
                 className="btn-close"
@@ -53,10 +52,10 @@ function EditItemForm({
                   name="name"
                   className="form-control"
                   type="text"
-                  value={productDetailForm?.name}
+                  value={itemDetailForm?.name}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setItemDetailForm({
+                      ...itemDetailForm,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -68,10 +67,10 @@ function EditItemForm({
                   name="price"
                   className="form-control"
                   type="number"
-                  value={productDetailForm?.price}
+                  value={itemDetailForm?.price}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setItemDetailForm({
+                      ...itemDetailForm,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -83,10 +82,10 @@ function EditItemForm({
                   name="quantity"
                   className="form-control"
                   type="number"
-                  value={productDetailForm?.quantity}
+                  value={itemDetailForm?.quantity}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setItemDetailForm({
+                      ...itemDetailForm,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -99,10 +98,10 @@ function EditItemForm({
                   className="form-control"
                   type="date"
                   placeholder="Expiration Date"
-                  value={productDetailForm?.expirationDate}
+                  value={itemDetailForm?.expirationDate}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setItemDetailForm({
+                      ...itemDetailForm,
                       expirationDate: e.target.value,
                     });
                   }}
@@ -112,7 +111,7 @@ function EditItemForm({
             <div className="modal-footer">
               <button
                 onClick={() => {
-                  setShowEditProductForm(false);
+                  setShowEditItemForm(false);
                 }}
                 type="button"
                 className="btn btn-info"

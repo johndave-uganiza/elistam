@@ -1,14 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
-import { ProductsContext } from "../context/ProductsContext";
 
 function DeleteItemForm({
-  showDeleteProductForm,
-  setShowDeleteProductForm,
-  currentProductItem,
-  handleRemoveProduct,
-  productDetailForm,
-  setProductDetailForm,
+  showDeleteItemForm,
+  setShowDeleteItemForm,
+  currentItem,
+  handleDeleteItem,
+  setCurrentItem,
 }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
@@ -20,18 +18,18 @@ function DeleteItemForm({
       bsModalRef.current = new Modal(modalRef.current, { backdrop: "static" });
     }
 
-    if (showDeleteProductForm) {
+    if (showDeleteItemForm) {
       bsModalRef.current.show();
     } else {
       bsModalRef.current.hide();
     }
-  }, [showDeleteProductForm]);
+  }, [showDeleteItemForm]);
 
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <form onSubmit={() => handleRemoveProduct(currentProductItem.id)}>
+          <form onSubmit={() => handleDeleteItem(currentItem.id)}>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
                 <span className="text-danger">Delete Item</span>
@@ -42,7 +40,7 @@ function DeleteItemForm({
               <button
                 onClick={() => {
                   bsModalRef.current.hide();
-                  setShowDeleteProductForm(false);
+                  setShowDeleteItemForm(false);
                 }}
                 type="button"
                 className="btn-close"
@@ -55,11 +53,11 @@ function DeleteItemForm({
                   name="name"
                   className="form-control"
                   type="text"
-                  value={productDetailForm?.name}
+                  value={currentItem?.name}
                   disabled={true}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setCurrentItem({
+                      ...currentItem,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -71,11 +69,11 @@ function DeleteItemForm({
                   name="price"
                   className="form-control"
                   type="number"
-                  value={productDetailForm?.price}
+                  value={currentItem?.price}
                   disabled={true}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setCurrentItem({
+                      ...currentItem,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -87,11 +85,11 @@ function DeleteItemForm({
                   name="quantity"
                   className="form-control"
                   type="number"
-                  value={productDetailForm?.quantity}
+                  value={currentItem?.quantity}
                   disabled={true}
                   onChange={(e) => {
-                    setProductDetailForm({
-                      ...productDetailForm,
+                    setCurrentItem({
+                      ...currentItem,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -112,7 +110,7 @@ function DeleteItemForm({
               <button
                 onClick={() => {
                   bsModalRef.current.hide();
-                  setShowDeleteProductForm(false);
+                  setShowDeleteItemForm(false);
                 }}
                 type="button"
                 className="btn btn-info"
