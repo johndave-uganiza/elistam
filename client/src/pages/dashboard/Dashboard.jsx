@@ -20,12 +20,6 @@ function Dashboard() {
       label: "Profit",
       bg: "bg-warning text-dark",
     },
-    // {
-    //   icon: "💳",
-    //   value: "$ 2,000.00",
-    //   label: "Gross",
-    //   bg: "bg-warning text-dark",
-    // },
   ];
 
   return (
@@ -69,7 +63,7 @@ function Dashboard() {
             <BarChart />
           </div>
         </div>
-        <div className="col-md-4 col-12  d-flex">
+        <div className="col-md-4 col-12 d-flex justify-content-end pe-0">
           <div className="card flex-fill">
             <div className="card-header bg-light d-flex align-items-center justify-content-between">
               <h5 className="mb-0 fw-semibold">🔔 Stock Alerts</h5>

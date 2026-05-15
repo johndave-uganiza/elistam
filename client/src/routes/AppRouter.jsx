@@ -47,7 +47,7 @@ function AppRouter() {
       />
 
       <Route
-        path="/add-to-order"
+        path="/add-to-orders"
         element={
           <OrderProvider>
             <AddToOrder />

@@ -27,7 +27,7 @@ function ProductCard({ product, handleAddToOrder }) {
           onClick={() => {
             handleAddToOrder(product);
           }}
-          className="btn btn-success btn-lg border shadow form-control text-white fw-medium"
+          className="btn btn-success btn border shadow form-control text-white fw-bold"
         >
           Add to Order
         </button>

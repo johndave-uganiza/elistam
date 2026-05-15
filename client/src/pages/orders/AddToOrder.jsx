@@ -21,7 +21,7 @@ function AddToBasket() {
     setOrders(newBasketItems);
     localStorage.setItem("order", JSON.stringify(newBasketItems));
 
-    navigate("/order");
+    navigate("/orders");
   }
 
   return (

@@ -56,7 +56,8 @@ function ProductList() {
   }
 
   function handleAddToOrder(product) {
-    // navigate("/add-to-order", { state: { product } });
+    // navigate("/add-to-orders", { state: { product } });
+
     setShowAddToOrderForm(true);
     setCurrentProduct(product);
     // setShowAddToOrderForm(true);

@@ -52,7 +52,7 @@ function AddToOrderForm({
   // const location = useLocation();
   // const navigate = useNavigate();
   const [itemQuantity, setItemQuantity] = useState(1);
-  const { orders, setOrders } = useContext(OrderContext);
+  const { order, setOrder } = useContext(OrderContext);
 
   function handleAddToBasket(e) {
     e.preventDefault();
@@ -61,12 +61,12 @@ function AddToOrderForm({
       quantity: itemQuantity,
     };
 
-    const newBasketItems = [...orders, newOrder];
+    const newBasketItems = [...order, newOrder];
 
-    setOrders(newBasketItems);
+    setOrder(newBasketItems);
     localStorage.setItem("order", JSON.stringify(newBasketItems));
     bsModalRef.current.hide();
-    // navigate("/order");
+    // navigate("/orders");
   }
 
   return (

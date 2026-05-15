@@ -1,23 +1,78 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { OrderContext } from "../../context/OrderContext";
+import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
+import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
+import { formatCurrency } from "../../utilities/currency";
 
 function Orders() {
-  const { orders } = useContext(OrderContext);
+  const [showEditOrderDetailForm, setShowEditOrderDetailForm] = useState(false);
+  const [showDeleteOrderDetailForm, setShowDeleteOrderDetailForm] =
+    useState(false);
+  const [currentOrderDetail, setCurrentOrderDetail] = useState(null);
+  const { order, setOrder } = useContext(OrderContext);
 
-  function getTotalBasketPrice() {
-    const total = orders.reduce(
-      (prev, current) => prev + current.quantity * current.price,
+  function getTotalOrderQuantiy() {
+    return order.reduce(
+      (prev, current) => Number(prev) + Number(current.quantity),
       0,
     );
+  }
 
-    return total.toFixed(2);
+  function getTotalOrderPrice() {
+    return Number(
+      order.reduce(
+        (prev, current) =>
+          Number(prev) + Number(current.quantity) * Number(current.price),
+        0,
+      ),
+    );
+  }
+
+  function handleEditOrderDetail(orderDetail) {
+    setCurrentOrderDetail(orderDetail);
+    setShowEditOrderDetailForm(true);
+  }
+
+  function handleUpdateOrderDetail(e) {
+    const formData = new FormData(e.target);
+    const quantity = formData.get("quantity");
+    const updatedOrder = order.map((order) => {
+      if (order.id === currentOrderDetail.id) {
+        return {
+          ...order,
+          quantity: quantity,
+        };
+      }
+
+      return order;
+    });
+
+    setOrder(updatedOrder);
+    setShowEditOrderDetailForm(false);
+    localStorage.setItem("order", JSON.stringify(updatedOrder));
+    setShowEditOrderDetailForm(false);
+  }
+
+  function handleDeleteOrderDetail(orderDetail) {
+    setCurrentOrderDetail(orderDetail);
+    setShowDeleteOrderDetailForm(true);
+  }
+
+  function handleConfirmDeleteOrderDetail(e) {
+    e.preventDefault();
+    const orderState = order.filter(
+      (order) => order.id !== currentOrderDetail.id,
+    );
+    localStorage.setItem("order", JSON.stringify(orderState));
+    setOrder(orderState);
+    setShowDeleteOrderDetailForm(false);
   }
 
   return (
     <div className="container-fluid flex-fill d-flex flex-column py-3">
       {/* <div className="row p-3">
         <div className="p-0 d-flex justify-content-between align-items-center">
-          <h3 className="">Orders</h3>
+          <h3 className="">orders</h3>
         </div>
       </div> */}
       <div className="row flex-fill">
@@ -25,10 +80,7 @@ function Orders() {
           <div className="card bg-primary-subtle flex-fill">
             <div className="card-header bg-black">
               <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
-                <span>Orders Summary</span>
-                <span className="fs-6 align-self-center">
-                  Date: {new Date().toLocaleDateString("en-US")}
-                </span>
+                <span>Order Summary</span>
               </h4>
             </div>
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
@@ -42,17 +94,22 @@ function Orders() {
                       Date:
                     </label>
 
-                    <input className="form-control form-control-sm" disabled />
+                    <input
+                      className="form-control fw-bold"
+                      disabled
+                      value={new Date().toLocaleDateString("en-US")}
+                    />
                   </div>
                   <div className="col-auto ms-md-auto">
-                    <label
-                      htmlFor="inputPassword4"
-                      className="form-label form-label-sm m-0"
-                    >
-                      Total Qty:
+                    <label className="form-label form-label-sm m-0">
+                      Total Quantity:
                     </label>
 
-                    <input className="form-control form-control-sm" disabled />
+                    <input
+                      className="form-control fw-bold"
+                      disabled
+                      value={`${getTotalOrderQuantiy().toFixed(2)} unit/s`}
+                    />
                   </div>
                   <div className="col-auto">
                     <label htmlFor="inputEmail4" className="form-label m-0">
@@ -60,40 +117,61 @@ function Orders() {
                     </label>
 
                     <input
-                      className="form-control form-control-sm"
+                      className="form-control fw-bold"
                       disabled
-                      value={`$${getTotalBasketPrice()}`}
+                      value={formatCurrency(
+                        getTotalOrderPrice(),
+                        "PHP",
+                        "en-PH",
+                      )}
                     />
                   </div>
                 </div>
                 <hr />
                 <div className="row flex-fill">
-                  <div
-                    className="overflow-scroll overflow-x-hidden"
-                    style={{ maxHeight: "340px" }}
-                  >
-                    <table className="table table-hover">
+                  <div className="overflow-auto" style={{ maxHeight: "340px" }}>
+                    <table className="table table-bordered table-hover table-striped small text-truncate">
                       <thead>
                         <tr>
-                          <th scope="col">Order #</th>
-                          <th scope="col">Name</th>
-                          <th scope="col">Quantity</th>
+                          {/* <th scope="col">Order #</th> */}
+                          <th scope="col">Product</th>
+                          <th scope="col">Qty</th>
                           <th scope="col">Price</th>
                           <th scope="col">Total</th>
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.map((item) => (
-                          <tr>
-                            <th scope="row">{item.id}</th>
-                            <td>{item.title}</td>
+                        {order.map((item, index) => (
+                          <tr
+                            key={index}
+                            className={index % 2 === 0 ? "table-secondary" : ""}
+                          >
+                            {/* <th scope="row">{item.id}</th> */}
+                            <td
+                              className="text-truncate"
+                              style={{ maxWidth: "80px" }}
+                            >
+                              {item.name}
+                            </td>
                             <td>{item.quantity}</td>
                             <td>{item.price}</td>
-                            <td>{item.quantity * item.price}</td>
                             <td>
-                              <a className="me-3 text-danger">Delete</a>
-                              <a className="me-3 text-success">Edit</a>
+                              {(item.quantity * item.price).toLocaleString()}
+                            </td>
+                            <td>
+                              <a
+                                onClick={() => handleDeleteOrderDetail(item)}
+                                className="btn btn-outline-danger me-3 btn-sm mb-1 mb-lg-0"
+                              >
+                                Delete
+                              </a>
+                              <a
+                                onClick={() => handleEditOrderDetail(item)}
+                                className="btn btn-outline-success me-3 btn-sm mb-1 mb-lg-0"
+                              >
+                                Edit
+                              </a>
                             </td>
                           </tr>
                         ))}
@@ -103,7 +181,7 @@ function Orders() {
                 </div>
                 <hr />
                 <div className="row">
-                  <div className="col-12 d-flex justify-content-between align-items-center">
+                  <div className="col-12 d-flex flex-sm-row flex-column justify-content-between align-items-center gap-md-0 gap-3">
                     <div className="d-flex gap-3">
                       <div className="form-check">
                         <input
@@ -111,9 +189,12 @@ function Orders() {
                           type="radio"
                           id="gridCheck"
                           name="paymentType"
-                          checked={true}
+                          // checked={true}
                         />
-                        <label className="form-check-label" htmlFor="gridCheck">
+                        <label
+                          className="form-check-label small"
+                          htmlFor="gridCheck"
+                        >
                           Regular
                         </label>
                       </div>
@@ -125,7 +206,10 @@ function Orders() {
                           name="paymentType"
                           disabled
                         />
-                        <label className="form-check-label" htmlFor="gridCheck">
+                        <label
+                          className="form-check-label small"
+                          htmlFor="gridCheck"
+                        >
                           Full Credit
                         </label>
                       </div>
@@ -137,13 +221,21 @@ function Orders() {
                           name="paymentType"
                           disabled
                         />
-                        <label className="form-check-label" htmlFor="gridCheck">
+                        <label
+                          className="form-check-label small"
+                          htmlFor="gridCheck"
+                        >
                           Partial Credit
                         </label>
                       </div>
                     </div>
-                    <button type="submit" className="btn btn-success fw-bold">
-                      Place Order
+                    <button type="submit" className="btn btn-success btn-sm">
+                      <span
+                        className="text-nowrap fw-bold"
+                        // style={{ fontSize: "0.75rem" }}
+                      >
+                        Place Order
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -152,6 +244,22 @@ function Orders() {
           </div>
         </div>
       </div>
+
+      <EditOrderDetailForm
+        showEditOrderDetailForm={showEditOrderDetailForm}
+        setShowEditOrderDetailForm={setShowEditOrderDetailForm}
+        currentOrderDetail={currentOrderDetail}
+        setCurrentOrderDetail={setCurrentOrderDetail}
+        handleUpdateOrderDetail={handleUpdateOrderDetail}
+      />
+
+      <DeleteOrderDetailForm
+        showDeleteOrderDetailForm={showDeleteOrderDetailForm}
+        setShowDeleteOrderDetailForm={setShowDeleteOrderDetailForm}
+        handleConfirmDeleteOrderDetail={handleConfirmDeleteOrderDetail}
+        currentOrderDetail={currentOrderDetail}
+        setCurrentOrderDetail={setCurrentOrderDetail}
+      />
     </div>
   );
 }
