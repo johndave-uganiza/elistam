@@ -56,15 +56,34 @@ function AddToOrderForm({
 
   function handleAddToBasket(e) {
     e.preventDefault();
-    const newOrder = {
-      ...currentProduct,
-      quantity: itemQuantity,
-    };
 
-    const newBasketItems = [...order, newOrder];
+    let updatedOrder;
+    if (
+      order.length > 0 &&
+      order.some((item) => item.id === currentProduct.id)
+    ) {
+      updatedOrder = order.map((item) => {
+        if (item.id === currentProduct.id) {
+          return {
+            ...item,
+            quantity: Number(item.quantity) + Number(itemQuantity),
+          };
+        }
+        return item;
+      });
+    } else {
+      updatedOrder = [
+        ...order,
+        {
+          ...currentProduct,
+          quantity: itemQuantity,
+        },
+      ];
+    }
 
-    setOrder(newBasketItems);
-    localStorage.setItem("order", JSON.stringify(newBasketItems));
+    setOrder(updatedOrder);
+    localStorage.setItem("order", JSON.stringify(updatedOrder));
+    setShowAddToOrderForm(false);
     bsModalRef.current.hide();
     // navigate("/orders");
   }
@@ -118,9 +137,9 @@ function AddToOrderForm({
                       </p>
                     </div>
 
-                    <div className="d-flex flex-column mb-4 col-lg-12 col-md-5 col-8">
-                      <p className="small">Quantity: {itemQuantity}</p>
+                    <div className="d-flex flex-column mb-4 w-75">
                       <p className="small">Price: ${currentProduct?.price}</p>
+                      <p className="small">Quantity: {itemQuantity}</p>
                       <div className="input-group mb-3">
                         <button
                           onClick={() => {
@@ -128,14 +147,14 @@ function AddToOrderForm({
                               prev > 1 ? prev - 1 : prev,
                             );
                           }}
-                          className="btn btn-warning"
+                          className="btn btn-sm btn-warning"
                           type="button"
                         >
                           -
                         </button>
                         <input
                           type="number"
-                          className="form-control text-center"
+                          className="form-control form-control-sm text-center"
                           onChange={(e) => setItemQuantity(e.target.value)}
                           value={itemQuantity}
                           onBlur={() => {
@@ -148,7 +167,7 @@ function AddToOrderForm({
                           onClick={() => {
                             setItemQuantity((prev) => prev + 1);
                           }}
-                          className="btn btn-warning"
+                          className="btn btn-sm btn-warning"
                           type="button"
                         >
                           +

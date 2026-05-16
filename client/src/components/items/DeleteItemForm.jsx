@@ -5,7 +5,7 @@ function DeleteItemForm({
   showDeleteItemForm,
   setShowDeleteItemForm,
   currentItem,
-  handleDeleteItem,
+  handleConfirmDeleteItem,
   setCurrentItem,
 }) {
   const modalRef = useRef(null);
@@ -29,7 +29,7 @@ function DeleteItemForm({
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <form onSubmit={() => handleDeleteItem(currentItem.id)}>
+          <form onSubmit={() => handleConfirmDeleteItem(currentItem)}>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
                 <span className="text-danger">Delete Item</span>
@@ -53,7 +53,7 @@ function DeleteItemForm({
                   name="name"
                   className="form-control"
                   type="text"
-                  value={currentItem?.name}
+                  value={currentItem?.name || ""}
                   disabled={true}
                   onChange={(e) => {
                     setCurrentItem({
@@ -69,7 +69,7 @@ function DeleteItemForm({
                   name="price"
                   className="form-control"
                   type="number"
-                  value={currentItem?.price}
+                  value={currentItem?.price || ""}
                   disabled={true}
                   onChange={(e) => {
                     setCurrentItem({
@@ -85,7 +85,7 @@ function DeleteItemForm({
                   name="quantity"
                   className="form-control"
                   type="number"
-                  value={currentItem?.quantity}
+                  value={currentItem?.quantity || ""}
                   disabled={true}
                   onChange={(e) => {
                     setCurrentItem({

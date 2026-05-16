@@ -121,13 +121,12 @@ function Items() {
     setShowDeleteItemForm(true);
   }
 
-  // function handleRemoveItem(itemId) {
-  //   const newItems = items.filter((item) => item.Id !== itemId);
-  //   setItems(newItems);
-  //   localStorage.setItem("items", JSON.stringify(newItems));
-
-  //   setShowDeleteItemForm(false);
-  // }
+  function handleConfirmDeleteItem(item) {
+    const newItems = items.filter((singleItem) => singleItem.id !== item.id);
+    setItems(newItems);
+    localStorage.setItem("items", JSON.stringify(newItems));
+    setShowDeleteItemForm(false);
+  }
 
   function handleSortBy(e) {
     setSortBy(e.target.value);
@@ -191,7 +190,7 @@ function Items() {
         setShowDeleteItemForm={setShowDeleteItemForm}
         currentItem={currentItem}
         setCurrentItem={setCurrentItem}
-        handleDeleteItem={handleDeleteItem}
+        handleConfirmDeleteItem={handleConfirmDeleteItem}
       />
     </div>
   );

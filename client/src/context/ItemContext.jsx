@@ -19,6 +19,7 @@ function ItemProvider({ children }) {
         // Save items to local storage only if data doesn't exist locally
         if (!JSON.parse(localStorage.getItem("items"))) {
           const result = res.products.map((item) => ({
+            id: item.id,
             name: item.title,
             price: item.price,
             quantity: item.stock,

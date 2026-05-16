@@ -81,6 +81,7 @@ function Orders() {
             <div className="card-header bg-black">
               <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
                 <span>Order Summary</span>
+                <span className="fs-6">{`Date: ${new Date().toLocaleDateString()}`}</span>
               </h4>
             </div>
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
@@ -91,13 +92,13 @@ function Orders() {
                       htmlFor="inputPassword4"
                       className="form-label form-label-sm m-0"
                     >
-                      Date:
+                      Total Product Type:
                     </label>
 
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={new Date().toLocaleDateString("en-US")}
+                      value={`${order?.length > 0 ? order.length : "0"}`}
                     />
                   </div>
                   <div className="col-auto ms-md-auto">
@@ -108,7 +109,7 @@ function Orders() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={`${getTotalOrderQuantiy().toFixed(2)} unit/s`}
+                      value={`${getTotalOrderQuantiy().toFixed(1)} unit(s)`}
                     />
                   </div>
                   <div className="col-auto">
