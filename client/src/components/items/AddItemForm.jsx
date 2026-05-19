@@ -34,9 +34,9 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
     const newItems = [
       ...items,
       {
-        title: name,
+        name: name,
         price: price,
-        stock: quantity,
+        quantity: quantity,
         expirationDate: expirationDate,
       },
     ];

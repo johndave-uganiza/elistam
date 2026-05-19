@@ -3,6 +3,7 @@ import { OrderContext } from "../../context/OrderContext";
 import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
 import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
 import { formatCurrency } from "../../utilities/currency";
+import { TransactionContext } from "../../context/TransactionContext";
 
 function Orders() {
   const [showEditOrderDetailForm, setShowEditOrderDetailForm] = useState(false);
@@ -10,6 +11,8 @@ function Orders() {
     useState(false);
   const [currentOrderDetail, setCurrentOrderDetail] = useState(null);
   const { order, setOrder } = useContext(OrderContext);
+  const { transactions: transactionCtx, setTransactions } =
+    useContext(TransactionContext);
 
   function getTotalOrderQuantiy() {
     return order.reduce(
@@ -68,13 +71,39 @@ function Orders() {
     setShowDeleteOrderDetailForm(false);
   }
 
+  function handlePlaceOrder(e) {
+    e.preventDefault();
+    const order = JSON.parse(localStorage.getItem("order")) || [];
+    const transactions =
+      JSON.parse(localStorage.getItem("transactions")) || transactionCtx;
+
+    if (order.length > 0) {
+      const newTransactions = transactions.concat(order);
+      setTransactions(newTransactions);
+      localStorage.setItem("transactions", JSON.stringify(newTransactions));
+    }
+
+    const products = JSON.parse(localStorage.getItem("products"));
+
+    const newItemsState = products.map((item) => {
+      const orderItem = order.find((orderItem) => orderItem.id === item.id);
+
+      if (orderItem) {
+        return {
+          ...item,
+          quantity: Number(item.quantity) - Number(orderItem.quantity),
+        };
+      }
+
+      return item;
+    });
+    localStorage.setItem("items", JSON.stringify(newItemsState));
+    localStorage.removeItem("order");
+    setOrder([]);
+  }
+
   return (
     <div className="container-fluid flex-fill d-flex flex-column py-3">
-      {/* <div className="row p-3">
-        <div className="p-0 d-flex justify-content-between align-items-center">
-          <h3 className="">orders</h3>
-        </div>
-      </div> */}
       <div className="row flex-fill">
         <div className="col-12 d-flex flex-column">
           <div className="card bg-primary-subtle flex-fill">
@@ -85,7 +114,10 @@ function Orders() {
               </h4>
             </div>
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
-              <form className="flex-fill d-flex flex-column">
+              <form
+                onSubmit={handlePlaceOrder}
+                className="flex-fill d-flex flex-column"
+              >
                 <div className="row">
                   <div className="col-auto">
                     <label
@@ -148,7 +180,6 @@ function Orders() {
                             key={index}
                             className={index % 2 === 0 ? "table-secondary" : ""}
                           >
-                            {/* <th scope="row">{item.id}</th> */}
                             <td
                               className="text-truncate"
                               style={{ maxWidth: "80px" }}
@@ -231,12 +262,7 @@ function Orders() {
                       </div>
                     </div>
                     <button type="submit" className="btn btn-success btn-sm">
-                      <span
-                        className="text-nowrap fw-bold"
-                        // style={{ fontSize: "0.75rem" }}
-                      >
-                        Place Order
-                      </span>
+                      <span className="text-nowrap fw-bold">Place Order</span>
                     </button>
                   </div>
                 </div>

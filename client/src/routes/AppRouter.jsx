@@ -10,6 +10,7 @@ import AddToOrder from "../pages/orders/AddToOrder";
 import Items from "../pages/items/Items";
 import Transactions from "../pages/transactions/Transactions";
 import { ItemProvider } from "../context/ItemContext";
+import { TransactionProvider } from "../context/TransactionContext";
 
 function AppRouter() {
   return (
@@ -59,12 +60,21 @@ function AppRouter() {
         path="/orders"
         element={
           <OrderProvider>
-            <Orders />
+            <TransactionProvider>
+              <Orders />
+            </TransactionProvider>
           </OrderProvider>
         }
       />
 
-      <Route path="/transactions" element={<Transactions />} />
+      <Route
+        path="/transactions"
+        element={
+          <TransactionProvider>
+            <Transactions />
+          </TransactionProvider>
+        }
+      />
     </Routes>
   );
 }

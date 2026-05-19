@@ -1,33 +1,34 @@
-// import { OrderContext } from "../../context/OrderContext";
+import { useContext } from "react";
+import { TransactionContext } from "../../context/TransactionContext";
+import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
+import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
+import { formatCurrency } from "../../utilities/currency";
 
 function Transactions() {
-  // const { orders } = useContext(OrderContext);
+  const { transactions: transactionCtx } = useContext(TransactionContext);
 
-  // function getTotalBasketPrice() {
-  //   const total = orders.reduce(
-  //     (prev, current) => prev + current.quantity * current.price,
-  //     0,
-  //   );
+  const transactions =
+    JSON.parse(localStorage.getItem("transactions")) || transactionCtx;
 
-  //   return total.toFixed(2);
-  // }
+  function getTotalTransactionPrice() {
+    return Number(
+      transactions.reduce(
+        (prev, current) =>
+          Number(prev) + Number(current.quantity) * Number(current.price),
+        0,
+      ),
+    );
+  }
 
   return (
     <div className="container-fluid flex-fill d-flex flex-column py-3">
-      {/* <div className="row p-3">
-        <div className="p-0 d-flex justify-content-between align-items-center">
-          <h3 className="">Orders</h3>
-        </div>
-      </div> */}
       <div className="row flex-fill">
         <div className="col-12 d-flex flex-column">
           <div className="card bg-primary-subtle flex-fill">
             <div className="card-header bg-black">
               <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
-                <span>Transaction Reports</span>
-                <span className="fs-6 align-self-center">
-                  Date: {new Date().toLocaleDateString("en-US")}
-                </span>
+                <span>Transaction Overview</span>
+                <span className="fs-6">{`Date: ${new Date().toLocaleDateString()}`}</span>
               </h4>
             </div>
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
@@ -41,7 +42,11 @@ function Transactions() {
                       From:
                     </label>
 
-                    <input className="form-control form-control-sm" disabled />
+                    <input
+                      className="form-control fw-bold"
+                      disabled
+                      value={`${new Date().toLocaleDateString()}`}
+                    />
                   </div>
                   <div className="col-auto">
                     <label
@@ -51,106 +56,98 @@ function Transactions() {
                       To:
                     </label>
 
-                    <input className="form-control form-control-sm" disabled />
+                    <input
+                      className="form-control fw-bold"
+                      disabled
+                      value={`${new Date().toLocaleDateString()}`}
+                    />
                   </div>
                   <div className="col-auto ms-md-auto">
-                    <label
-                      htmlFor="inputPassword4"
-                      className="form-label form-label-sm m-0"
-                    >
-                      Total Gross Sales:
-                    </label>
-
-                    <input className="form-control form-control-sm" disabled />
-                  </div>
-                  <div className="col-auto">
-                    <label htmlFor="inputEmail4" className="form-label m-0">
-                      Total Net Sales:
+                    <label className="form-label form-label-sm m-0">
+                      Total Gross Amount:
                     </label>
 
                     <input
-                      className="form-control form-control-sm"
+                      className="form-control fw-bold"
                       disabled
-                      // value={`$${getTotalBasketPrice()}`}
+                      value={formatCurrency(
+                        getTotalTransactionPrice(),
+                        "PHP",
+                        "en-PH",
+                      )}
+                    />
+                  </div>
+                  <div className="col-auto">
+                    <label htmlFor="inputEmail4" className="form-label m-0">
+                      Total Net Amount:
+                    </label>
+
+                    <input
+                      className="form-control fw-bold"
+                      disabled
+                      value={formatCurrency(
+                        getTotalTransactionPrice() * 0.15,
+                        "PHP",
+                        "en-PH",
+                      )}
                     />
                   </div>
                 </div>
                 <hr />
                 <div className="row flex-fill">
-                  <div
-                    className="overflow-scroll overflow-x-hidden"
-                    style={{ maxHeight: "340px" }}
-                  >
-                    <table className="table table-hover">
+                  <div className="overflow-auto" style={{ maxHeight: "340px" }}>
+                    <table className="table table-bordered table-hover table-striped small text-truncate">
                       <thead>
                         <tr>
                           <th scope="col">Order #</th>
-                          <th scope="col">Name</th>
+                          <th scope="col">Product</th>
                           <th scope="col">Quantity</th>
-                          <th scope="col">Price</th>
-                          <th scope="col">Total</th>
+                          <th scope="col">Total Price</th>
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <th scope="row">{"item.id"}</th>
-                          <td>{"item.title"}</td>
-                          <td>{"item.quantity"}</td>
-                          <td>{"item.price"}</td>
-                          <td>{"item.quantity * item.price"}</td>
-                          <td>
-                            <a className="me-3 text-danger">Delete</a>
-                            <a className="me-3 text-success">Edit</a>
-                          </td>
-                        </tr>
+                        {transactions.map((item, index) => (
+                          <tr
+                            key={index}
+                            className={index % 2 === 0 ? "table-secondary" : ""}
+                          >
+                            {/* <th scope="row">{item.id}</th> */}
+                            <td>{`Order-${item.id}`}</td>
+                            <td
+                              className="text-truncate"
+                              style={{ maxWidth: "80px" }}
+                            >
+                              {item.name}
+                            </td>
+                            <td>{item.quantity}</td>
+                            <td>
+                              {(item.quantity * item.price).toLocaleString()}
+                            </td>
+                            <td>
+                              <a className="btn btn-outline-danger me-3 btn-sm mb-1 mb-lg-0">
+                                Delete
+                              </a>
+                              <a className="btn btn-outline-success me-3 btn-sm mb-1 mb-lg-0">
+                                Edit
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
                 </div>
                 <hr />
                 <div className="row">
-                  <div className="col-12 d-flex justify-content-between align-items-center">
-                    <div className="d-flex gap-3">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input bg-warning"
-                          type="radio"
-                          id="gridCheck"
-                          name="paymentType"
-                          checked={true}
-                        />
-                        <label className="form-check-label" htmlFor="gridCheck">
-                          Regular
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          id="gridCheck"
-                          name="paymentType"
-                          disabled
-                        />
-                        <label className="form-check-label" htmlFor="gridCheck">
-                          Full Credit
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          id="gridCheck"
-                          name="paymentType"
-                          disabled
-                        />
-                        <label className="form-check-label" htmlFor="gridCheck">
-                          Partial Credit
-                        </label>
-                      </div>
-                    </div>
-                    <button type="submit" className="btn btn-success fw-bold">
-                      Export Transaction
+                  <div className="col-12 d-flex flex-sm-row flex-column justify-content-end align-items-center gap-md-0 gap-3">
+                    <button type="submit" className="btn btn-success btn-sm">
+                      <span
+                        className="fw-bold"
+                        // style={{ fontSize: "0.75rem" }}
+                      >
+                        Export to CSV
+                      </span>
                     </button>
                   </div>
                 </div>
