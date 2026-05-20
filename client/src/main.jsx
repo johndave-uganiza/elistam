@@ -4,6 +4,7 @@ import { HashRouter, BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootswatch/dist/darkly/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 createRoot(document.getElementById("root")).render(
   // Change to HashRouter to resolve client-side routing issues because GitHub Pages only support static hosting

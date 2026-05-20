@@ -30,6 +30,7 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
     const expirationDate = new Date(
       formData.get("expirationDate"),
     ).toLocaleDateString("en-US");
+    const image = formData.get("image");
 
     const newItems = [
       ...items,
@@ -38,6 +39,7 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
         price: price,
         quantity: quantity,
         expirationDate: expirationDate,
+        image: URL.createObjectURL(image),
       },
     ];
 
@@ -67,42 +69,49 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={hanldeAddItem} id="addProductForm">
+            <form onSubmit={hanldeAddItem} id="addItemForm">
               <div className="mb-3">
-                <label className="form-label">Name</label>
+                <label className="form-label">Name:</label>
                 <input
                   name="name"
                   className="form-control"
                   type="text"
-                  placeholder="Product Name"
+                  placeholder="Item Name"
+                  required
                 ></input>
               </div>
               <div className="mb-3">
-                <label className="form-label">Price</label>
+                <label className="form-label">Price:</label>
                 <input
                   name="price"
                   className="form-control"
                   type="number"
                   placeholder="Price"
+                  required
                 ></input>
               </div>
               <div className="mb-3">
-                <label className="form-label">Quantity</label>
+                <label className="form-label">Quantity:</label>
                 <input
                   name="quantity"
                   className="form-control"
                   type="number"
                   placeholder="Quantity"
+                  required
                 ></input>
               </div>
               <div className="mb-3">
-                <label className="form-label">Expiration Date</label>
+                <label className="form-label">Expiration Date:</label>
                 <input
                   name="expirationDate"
                   className="form-control"
                   type="date"
                   placeholder="Expiration Date"
                 ></input>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Image:</label>
+                <input type="file" className="form-control" name="image" />
               </div>
             </form>
           </div>
@@ -118,7 +127,7 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
               Cancel
             </button>
             <button
-              form="addProductForm"
+              form="addItemForm"
               type="submit"
               className="btn btn-primary"
             >

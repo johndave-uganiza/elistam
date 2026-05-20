@@ -99,10 +99,9 @@ function Transactions() {
                     <table className="table table-bordered table-hover table-striped small text-truncate">
                       <thead>
                         <tr>
-                          <th scope="col">Order #</th>
                           <th scope="col">Product</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Total Price</th>
+                          <th scope="col">Qty</th>
+                          <th scope="col">Total</th>
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
@@ -113,23 +112,27 @@ function Transactions() {
                             className={index % 2 === 0 ? "table-secondary" : ""}
                           >
                             {/* <th scope="row">{item.id}</th> */}
-                            <td>{`Order-${item.id}`}</td>
-                            <td
-                              className="text-truncate"
-                              style={{ maxWidth: "80px" }}
-                            >
-                              {item.name}
-                            </td>
+                            <td className="text-wrap">{item.name}</td>
                             <td>{item.quantity}</td>
                             <td>
-                              {(item.quantity * item.price).toLocaleString()}
+                              {formatCurrency(
+                                item.quantity * item.price,
+                                "PHP",
+                                "en-PH",
+                              ).toLocaleString()}
                             </td>
                             <td>
-                              <a className="btn btn-outline-danger me-3 btn-sm mb-1 mb-lg-0">
-                                Delete
+                              <a className="btn btn-outline-danger me-1 btn-sm mb-1 mb-lg-0">
+                                <i className="bi bi-trash3-fill me-1"></i>
+                                <span className=" d-none d-md-inline">
+                                  Delete
+                                </span>
                               </a>
-                              <a className="btn btn-outline-success me-3 btn-sm mb-1 mb-lg-0">
-                                Edit
+                              <a className="btn btn-outline-success me-1 btn-sm mb-1 mb-lg-0">
+                                <i className="bi bi-list me-1"></i>
+                                <span className="d-none d-md-inline">
+                                  View Details
+                                </span>
                               </a>
                             </td>
                           </tr>

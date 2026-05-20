@@ -1,39 +1,44 @@
 function LoginPage() {
+  function handleLogin(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
+  }
+
   return (
     <div className="d-flex align-items-center justify-content-center flex-fill bg-secondary">
-      <div className="card p-4" style={{ width: "350px" }}>
-        <div className="text-center h1">Login</div>
-        <form>
-          <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              Username
-            </label>
+      <div className="card p-4" style={{ minWidth: "320px" }}>
+        <h3 className="text-center mb-4">Login</h3>
+        <form onSubmit={handleLogin}>
+          <div className="form-floating mb-4">
             <input
-              type="text"
+              type="email"
+              name="email"
               className="form-control"
-              id="username"
-              placeholder="Username"
+              id="email"
+              placeholder=""
             />
+            <label htmlFor="email">Email</label>
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
+          <div className="form-floating mb-4">
             <input
               type="password"
+              name="password"
               className="form-control"
               id="password"
-              placeholder="Password"
+              placeholder=""
             />
+            <label htmlFor="password">Password</label>
           </div>
-          <div className="mb-3">
-            <button type="submit" className="btn btn-success w-100">
+          <div className="mt-5">
+            <button type="submit" className="btn btn-success fw-bold w-100">
               Login
             </button>
           </div>
-          <div className="text-center">
+          {/* <div className="text-center">
             <a href="#">No account? Register here.</a>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

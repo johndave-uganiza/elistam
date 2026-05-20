@@ -152,11 +152,7 @@ function Orders() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={formatCurrency(
-                        getTotalOrderPrice(),
-                        "PHP",
-                        "en-PH",
-                      )}
+                      value={formatCurrency(getTotalOrderPrice(), "PHP")}
                     />
                   </div>
                 </div>
@@ -164,7 +160,7 @@ function Orders() {
                 <div className="row flex-fill">
                   <div className="overflow-auto" style={{ maxHeight: "340px" }}>
                     <table className="table table-bordered table-hover table-striped small text-truncate">
-                      <thead>
+                      <thead className="small">
                         <tr>
                           {/* <th scope="col">Order #</th> */}
                           <th scope="col">Product</th>
@@ -174,35 +170,42 @@ function Orders() {
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="small">
                         {order.map((item, index) => (
                           <tr
                             key={index}
                             className={index % 2 === 0 ? "table-secondary" : ""}
                           >
                             <td
-                              className="text-truncate"
-                              style={{ maxWidth: "80px" }}
+                              className="text-wrap"
+                              // style={{ maxWidth: "120px" }}
                             >
                               {item.name}
                             </td>
                             <td>{item.quantity}</td>
-                            <td>{item.price}</td>
+                            <td>{formatCurrency(item.price, "PHP")}</td>
                             <td>
-                              {(item.quantity * item.price).toLocaleString()}
+                              {formatCurrency(
+                                item.quantity * item.price,
+                                "PHP",
+                              )}
                             </td>
                             <td>
                               <a
                                 onClick={() => handleDeleteOrderDetail(item)}
-                                className="btn btn-outline-danger me-3 btn-sm mb-1 mb-lg-0"
+                                className="btn btn-outline-danger me-1 btn-sm mb-1 mb-lg-0"
                               >
-                                Delete
+                                <i className="bi bi-trash3-fill me-1"></i>
+                                <span className="d-none d-md-inline">
+                                  Delete
+                                </span>
                               </a>
                               <a
                                 onClick={() => handleEditOrderDetail(item)}
-                                className="btn btn-outline-success me-3 btn-sm mb-1 mb-lg-0"
+                                className="btn btn-outline-success me-1 btn-sm mb-1 mb-lg-0"
                               >
-                                Edit
+                                <i className="bi bi-pencil-square me-1"></i>
+                                <span className="d-none d-md-inline">Edit</span>
                               </a>
                             </td>
                           </tr>
