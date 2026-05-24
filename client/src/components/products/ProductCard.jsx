@@ -1,5 +1,9 @@
+import { useLocation, useNavigate } from "react-router-dom";
 function ProductCard({ product, handleAddToOrder }) {
+  const navigate = useNavigate();
   const { name, price, image, quantity } = product;
+  const location = useLocation();
+  const auth = localStorage.getItem("auth");
   return (
     <div className="col-xl-2 col-lg-3 col-md-3 col-sm-5 col-12 card bg-primary-subtle p-1 shadow border border-2 border-primary">
       <div className="card-header bg-primary text-white small fw-medium">
@@ -25,7 +29,9 @@ function ProductCard({ product, handleAddToOrder }) {
       <div className="d-flex flex-column gap-2">
         <button
           onClick={() => {
-            handleAddToOrder(product);
+            auth
+              ? handleAddToOrder(product)
+              : navigate("/login", { state: { from: location } });
           }}
           className="btn btn-success btn border shadow form-control text-white fw-bold"
         >

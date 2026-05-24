@@ -54,7 +54,7 @@ function AddToOrderForm({
   const [itemQuantity, setItemQuantity] = useState(1);
   const { order, setOrder } = useContext(OrderContext);
 
-  function handleAddToBasket(e) {
+  function handleAddToOrder(e) {
     e.preventDefault();
 
     let updatedOrder;
@@ -91,7 +91,7 @@ function AddToOrderForm({
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
-        <form onSubmit={handleAddToBasket}>
+        <form onSubmit={handleAddToOrder}>
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-name fs-5" id="staticBackdropLabel">

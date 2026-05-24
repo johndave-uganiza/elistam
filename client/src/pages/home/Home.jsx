@@ -1,17 +1,9 @@
-import hero from "../../assets/images/hero.png";
+import Background from "../../components/common/Background";
 
 function Home() {
   return (
     /* Hero Section */
-    <div
-      style={{
-        backgroundImage: `url(${hero})`,
-        backgroundSize: "100% 100%",
-        backgroundPosition: "center",
-        opacity: "100%",
-        minHeight: "calc(100vh - 72px - 40px)",
-      }}
-    >
+    <Background>
       <div className="p-3">
         <div className="container my-5 opacity-75">
           <div className="row justify-content-center">
@@ -49,7 +41,7 @@ function Home() {
           </div>
         </div>
       </div>
-    </div>
+    </Background>
   );
 }
 

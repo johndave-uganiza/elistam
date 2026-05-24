@@ -9,6 +9,7 @@ import ToastAlert from "../../components/common/ToastAlert";
 import ProductsToolbar from "../../components/products/ProductsToolbar";
 import AddToOrderForm from "../../components/products/AddToOrderForm";
 import { Modal } from "bootstrap";
+import { Navigate } from "react-router-dom";
 
 function ProductList() {
   // const navigate = useNavigate();
@@ -20,6 +21,8 @@ function ProductList() {
   const [searchInput, setSearchInput] = useState("");
   const [currentProduct, setCurrentProduct] = useState(null);
   const [showAddToOrderForm, setShowAddToOrderForm] = useState(false);
+  // const auth = localStorage.getItem("auth");
+  // const navigate = useNavigate();
 
   // Filter products
   const filteredProducts = products?.filter((product) =>
@@ -57,7 +60,8 @@ function ProductList() {
 
   function handleAddToOrder(product) {
     // navigate("/add-to-orders", { state: { product } });
-
+    // <Navigate to="/login" />
+    // navigate("/login");
     setShowAddToOrderForm(true);
     setCurrentProduct(product);
     // setShowAddToOrderForm(true);

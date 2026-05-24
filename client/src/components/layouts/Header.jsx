@@ -4,6 +4,7 @@ import { NavLink, Link, Navigate, useNavigate } from "react-router-dom";
 function Header() {
   const navigate = useNavigate();
   const [collapse, setCollapse] = useState(false);
+  const auth = localStorage.getItem("auth");
 
   function toggleNavigation() {
     setCollapse(!collapse);
@@ -59,10 +60,13 @@ function Header() {
           </ul>
           <div>
             <button
-              className="btn btn-warning border text-black"
-              onClick={() => navigate("/login")}
+              className={`btn btn-${!auth ? "warning" : "danger"} border text-black`}
+              onClick={() => {
+                auth && localStorage.removeItem("auth");
+                navigate("/login");
+              }}
             >
-              Login
+              {!auth ? <span>Login</span> : <span>Logout</span>}
             </button>
           </div>
         </div>

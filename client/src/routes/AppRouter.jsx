@@ -11,6 +11,7 @@ import Items from "../pages/items/Items";
 import Transactions from "../pages/transactions/Transactions";
 import { ItemProvider } from "../context/ItemContext";
 import { TransactionProvider } from "../context/TransactionContext";
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRouter() {
   return (
@@ -22,7 +23,9 @@ function AppRouter() {
         path="/dashboard"
         element={
           // <AuthPage>
-          <Dashboard />
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
           // </AuthPage>
         }
       />
@@ -30,9 +33,11 @@ function AppRouter() {
       <Route
         path="/items"
         element={
-          <ItemProvider>
-            <Items />
-          </ItemProvider>
+          <ProtectedRoute>
+            <ItemProvider>
+              <Items />
+            </ItemProvider>
+          </ProtectedRoute>
         }
       />
 
@@ -50,29 +55,35 @@ function AppRouter() {
       <Route
         path="/add-to-orders"
         element={
-          <OrderProvider>
-            <AddToOrder />
-          </OrderProvider>
+          <ProtectedRoute>
+            <OrderProvider>
+              <AddToOrder />
+            </OrderProvider>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/orders"
         element={
-          <OrderProvider>
-            <TransactionProvider>
-              <Orders />
-            </TransactionProvider>
-          </OrderProvider>
+          <ProtectedRoute>
+            <OrderProvider>
+              <TransactionProvider>
+                <Orders />
+              </TransactionProvider>
+            </OrderProvider>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/transactions"
         element={
-          <TransactionProvider>
-            <Transactions />
-          </TransactionProvider>
+          <ProtectedRoute>
+            <TransactionProvider>
+              <Transactions />
+            </TransactionProvider>
+          </ProtectedRoute>
         }
       />
     </Routes>

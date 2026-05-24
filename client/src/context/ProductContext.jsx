@@ -6,36 +6,40 @@ const ProductContext = createContext(null);
 // const jwtToken = "";
 
 function ProductProvider({ children }) {
-  localStorage.setItem(
-    "products",
-    localStorage.getItem("items") || JSON.stringify([]),
-  );
+  // localStorage.setItem(
+  //   "products",
+  //   localStorage.getItem("items") || JSON.stringify([]),
+  // );
 
   const [products, setProducts] = useState(
-    JSON.parse(localStorage.getItem("products")) || [],
+    JSON.parse(localStorage.getItem("items")) ||
+      JSON.parse(localStorage.getItem("products")),
   );
 
-  // function fetchProducts() {
-  //   fetch("https://dummyjson.com/products", {
-  //     method: "GET",
-  //   })
-  //     .then((res) => res.json())
-  //     .then((res) => {
-  //       // Save products to local storage only if data doesn't exist locally
-  //       if (!JSON.parse(localStorage.getItem("products"))) {
-  //         const result = res.products.map((item) => ({
-  //           id: item.id,
-  //           name: item.title,
-  //           price: item.price,
-  //           quantity: item.stock,
-  //           image: item.thumbnail,
-  //         }));
-  //         setProducts(result);
-  //         localStorage.setItem("products", JSON.stringify(result));
-  //       }
-  //     })
-  //     .catch((error) => console.error(error));
-  // }
+  function fetchProducts() {
+    fetch("https://dummyjson.com/products", {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        // Save products to local storage only if data doesn't exist locally
+        if (!JSON.parse(localStorage.getItem("products"))) {
+          const result = res.products.map((item) => ({
+            id: item.id,
+            name: item.title,
+            price: item.price,
+            quantity: item.stock,
+            image: item.thumbnail,
+          }));
+          setProducts(result);
+          localStorage.setItem(
+            "products",
+            JSON.stringify(localStorage.getItem("items") || result),
+          );
+        }
+      })
+      .catch((error) => console.error(error));
+  }
 
   // function fetchProducts() {
   //   fetch(`${BASE_URL}api/Item`, {
@@ -56,9 +60,9 @@ function ProductProvider({ children }) {
   //     .catch((error) => console.error(error));
   // }
 
-  // useEffect(() => {
-  //   fetchProducts();
-  // }, []);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <ProductContext.Provider value={{ products, setProducts }}>

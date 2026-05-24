@@ -38,7 +38,7 @@ function Dashboard() {
           <span className="me-1">
             Everything is looking good. Keep up the good work!
           </span>
-          <i class="bi bi-hand-thumbs-up-fill text-warning"></i>
+          <i className="bi bi-hand-thumbs-up-fill text-warning"></i>
         </div>
       </div>
       <div className="row px-3 pb-4">
