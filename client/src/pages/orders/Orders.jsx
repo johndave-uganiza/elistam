@@ -11,11 +11,11 @@ function Orders() {
     useState(false);
   const [currentOrderDetail, setCurrentOrderDetail] = useState(null);
   const { order, setOrder } = useContext(OrderContext);
-  const { transactions: transactionCtx, setTransactions } =
-    useContext(TransactionContext);
+  const { transactionCtx, setTransactionCtx } = useContext(TransactionContext);
+  const orderDetails = order?.details || [];
 
-  function getTotalOrderQuantiy() {
-    return order.reduce(
+  function getTotalOrderQuantity() {
+    return orderDetails.reduce(
       (prev, current) => Number(prev) + Number(current.quantity),
       0,
     );
@@ -23,7 +23,7 @@ function Orders() {
 
   function getTotalOrderPrice() {
     return Number(
-      order.reduce(
+      orderDetails.reduce(
         (prev, current) =>
           Number(prev) + Number(current.quantity) * Number(current.price),
         0,
@@ -39,7 +39,7 @@ function Orders() {
   function handleUpdateOrderDetail(e) {
     const formData = new FormData(e.target);
     const quantity = formData.get("quantity");
-    const updatedOrder = order.map((order) => {
+    const updatedOrder = orderDetails.map((order) => {
       if (order.id === currentOrderDetail.id) {
         return {
           ...order,
@@ -73,32 +73,40 @@ function Orders() {
 
   function handlePlaceOrder(e) {
     e.preventDefault();
-    const order = JSON.parse(localStorage.getItem("order")) || [];
-    const transactions =
-      JSON.parse(localStorage.getItem("transactions")) || transactionCtx;
+    const order = JSON.parse(localStorage.getItem("order")) || {
+      id: null,
+      details: [],
+    };
 
-    if (order.length > 0) {
-      const newTransactions = transactions.concat(order);
-      setTransactions(newTransactions);
+    if (order.id && orderDetails.length > 0) {
+      const newTransactions = transactionCtx.concat({
+        ...order,
+        totalPrice: getTotalOrderPrice(),
+        totalOrderedQuantity: getTotalOrderQuantity(),
+      });
+
+      setTransactionCtx(newTransactions);
       localStorage.setItem("transactions", JSON.stringify(newTransactions));
     }
 
-    const products = JSON.parse(localStorage.getItem("products"));
+    const items = JSON.parse(localStorage.getItem("items"));
 
-    const newItemsState = products.map((item) => {
-      const orderItem = order.find((orderItem) => orderItem.id === item.id);
+    const updatedItems = items.map((item) => {
+      const orderedItem = orderDetails.find(
+        (orderDetail) => orderDetail.id === item.id,
+      );
 
-      if (orderItem) {
+      if (orderedItem) {
         return {
           ...item,
-          quantity: Number(item.quantity) - Number(orderItem.quantity),
+          quantity: Number(item.quantity) - Number(orderedItem.quantity),
         };
       }
 
       return item;
     });
-    localStorage.setItem("items", JSON.stringify(newItemsState));
-    localStorage.removeItem("order");
+    localStorage.setItem("items", JSON.stringify(updatedItems));
+    localStorage.setItem("order", JSON.stringify({ id: null, details: [] }));
     setOrder([]);
   }
 
@@ -130,7 +138,7 @@ function Orders() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={`${order?.length > 0 ? order.length : "0"}`}
+                      value={`${orderDetails?.length > 0 ? orderDetails.length : "0"}`}
                     />
                   </div>
                   <div className="col-auto ms-md-auto">
@@ -141,7 +149,7 @@ function Orders() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={`${getTotalOrderQuantiy().toFixed(1)} unit(s)`}
+                      value={`${getTotalOrderQuantity().toFixed(1)} unit(s)`}
                     />
                   </div>
                   <div className="col-auto">
@@ -159,8 +167,8 @@ function Orders() {
                 <hr />
                 <div className="row flex-fill">
                   <div className="overflow-auto" style={{ maxHeight: "340px" }}>
-                    <table className="table table-bordered table-hover table-striped small text-truncate">
-                      <thead className="small">
+                    <table className="table table-bordered table-hover table-striped small">
+                      <thead>
                         <tr>
                           {/* <th scope="col">Order #</th> */}
                           <th scope="col">Product</th>
@@ -170,8 +178,8 @@ function Orders() {
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="small">
-                        {order.map((item, index) => (
+                      <tbody>
+                        {orderDetails.map((item, index) => (
                           <tr
                             key={index}
                             className={index % 2 === 0 ? "table-secondary" : ""}

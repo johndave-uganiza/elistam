@@ -67,7 +67,7 @@ function EditOrderDetailForm({
             </div>
             <div className="modal-footer">
               <button type="submit" className="btn btn-warning">
-                Save
+                Update
               </button>
               <button
                 onClick={() => {

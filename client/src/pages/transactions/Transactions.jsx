@@ -1,23 +1,39 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { TransactionContext } from "../../context/TransactionContext";
 import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
 import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
 import { formatCurrency } from "../../utilities/currency";
+import DeleteTransactionForm from "../../components/transactions/DeleteTransactionForm";
 
 function Transactions() {
-  const { transactions: transactionCtx } = useContext(TransactionContext);
-
-  const transactions =
-    JSON.parse(localStorage.getItem("transactions")) || transactionCtx;
+  const { transactionCtx, setTransactionCtx } = useContext(TransactionContext);
+  const [showDeleteTransactionForm, setShowDeleteTransactionForm] =
+    useState(false);
+  const [currentTransaction, setCurrentTransaction] = useState(null);
 
   function getTotalTransactionPrice() {
     return Number(
-      transactions.reduce(
-        (prev, current) =>
-          Number(prev) + Number(current.quantity) * Number(current.price),
+      transactionCtx.reduce(
+        (prev, current) => Number(prev) + Number(current.totalPrice),
         0,
       ),
     );
+  }
+
+  function handleDeleteTransactionDetail(current) {
+    setCurrentTransaction(current);
+    setShowDeleteTransactionForm(true);
+  }
+
+  function handleConfirmDeleteTransaction(e, current) {
+    e.preventDefault();
+    const updatedTransactions = transactionCtx.filter(
+      (transaction) => transaction.id !== current.id,
+    );
+
+    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
+    setTransactionCtx(updatedTransactions);
+    setShowDeleteTransactionForm(false);
   }
 
   return (
@@ -96,33 +112,38 @@ function Transactions() {
                 <hr />
                 <div className="row flex-fill">
                   <div className="overflow-auto" style={{ maxHeight: "340px" }}>
-                    <table className="table table-bordered table-hover table-striped small text-truncate">
+                    <table className="table table-bordered table-hover table-striped small">
                       <thead>
                         <tr>
-                          <th scope="col">Product</th>
+                          <th scope="col">Order #</th>
                           <th scope="col">Qty</th>
                           <th scope="col">Total</th>
                           <th scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {transactions.map((item, index) => (
+                        {transactionCtx.map((item, index) => (
                           <tr
                             key={index}
                             className={index % 2 === 0 ? "table-secondary" : ""}
                           >
                             {/* <th scope="row">{item.id}</th> */}
-                            <td className="text-wrap">{item.name}</td>
-                            <td>{item.quantity}</td>
+                            <td className="text-wrap">{`Order - ${item.id}`}</td>
+                            <td>{item.totalOrderedQuantity}</td>
                             <td>
                               {formatCurrency(
-                                item.quantity * item.price,
+                                item.totalPrice,
                                 "PHP",
                                 "en-PH",
                               ).toLocaleString()}
                             </td>
                             <td>
-                              <a className="btn btn-outline-danger me-1 btn-sm mb-1 mb-lg-0">
+                              <a
+                                className="btn btn-outline-danger me-1 btn-sm mb-1 mb-lg-0"
+                                onClick={() =>
+                                  handleDeleteTransactionDetail(item)
+                                }
+                              >
                                 <i className="bi bi-trash3-fill me-1"></i>
                                 <span className=" d-none d-md-inline">
                                   Delete
@@ -159,6 +180,14 @@ function Transactions() {
           </div>
         </div>
       </div>
+
+      <DeleteTransactionForm
+        showDeleteTransactionForm={showDeleteTransactionForm}
+        setShowDeleteTransactionForm={setShowDeleteTransactionForm}
+        currentTransaction={currentTransaction}
+        setCurrentTransaction={setCurrentTransaction}
+        handleConfirmDeleteTransaction={handleConfirmDeleteTransaction}
+      />
     </div>
   );
 }

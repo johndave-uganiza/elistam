@@ -4,7 +4,7 @@ const OrderContext = createContext(null);
 
 function OrderProvider({ children }) {
   const [order, setOrder] = useState(
-    JSON.parse(localStorage.getItem("order")) || [],
+    JSON.parse(localStorage.getItem("order")) || { id: null, details: [] },
   );
 
   return (

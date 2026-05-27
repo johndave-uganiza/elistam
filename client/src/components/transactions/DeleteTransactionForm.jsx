@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
 
-function EditItemForm({
-  showEditItemForm,
-  setShowEditItemForm,
-  handleUpdateItem,
-  itemDetailForm,
-  setItemDetailForm,
+function DeleteTransactionForm({
+  showDeleteTransactionForm,
+  setShowDeleteTransactionForm,
+  currentTransaction,
+  handleConfirmDeleteTransaction,
+  setCurrentTransaction,
 }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
@@ -18,28 +18,33 @@ function EditItemForm({
       bsModalRef.current = new Modal(modalRef.current, { backdrop: "static" });
     }
 
-    if (showEditItemForm) {
+    if (showDeleteTransactionForm) {
       bsModalRef.current.show();
     } else {
       bsModalRef.current.hide();
     }
-  }, [showEditItemForm]);
+  }, [showDeleteTransactionForm]);
 
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <form onSubmit={handleUpdateItem}>
+          <form
+            onSubmit={(e) =>
+              handleConfirmDeleteTransaction(e, currentTransaction)
+            }
+          >
             <div className="modal-header">
-              <h1
-                className="modal-title fs-5 text-warning"
-                id="staticBackdropLabel"
-              >
-                Edit Item
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                <span className="text-danger">Delete Item</span>
+                <p className="fs-6">
+                  Are you sure you want to delete the item?
+                </p>
               </h1>
               <button
                 onClick={() => {
-                  setShowEditItemForm(false);
+                  bsModalRef.current.hide();
+                  setShowDeleteTransactionForm(false);
                 }}
                 type="button"
                 className="btn-close"
@@ -52,10 +57,11 @@ function EditItemForm({
                   name="name"
                   className="form-control"
                   type="text"
-                  value={itemDetailForm?.name}
+                  value={currentTransaction?.name || ""}
+                  disabled={true}
                   onChange={(e) => {
-                    setItemDetailForm({
-                      ...itemDetailForm,
+                    setCurrentTransaction({
+                      ...currentTransaction,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -67,10 +73,11 @@ function EditItemForm({
                   name="price"
                   className="form-control"
                   type="number"
-                  value={itemDetailForm?.price}
+                  value={currentTransaction?.price || ""}
+                  disabled={true}
                   onChange={(e) => {
-                    setItemDetailForm({
-                      ...itemDetailForm,
+                    setCurrentTransaction({
+                      ...currentTransaction,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -82,10 +89,11 @@ function EditItemForm({
                   name="quantity"
                   className="form-control"
                   type="number"
-                  value={itemDetailForm?.quantity}
+                  value={currentTransaction?.quantity || ""}
+                  disabled={true}
                   onChange={(e) => {
-                    setItemDetailForm({
-                      ...itemDetailForm,
+                    setCurrentTransaction({
+                      ...currentTransaction,
                       [e.target.name]: e.target.value,
                     });
                   }}
@@ -98,28 +106,23 @@ function EditItemForm({
                   className="form-control"
                   type="date"
                   placeholder="Expiration Date"
-                  value={itemDetailForm?.expirationDate}
-                  onChange={(e) => {
-                    setItemDetailForm({
-                      ...itemDetailForm,
-                      expirationDate: e.target.value,
-                    });
-                  }}
+                  disabled={true}
                 ></input>
               </div>
             </div>
             <div className="modal-footer">
               <button
                 onClick={() => {
-                  setShowEditItemForm(false);
+                  bsModalRef.current.hide();
+                  setShowDeleteTransactionForm(false);
                 }}
                 type="button"
                 className="btn btn-info"
               >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-warning">
-                Update
+              <button type="submit" className="btn btn-danger">
+                Delete
               </button>
             </div>
           </form>
@@ -129,4 +132,4 @@ function EditItemForm({
   );
 }
 
-export default EditItemForm;
+export default DeleteTransactionForm;

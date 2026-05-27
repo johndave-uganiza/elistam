@@ -54,15 +54,19 @@ function AddToOrderForm({
   const [itemQuantity, setItemQuantity] = useState(1);
   const { order, setOrder } = useContext(OrderContext);
 
-  function handleAddToOrder(e) {
+  function handleConfirmAddToOrder(e) {
     e.preventDefault();
 
-    let updatedOrder;
+    const transactions = JSON.parse(localStorage.getItem("transactions"));
+
+    const id = transactions ? transactions.length + 1 : 1;
+
+    let details;
     if (
-      order.length > 0 &&
-      order.some((item) => item.id === currentProduct.id)
+      order.details.length > 0 &&
+      order.details.some((item) => item.id === currentProduct.id)
     ) {
-      updatedOrder = order.map((item) => {
+      details = order.details.map((item) => {
         if (item.id === currentProduct.id) {
           return {
             ...item,
@@ -72,8 +76,8 @@ function AddToOrderForm({
         return item;
       });
     } else {
-      updatedOrder = [
-        ...order,
+      details = [
+        ...order.details,
         {
           ...currentProduct,
           quantity: itemQuantity,
@@ -81,17 +85,21 @@ function AddToOrderForm({
       ];
     }
 
+    const updatedOrder = {
+      id: id,
+      details: details,
+    };
+
     setOrder(updatedOrder);
     localStorage.setItem("order", JSON.stringify(updatedOrder));
     setShowAddToOrderForm(false);
     bsModalRef.current.hide();
-    // navigate("/orders");
   }
 
   return (
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
-        <form onSubmit={handleAddToOrder}>
+        <form onSubmit={handleConfirmAddToOrder}>
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-name fs-5" id="staticBackdropLabel">

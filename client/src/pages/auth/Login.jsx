@@ -13,7 +13,7 @@ function LoginPage() {
     const password = formData.get("password");
     const admin = {
       email: "admin@test.com",
-      password: "123",
+      password: "Admin123",
     };
 
     if (email === admin.email && password === admin.password) {
