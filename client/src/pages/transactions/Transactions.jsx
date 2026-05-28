@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { TransactionContext } from "../../context/TransactionContext";
 import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
 import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
-import { formatCurrency } from "../../utilities/currency";
+import { eListam } from "../../utilities/elistam";
 import DeleteTransactionForm from "../../components/transactions/DeleteTransactionForm";
 
 function Transactions() {
@@ -50,7 +50,7 @@ function Transactions() {
             <div className="card-body bg-secondary d-flex flex-column flex-fill">
               <form className="flex-fill d-flex flex-column">
                 <div className="row">
-                  <div className="col-auto">
+                  {/* <div className="col-auto">
                     <label
                       htmlFor="inputPassword4"
                       className="form-label form-label-sm m-0"
@@ -77,7 +77,7 @@ function Transactions() {
                       disabled
                       value={`${new Date().toLocaleDateString()}`}
                     />
-                  </div>
+                  </div> */}
                   <div className="col-auto ms-md-auto">
                     <label className="form-label form-label-sm m-0">
                       Total Gross Amount:
@@ -86,10 +86,8 @@ function Transactions() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={formatCurrency(
+                      value={eListam.utils.formatCurrencyToPHP(
                         getTotalTransactionPrice(),
-                        "PHP",
-                        "en-PH",
                       )}
                     />
                   </div>
@@ -101,10 +99,8 @@ function Transactions() {
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={formatCurrency(
+                      value={eListam.utils.formatCurrencyToPHP(
                         getTotalTransactionPrice() * 0.15,
-                        "PHP",
-                        "en-PH",
                       )}
                     />
                   </div>
@@ -115,8 +111,9 @@ function Transactions() {
                     <table className="table table-bordered table-hover table-striped small">
                       <thead>
                         <tr>
-                          <th scope="col">Order #</th>
-                          <th scope="col">Qty</th>
+                          <th scope="col">Transact Number</th>
+                          <th scope="col">Order Number</th>
+                          <th scope="col">Date</th>
                           <th scope="col">Total</th>
                           <th scope="col">Actions</th>
                         </tr>
@@ -128,14 +125,13 @@ function Transactions() {
                             className={index % 2 === 0 ? "table-secondary" : ""}
                           >
                             {/* <th scope="row">{item.id}</th> */}
-                            <td className="text-wrap">{`Order - ${item.id}`}</td>
-                            <td>{item.totalOrderedQuantity}</td>
+                            <td className="text-wrap">{`T - ${item.id}`}</td>
+                            <td className="text-wrap">{`O - ${item.id}`}</td>
+                            <td className="text-wrap">{item.date}</td>
                             <td>
-                              {formatCurrency(
+                              {eListam.utils.formatCurrencyToPHP(
                                 item.totalPrice,
-                                "PHP",
-                                "en-PH",
-                              ).toLocaleString()}
+                              )}
                             </td>
                             <td>
                               <a
@@ -149,7 +145,7 @@ function Transactions() {
                                   Delete
                                 </span>
                               </a>
-                              <a className="btn btn-outline-success me-1 btn-sm mb-1 mb-lg-0">
+                              <a className="btn btn-outline-success me-1 btn-sm mb-1 mb-lg-0 disabled">
                                 <i className="bi bi-list me-1"></i>
                                 <span className="d-none d-md-inline">
                                   View Details
@@ -165,12 +161,15 @@ function Transactions() {
                 <hr />
                 <div className="row">
                   <div className="col-12 d-flex flex-sm-row flex-column justify-content-end align-items-center gap-md-0 gap-3">
-                    <button type="submit" className="btn btn-success btn-sm">
+                    <button
+                      type="submit"
+                      className="btn btn-info btn-sm disabled"
+                    >
                       <span
                         className="fw-bold"
                         // style={{ fontSize: "0.75rem" }}
                       >
-                        Export to CSV
+                        Generate Report
                       </span>
                     </button>
                   </div>
@@ -185,7 +184,6 @@ function Transactions() {
         showDeleteTransactionForm={showDeleteTransactionForm}
         setShowDeleteTransactionForm={setShowDeleteTransactionForm}
         currentTransaction={currentTransaction}
-        setCurrentTransaction={setCurrentTransaction}
         handleConfirmDeleteTransaction={handleConfirmDeleteTransaction}
       />
     </div>

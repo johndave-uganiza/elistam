@@ -30,7 +30,9 @@ function EditOrderDetailForm({
     <div ref={modalRef} className="modal fade" tabIndex="-1">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content w-auto">
-          <form onSubmit={handleUpdateOrderDetail}>
+          <form
+            onSubmit={(e) => handleUpdateOrderDetail(e, currentOrderDetail)}
+          >
             <div className="modal-header">
               <div className="modal-title" id="staticBackdropLabel">
                 <div className="fs-5 text-warning">Edit Order Detail</div>

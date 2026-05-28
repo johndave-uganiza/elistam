@@ -6,7 +6,6 @@ function DeleteTransactionForm({
   setShowDeleteTransactionForm,
   currentTransaction,
   handleConfirmDeleteTransaction,
-  setCurrentTransaction,
 }) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
@@ -35,15 +34,11 @@ function DeleteTransactionForm({
             }
           >
             <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                <span className="text-danger">Delete Item</span>
-                <p className="fs-6">
-                  Are you sure you want to delete the item?
-                </p>
-              </h1>
+              <div className="modal-title" id="staticBackdropLabel">
+                <div className="fs-5 text-danger">Delete Transaction</div>
+              </div>
               <button
                 onClick={() => {
-                  bsModalRef.current.hide();
                   setShowDeleteTransactionForm(false);
                 }}
                 type="button"
@@ -51,63 +46,13 @@ function DeleteTransactionForm({
               ></button>
             </div>
             <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Name</label>
-                <input
-                  name="name"
-                  className="form-control"
-                  type="text"
-                  value={currentTransaction?.name || ""}
-                  disabled={true}
-                  onChange={(e) => {
-                    setCurrentTransaction({
-                      ...currentTransaction,
-                      [e.target.name]: e.target.value,
-                    });
-                  }}
-                ></input>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Price (USD)</label>
-                <input
-                  name="price"
-                  className="form-control"
-                  type="number"
-                  value={currentTransaction?.price || ""}
-                  disabled={true}
-                  onChange={(e) => {
-                    setCurrentTransaction({
-                      ...currentTransaction,
-                      [e.target.name]: e.target.value,
-                    });
-                  }}
-                ></input>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Available Stock</label>
-                <input
-                  name="quantity"
-                  className="form-control"
-                  type="number"
-                  value={currentTransaction?.quantity || ""}
-                  disabled={true}
-                  onChange={(e) => {
-                    setCurrentTransaction({
-                      ...currentTransaction,
-                      [e.target.name]: e.target.value,
-                    });
-                  }}
-                ></input>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Expiration Date</label>
-                <input
-                  name="expirationDate"
-                  className="form-control"
-                  type="date"
-                  placeholder="Expiration Date"
-                  disabled={true}
-                ></input>
+              <div className="d-flex align-items-center">
+                <p className="fs-6">
+                  Are you sure you want to delete transaction{" "}
+                  <strong className="text-warning">
+                    {`T-${currentTransaction?.id}`}?
+                  </strong>
+                </p>
               </div>
             </div>
             <div className="modal-footer">

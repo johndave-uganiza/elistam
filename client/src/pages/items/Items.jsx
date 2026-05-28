@@ -89,13 +89,14 @@ function Items() {
     const expirationDate = new Date(
       formData.get("expirationDate"),
     ).toLocaleDateString("en-US");
+
     const updatedItems = items.map((item) => {
       if (item.id === currentItem.id) {
         return {
           ...item,
           name: name,
           price: price,
-          stock: quantity,
+          quantity: quantity,
           expirationDate: expirationDate,
         };
       }

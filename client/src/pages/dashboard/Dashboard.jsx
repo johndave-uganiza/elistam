@@ -1,24 +1,37 @@
+import { useContext } from "react";
 import BarChart from "../../components/dashboard/BarChart";
+import { TransactionContext } from "../../context/TransactionContext";
+import { ItemContext } from "../../context/ItemContext";
+import { eListam } from "../../utilities/elistam";
 
 function Dashboard() {
+  const { transactionCtx } = useContext(TransactionContext);
+  const { items } = useContext(ItemContext);
+
   const cards = [
     {
       icon: "bi bi-calendar-check-fill",
-      value: "$ 1,000.00",
+      value: eListam.utils.formatCurrencyToPHP(
+        eListam.helpers.getTotalTransactionPriceToday(transactionCtx),
+      ),
       label: "Today",
       border: "border-primary",
       color: "text-primary",
     },
     {
       icon: "bi bi-boxes",
-      value: "$ 1,000.00",
+      value: eListam.utils.formatCurrencyToPHP(
+        eListam.helpers.getTotalStockAmount(items),
+      ),
       label: "Stocks",
       border: "border-success",
       color: "text-success",
     },
     {
       icon: "bi bi-piggy-bank-fill",
-      value: "$ 1,000.00",
+      value: eListam.utils.formatCurrencyToPHP(
+        eListam.helpers.getTotalProfit(items),
+      ),
       label: "Profit",
       border: "border-warning",
       color: "text-warning",
@@ -47,7 +60,7 @@ function Dashboard() {
             {cards.map((card, index) => (
               <div key={index} className="col-md-3 col-12 p-0">
                 <div
-                  className={`card mb-3 border-0 border-5 border-top ${card.border} bg-white text-dark shadow-lg`}
+                  className={`card mb-3 border-0 border-5 border-top ${card.border} bg-white text-dark shadow-sm`}
                 >
                   <div className="row g-0">
                     <div className="col-lg-4 col-md-12 col-4 d-flex align-items-center justify-content-center">
@@ -84,21 +97,22 @@ function Dashboard() {
                 <table className="table table-hover">
                   <thead className="table-light">
                     <tr>
-                      <th>#</th>
-                      <th>Item</th>
-                      <th className="text-end">Quantity</th>
+                      <th>Item #</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>1</td>
-                      <td>Product-1</td>
-                      <td className="text-end">1</td>
+                      <td>Item-1</td>
+                      <td>Quantity is below 10 units</td>
                     </tr>
                     <tr>
-                      <td>2</td>
-                      <td>Product-2</td>
-                      <td className="text-end">2</td>
+                      <td>Item-2</td>
+                      <td>Expires in 6 months</td>
+                    </tr>
+                    <tr>
+                      <td>Item-3</td>
+                      <td>Out of Stock</td>
                     </tr>
                   </tbody>
                 </table>

@@ -1,3 +1,5 @@
+import { eListam } from "../../utilities/elistam";
+
 function ItemCard({ item, handleEditItem, handleDeleteItem }) {
   const { name, price, image, quantity } = item;
   return (
@@ -10,7 +12,9 @@ function ItemCard({ item, handleEditItem, handleDeleteItem }) {
 
         <div className="align-self-start">
           <div className="d-flex align-items-center">
-            <span className="fs-6 text-black">${price}</span>
+            <span className="fs-6 text-black">
+              {eListam.utils.formatCurrencyToPHP(price)}
+            </span>
             <span
               className={`badge bg-${quantity > 10 ? "success" : "warning"} text-white ms-2`}
             >

@@ -34,6 +34,8 @@ function BarChart() {
         },
       },
       y: {
+        min: 0,
+        max: 50000,
         ticks: {
           color: "#000", // y-axis labels
         },
@@ -63,7 +65,7 @@ function BarChart() {
     },
   };
 
-  const labels = [
+  const months = [
     "January",
     "February",
     "March",
@@ -79,16 +81,16 @@ function BarChart() {
   ];
 
   const data = {
-    labels,
+    labels: months,
     datasets: [
       {
-        label: "Dataset 1",
-        data: [0, 0, 0],
+        label: "Stocks",
+        data: [10000, 20000, 30000],
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
       {
-        label: "Dataset 2",
-        data: [0, 0, 0],
+        label: "Profit",
+        data: [10000 * 0.2, 20000 * 0.3, 30000 * 0.4],
         backgroundColor: "rgba(53, 162, 235, 0.5)",
       },
     ],

@@ -22,7 +22,7 @@ function LoginPage() {
 
     const auth = localStorage.getItem("auth");
     if (auth) {
-      navigate(from);
+      navigate(from || "/dashboard");
     }
   }
 

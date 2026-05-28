@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { OrderContext } from "../../context/OrderContext";
 import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
 import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
-import { formatCurrency } from "../../utilities/currency";
+import { eListam } from "../../utilities/elistam";
 import { TransactionContext } from "../../context/TransactionContext";
 
 function Orders() {
@@ -31,27 +31,33 @@ function Orders() {
     );
   }
 
-  function handleEditOrderDetail(orderDetail) {
-    setCurrentOrderDetail(orderDetail);
+  function handleEditOrderDetail(current) {
+    setCurrentOrderDetail(current);
     setShowEditOrderDetailForm(true);
   }
 
-  function handleUpdateOrderDetail(e) {
+  function handleUpdateOrderDetail(e, current) {
+    e.preventDefault();
     const formData = new FormData(e.target);
-    const quantity = formData.get("quantity");
-    const updatedOrder = orderDetails.map((order) => {
-      if (order.id === currentOrderDetail.id) {
+    const quantity = Number(formData.get("quantity"));
+
+    const updatedOrderDetails = orderDetails.map((detail) => {
+      if (detail.id === current.id) {
         return {
-          ...order,
+          ...detail,
           quantity: quantity,
         };
       }
 
-      return order;
+      return detail;
     });
 
+    const updatedOrder = {
+      ...order,
+      details: updatedOrderDetails,
+    };
+
     setOrder(updatedOrder);
-    setShowEditOrderDetailForm(false);
     localStorage.setItem("order", JSON.stringify(updatedOrder));
     setShowEditOrderDetailForm(false);
   }
@@ -83,6 +89,7 @@ function Orders() {
         ...order,
         totalPrice: getTotalOrderPrice(),
         totalOrderedQuantity: getTotalOrderQuantity(),
+        date: new Date().toLocaleDateString(),
       });
 
       setTransactionCtx(newTransactions);
@@ -127,7 +134,7 @@ function Orders() {
                 className="flex-fill d-flex flex-column"
               >
                 <div className="row">
-                  <div className="col-auto">
+                  {/* <div className="col-auto">
                     <label
                       htmlFor="inputPassword4"
                       className="form-label form-label-sm m-0"
@@ -140,7 +147,7 @@ function Orders() {
                       disabled
                       value={`${orderDetails?.length > 0 ? orderDetails.length : "0"}`}
                     />
-                  </div>
+                  </div> */}
                   <div className="col-auto ms-md-auto">
                     <label className="form-label form-label-sm m-0">
                       Total Quantity:
@@ -153,14 +160,13 @@ function Orders() {
                     />
                   </div>
                   <div className="col-auto">
-                    <label htmlFor="inputEmail4" className="form-label m-0">
-                      Total Price:
-                    </label>
-
+                    <label className="form-label m-0">Total Price:</label>
                     <input
                       className="form-control fw-bold"
                       disabled
-                      value={formatCurrency(getTotalOrderPrice(), "PHP")}
+                      value={eListam.utils.formatCurrencyToPHP(
+                        getTotalOrderPrice(),
+                      )}
                     />
                   </div>
                 </div>
@@ -191,11 +197,12 @@ function Orders() {
                               {item.name}
                             </td>
                             <td>{item.quantity}</td>
-                            <td>{formatCurrency(item.price, "PHP")}</td>
                             <td>
-                              {formatCurrency(
+                              {eListam.utils.formatCurrencyToPHP(item.price)}
+                            </td>
+                            <td>
+                              {eListam.utils.formatCurrencyToPHP(
                                 item.quantity * item.price,
-                                "PHP",
                               )}
                             </td>
                             <td>

@@ -24,7 +24,11 @@ function AppRouter() {
         element={
           // <AuthPage>
           <ProtectedRoute>
-            <Dashboard />
+            <TransactionProvider>
+              <ItemProvider>
+                <Dashboard />
+              </ItemProvider>
+            </TransactionProvider>
           </ProtectedRoute>
           // </AuthPage>
         }
