@@ -63,69 +63,69 @@ namespace eListamAPI.Controllers
         #endregion
 
         #region Register
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-        {
-            ApiResponse apiResponse = new ApiResponse();
-            // Create new Application User if the RegisterDTO model is valid
-            if (!ModelState.IsValid)
-            {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        apiResponse.Messages = [error.ErrorMessage];
-                    }
-                }
+        //[AllowAnonymous]
+        //[HttpPost("register")]
+        //public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        //{
+        //    ApiResponse apiResponse = new ApiResponse();
+        //    // Create new Application User if the RegisterDTO model is valid
+        //    if (!ModelState.IsValid)
+        //    {
+        //        apiResponse.StatusCode = HttpStatusCode.BadRequest;
+        //        apiResponse.IsSuccess = false;
+        //        foreach (var value in ModelState.Values)
+        //        {
+        //            foreach (var error in value.Errors)
+        //            {
+        //                apiResponse.Messages = [error.ErrorMessage];
+        //            }
+        //        }
 
-                return BadRequest(apiResponse);
-            }
+        //        return BadRequest(apiResponse);
+        //    }
 
             
-            ApplicationUser newApplicationUser = new ApplicationUser()
-            {
-                UserName = request.UserName,
-                Email = request.Email,
-                NormalizedUserName = request.UserName.ToUpper(),
-                NormalizedEmail = request.Email.ToUpper()
-            };
+        //    ApplicationUser newApplicationUser = new ApplicationUser()
+        //    {
+        //        UserName = request.UserName,
+        //        Email = request.Email,
+        //        NormalizedUserName = request.UserName.ToUpper(),
+        //        NormalizedEmail = request.Email.ToUpper()
+        //    };
 
-            var result = await _userManager.CreateAsync(newApplicationUser, request.Password);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    apiResponse.Messages = [error.Description];
-                }
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return BadRequest(apiResponse);
-            }
+        //    var result = await _userManager.CreateAsync(newApplicationUser, request.Password);
+        //    if (!result.Succeeded)
+        //    {
+        //        foreach (var error in result.Errors)
+        //        {
+        //            apiResponse.Messages = [error.Description];
+        //        }
+        //        apiResponse.StatusCode = HttpStatusCode.BadRequest;
+        //        apiResponse.IsSuccess = false;
+        //        return BadRequest(apiResponse);
+        //    }
             
-            // Create roles if not exist
-            if (!await _roleManager.RoleExistsAsync(Role.Admin))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
-                await _roleManager.CreateAsync(new IdentityRole(Role.User));
-            }
+        //    // Create roles if not exist
+        //    if (!await _roleManager.RoleExistsAsync(Role.Admin))
+        //    {
+        //        await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
+        //        await _roleManager.CreateAsync(new IdentityRole(Role.Demo));
+        //    }
 
-            // Assign the given role
-            if (request.Role.Equals(Role.Admin, StringComparison.CurrentCultureIgnoreCase))
-            {
-                await _userManager.AddToRoleAsync(newApplicationUser, Role.Admin);
-            }
-            else
-            {
-                await _userManager.AddToRoleAsync(newApplicationUser, Role.User);
-            }
+        //    // Assign the given role
+        //    if (request.Role.Equals(Role.Admin, StringComparison.CurrentCultureIgnoreCase))
+        //    {
+        //        await _userManager.AddToRoleAsync(newApplicationUser, Role.Admin);
+        //    }
+        //    else
+        //    {
+        //        await _userManager.AddToRoleAsync(newApplicationUser, Role.User);
+        //    }
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            return Ok(apiResponse);
-        }
+        //    apiResponse.StatusCode = HttpStatusCode.OK;
+        //    apiResponse.IsSuccess = true;
+        //    return Ok(apiResponse);
+        //}
         #endregion
 
         #region Login

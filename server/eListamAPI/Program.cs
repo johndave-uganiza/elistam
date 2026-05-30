@@ -26,6 +26,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // Add HttpClient service
 builder.Services.AddHttpClient();
 
+// Add Identity Seeder
+builder.Services.AddScoped<IdentitySeeder>();
+
 // Add ApplicationDbSeeder
 builder.Services.AddScoped<ApplicationDbSeeder>();
 
@@ -69,10 +72,21 @@ var app = builder.Build();
 //using statement ensures that DI scope is properly disposed
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
+    var serviceProvider = scope.ServiceProvider;
 
-    // Seed dummy products
-    await seeder.SeedAsync();
+    var db = serviceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+
+    if (await db.Database.CanConnectAsync())
+    {
+        // Seed Identity
+        var identitySeeder = serviceProvider.GetRequiredService<IdentitySeeder>();
+        await identitySeeder.SeedAsync();
+
+        // Seed Dummy Products
+        var applicationDbSeeder = serviceProvider.GetRequiredService<ApplicationDbSeeder>();
+        await applicationDbSeeder.SeedAsync();
+    }
 }
 
 // Configure the HTTP request pipeline.
