@@ -1,0 +1,437 @@
+﻿using eListam.Application.DTOs.Orders;
+using eListam.Infrastructure.Persistence;
+using eListam.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
+using eListam.API.Common;
+
+namespace eListamAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    // Use ControllerBase for Web Api controllers
+    public class OrderController : ControllerBase
+    {
+        #region Fields
+        private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _env;
+        #endregion
+
+        #region Constructor
+        public OrderController(ApplicationDbContext db, IWebHostEnvironment env)
+        {
+            _db = db;
+            _env = env;
+        }
+        #endregion
+
+        #region GetAsync
+        [HttpGet]
+        public async Task<IActionResult> GetAsync()
+        {
+            var existingOrders = await _db.Orders
+            .Include(o => o.OrderDetails)
+            .Where(o => !o.IsPosted)
+            .ToListAsync();
+
+            var getOrderResponse = existingOrders.Select(o => new GetOrderResponse()
+            {
+                Id = o.Id,
+                OrderNumber = o.OrderNumber,
+                TotalPrice = o.TotalPrice,
+                TotalQuantity = o.TotalQuantity,
+                UserId = o.UserId,
+                OrderDetails = o.OrderDetails.Select(od => new GetOrderDetailResponse()
+                {
+                    Description = od.Description,
+                    Image = od.Image,
+                    Name = od.Name,
+                    OrderDetailId = od.Id,
+                    Price = od.Price,
+                    ProductId = od.ItemId,
+                    Quantity = od.Quantity
+                })
+            });
+
+            ApiResponse response = new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                Data = getOrderResponse,
+            };
+
+            return Ok(response);
+        }
+        #endregion
+
+        #region GetByIdAsync
+        [HttpGet("{id:int}")]
+        // Mirror the CreatedAtAction Name from CreateAsync
+        [ActionName(nameof(GetByIdAsync))]
+        public async Task<IActionResult> GetByIdAsync(int id)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (id <= 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["Invalid Product Id!"];
+                return BadRequest();
+            }
+
+            var existingOrder = await _db.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(p => p.Id == id);
+               
+            if (existingOrder == null)
+            {
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Product Not Found!"];
+                return NotFound();
+            }
+
+            var getOrderResponse = new GetOrderResponse()
+            {
+                Id = existingOrder.Id,
+                OrderNumber = existingOrder.OrderNumber,
+                TotalPrice = existingOrder.TotalPrice,
+                TotalQuantity = existingOrder.TotalQuantity,
+                OrderDetails = existingOrder.OrderDetails.Select(od => new GetOrderDetailResponse()
+                {
+                    Description = od.Description,
+                    Image = od.Image,
+                    Name = od.Name,
+                    OrderDetailId = od.Id,
+                    Price = od.Price,
+                    ProductId = od.ItemId,
+                    Quantity = od.Quantity
+                })
+            };
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Data = getOrderResponse;
+            return Ok(response);
+        }
+        #endregion
+
+        #region CreateAsync
+        [HttpPost]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest req)
+        {
+            ApiResponse response = new ApiResponse();
+
+            #region Validations
+            if (!ModelState.IsValid)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                foreach (var value in ModelState.Values)
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var error in value.Errors)
+                    {
+                        errorMessages.Add(error.ErrorMessage);
+                    }
+                    response.Messages = errorMessages;
+                }
+                return BadRequest(response);
+            }
+
+            var applicationUser = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            if (applicationUser == null)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["User does not exists!"];
+                return BadRequest(response);
+            }
+
+            var existingProduct = await _db.Items
+                .FirstOrDefaultAsync(p => p.Id == req.ProductId && p.Quantity > 0);
+
+            if (existingProduct == null)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                response.Messages = ["Product Not Found!"];
+                return BadRequest(response);
+            }
+            #endregion
+
+            var pendingOrder = await _db.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(p => !p.IsPosted);
+
+            // Create new order if pending order doesn't exist
+            if (pendingOrder == null)
+            {
+                // Create new Order
+                Order order = new Order()
+                {
+                    OrderNumber = Guid.NewGuid().ToString(),
+                    Date = req.Date ?? DateTime.UtcNow,
+                    TotalPrice = existingProduct.Price * existingProduct.Quantity,
+                    TotalQuantity = existingProduct.Quantity,
+                    UserId = req.UserId,
+                    IsPosted = false,
+                    OrderDetails = [new OrderDetail()
+                    {
+                        ItemId = existingProduct.Id,
+                        Name = existingProduct.Name,
+                        Description = existingProduct.Description,
+                        Price = existingProduct.Price,
+                        Quantity = existingProduct.Quantity,
+                        Image = existingProduct.Image
+                    }]
+                };
+
+                await _db.Orders.AddAsync(order);
+                await _db.SaveChangesAsync();
+
+                response.StatusCode = HttpStatusCode.Created;
+                response.IsSuccess = true;
+                response.Data = new GetOrderResponse()
+                {
+                    Id = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    Date = order.Date,
+                    TotalPrice = order.TotalPrice,
+                    TotalQuantity = order.TotalQuantity,
+                    IsPosted = order.IsPosted,
+                    UserId = order.UserId
+                };
+                return CreatedAtAction(nameof(GetByIdAsync), new { id = order.Id }, response);
+            }
+
+            // If user has changed, update UserId
+            pendingOrder.UserId = req.UserId;
+            
+            // Add order detail for pending order
+            var pendingOrderDetails = pendingOrder.OrderDetails;
+            var newOrderDetail = new OrderDetail()
+            {
+                Quantity = existingProduct.Quantity,
+                Description = existingProduct.Description,
+                Image = existingProduct.Image,
+                Name = existingProduct.Name,
+                Price = existingProduct.Price,
+                ItemId = existingProduct.Id
+            };
+
+            await _db.OrderDetails.AddAsync(newOrderDetail);
+            await _db.SaveChangesAsync();
+
+            response.StatusCode = HttpStatusCode.Created;
+            response.IsSuccess= true;
+            response.Data = new GetOrderResponse()
+            {
+                Id = pendingOrder.Id,
+                OrderNumber = pendingOrder.OrderNumber,
+                Date = pendingOrder.Date,
+                TotalPrice = pendingOrder.TotalPrice,
+                TotalQuantity = pendingOrder.TotalQuantity,
+                IsPosted = pendingOrder.IsPosted,
+                UserId = req.UserId,
+                OrderDetails = pendingOrderDetails.Select(od => new GetOrderDetailResponse()
+                {
+                    Quantity = od.Quantity,
+                    Description = od.Description,
+                    Image = od.Image,
+                    Name = od.Name,
+                    Price = od.Price,
+                    ProductId = od.ItemId,
+                    OrderDetailId = od.Id
+
+                })
+            };
+            
+            return Ok(response);
+        }
+        #endregion
+
+        #region UpdateAsync
+        [HttpPut("{id:int}")]
+        [ActionName(nameof(UpdateAsync))]
+        public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderRequest req)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (!ModelState.IsValid)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+
+                foreach (var value in ModelState.Values)
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var error in value.Errors)
+                    {
+                        errorMessages.Add(error.ErrorMessage);
+                    }
+                    response.Messages = errorMessages;
+                }
+
+                return BadRequest(response);
+            }
+
+            if (id != req.OrderId || id == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                return BadRequest(response);
+            }
+
+            var existingOrder = await _db.Orders
+                .Include(e => e.OrderDetails)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (existingOrder == null)
+            {
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                return NotFound(response);
+            }
+
+            existingOrder.Date = req.Date ?? existingOrder.Date;
+
+            await _db.SaveChangesAsync();
+
+            // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
+            response.Data = new GetOrderResponse()
+            {
+                Id = existingOrder.Id,
+                OrderNumber = existingOrder.OrderNumber,
+                Date = existingOrder.Date,
+                TotalPrice = existingOrder.TotalPrice,
+                TotalQuantity = existingOrder.TotalQuantity,
+                IsPosted = existingOrder.IsPosted,
+                OrderDetails = existingOrder.OrderDetails.Select(ed => new GetOrderDetailResponse()
+                {
+                    Description = ed.Description,
+                    Image = ed.Image,
+                    Name = ed.Name,
+                    OrderDetailId = ed.Id,
+                    Price = ed.Price,
+                    ProductId = ed.ItemId,
+                    Quantity = ed.Quantity
+                })
+            };
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
+        }
+        #endregion
+
+        #region DeleteAsync
+        [HttpDelete("{id:int}")]
+        [ActionName(nameof(DeleteAsync))]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            ApiResponse response = new ApiResponse();
+
+            var pendingOrder = await _db.Orders.FirstOrDefaultAsync(p => p.Id == id);
+            if (pendingOrder != null)
+            {
+                _db.Orders.Remove(pendingOrder);
+                await _db.SaveChangesAsync();
+
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+                response.Data = pendingOrder;
+                return Ok(response);
+            }
+
+            response.StatusCode = HttpStatusCode.NotFound;
+            response.Messages = ["There is no pending Order!"];
+            return NotFound(response);
+        }
+        #endregion
+
+        #region PlaceOrderAsync
+        [HttpPost("{id:int}/Place")]
+        public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (!ModelState.IsValid)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+
+                foreach (var value in ModelState.Values)
+                {
+                    var errorMessages = new List<string>();
+                    foreach (var error in value.Errors)
+                    {
+                        errorMessages.Add(error.ErrorMessage);
+                    }
+                    response.Messages = errorMessages;
+                }
+
+                return BadRequest(response);
+            }
+
+            var existingOrder = await _db.Orders
+                .Include(e => e.OrderDetails)
+                .FirstOrDefaultAsync(o => o.Id == id && !o.IsPosted);
+
+            if (existingOrder == null)
+            {
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.Messages = ["Order does not exists!"];
+                return NotFound(response);
+            }
+
+            existingOrder.UserId = req.UserId;
+            existingOrder.IsPosted = true;
+
+            var existingOrderDetails = existingOrder.OrderDetails;
+
+            var newTransaction = new Transaction()
+            {
+                Date = existingOrder.Date,
+                IsPosted = existingOrder.IsPosted,
+                OrderId = existingOrder.Id,
+                OrderNumber = existingOrder.OrderNumber,
+                TotalPrice = existingOrder.TotalPrice,
+                TotalQuantity = existingOrder.TotalQuantity,
+                UserId = req.UserId,
+                TransactionDetails = existingOrderDetails.Select(od => new TransactionDetail()
+                {
+                    Description = od.Description,
+                    Image = od.Image,
+                    Name = od.Name,
+                    Price = od.Price,
+                    ItemId = od.ItemId,
+                    Quantity = od.Quantity,
+                }).ToList()
+            };
+
+            await _db.Transactions.AddAsync(newTransaction);
+            await _db.SaveChangesAsync();
+
+            // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
+            response.Data = new GetOrderResponse()
+            {
+                Id = existingOrder.Id,
+                OrderNumber = existingOrder.OrderNumber,
+                Date = existingOrder.Date,
+                TotalPrice = existingOrder.TotalPrice,
+                TotalQuantity = existingOrder.TotalQuantity,
+                IsPosted = existingOrder.IsPosted,
+                UserId = existingOrder.UserId
+            };
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
+        }
+        #endregion
+    }
+}
