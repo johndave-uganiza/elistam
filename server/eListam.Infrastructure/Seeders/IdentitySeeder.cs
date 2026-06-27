@@ -24,22 +24,22 @@ namespace eListam.Infrastructure.Seeders
         #region SeedAsync
         public async Task SeedAsync()
         {
-            var adminData = new UserData(
+            var adminUser = new UserData(
                 _config["SeedUsers:AdminUserName"]!,
                  _config["SeedUsers:AdminEmail"]!,
                  _config["SeedUsers:AdminPassword"]!,
                  Role.Admin
                 );
 
-            var demoData = new UserData(
+            var demoUser = new UserData(
                 _config["SeedUsers:DemoUserName"]!,
                  _config["SeedUsers:DemoEmail"]!,
                  _config["SeedUsers:DemoPassword"]!,
                  Role.Demo
                 );
 
-            await CreateUserAsync(adminData);
-            await CreateUserAsync(demoData);
+            await CreateUserAsync(adminUser);
+            await CreateUserAsync(demoUser);
         }
         #endregion
 
@@ -85,25 +85,3 @@ namespace eListam.Infrastructure.Seeders
         #endregion
     }
 }
-
-
-//public class DatabaseInitializer
-//{
-//    public async Task InitializeAsync(IServiceProvider services)
-//    {
-//        using var scope = services.CreateScope();
-
-//        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-//        await db.Database.MigrateAsync();
-
-//        var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
-//        await identitySeeder.SeedAsync();
-
-//        var appSeeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
-//        await appSeeder.SeedAsync();
-//    }
-//}
-
-//await app.Services.GetRequiredService<DatabaseInitializer>()
-//    .InitializeAsync(app.Services);

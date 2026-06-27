@@ -1,5 +1,4 @@
-﻿using eListamAPI.Constants;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace eListam.Application.DTOs.Auth
 {

@@ -1,15 +1,9 @@
-﻿using eListam.Infrastructure.Persistence;
-using eListam.Domain.Models;
+﻿using eListam.API.Common;
 using eListam.Application.DTOs.Auth;
+using eListam.Application.Services.Abstractions.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
-using eListam.API.Common;
 
 namespace eListamAPI.Controllers
 {
@@ -18,46 +12,77 @@ namespace eListamAPI.Controllers
     public class AuthController : Controller
     {
         #region Fields
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationDbContext _db;
-        private readonly string _secretKey;
+        private readonly IAuthService _authService;
         #endregion
 
         #region Constructor
-        public AuthController(
-            UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext db,
-            IConfiguration configuration)
-
+        public AuthController(IAuthService authService)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _db = db;
-            _secretKey = configuration.GetValue<string>("Jwt:SecretKey") ?? "";
+            _authService = authService;
         }
         #endregion
 
         #region Users
         [HttpGet("users")]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> GetAsync()
         {
-            ApiResponse apiResponse = new ApiResponse();
-            var existingApplicationUsers = _db.ApplicationUsers.ToList();
+            var applicationUsers = await _authService.GetApplicationUsersAsync();
 
-            if (existingApplicationUsers != null)
+            if (applicationUsers == null)
             {
-                apiResponse.Data = existingApplicationUsers;
-                apiResponse.StatusCode = HttpStatusCode.OK;
-                apiResponse.IsSuccess = true;
-                return Ok(apiResponse);
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = true,
+                    Messages = []
+                });
             }
-        
-            apiResponse.StatusCode = HttpStatusCode.BadRequest;
-            apiResponse.IsSuccess = false;
-            apiResponse.Messages = ["No Users Found."];
-            return BadRequest(apiResponse);
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                Data = applicationUsers,
+                Messages = []
+            });
+        }
+        #endregion
+
+        #region Login
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
+        {
+            // Find user by email
+            var applicationUser = await _authService.LoginAsync(request);
+
+            if (applicationUser == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = true,
+                    Messages = []
+                });
+            }
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                Data = applicationUser,
+                Messages = []
+            });
+        }
+        #endregion
+
+        #region LogoutAsync
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogoutAsync()
+        {
+            await _authService.LogoutAsync();
+
+            return Ok();
         }
         #endregion
 
@@ -83,7 +108,7 @@ namespace eListamAPI.Controllers
         //        return BadRequest(apiResponse);
         //    }
 
-            
+
         //    ApplicationUser newApplicationUser = new ApplicationUser()
         //    {
         //        UserName = request.UserName,
@@ -103,7 +128,7 @@ namespace eListamAPI.Controllers
         //        apiResponse.IsSuccess = false;
         //        return BadRequest(apiResponse);
         //    }
-            
+
         //    // Create roles if not exist
         //    if (!await _roleManager.RoleExistsAsync(Role.Admin))
         //    {
@@ -125,84 +150,6 @@ namespace eListamAPI.Controllers
         //    apiResponse.IsSuccess = true;
         //    return Ok(apiResponse);
         //}
-        #endregion
-
-        #region Login
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        {
-            ApiResponse apiResponse = new ApiResponse();
-            // Check if model is valid
-            if (ModelState.IsValid)
-            {
-                // Find user by email
-                var userFromDb = await _userManager.FindByEmailAsync(request.Email);
-
-                if (userFromDb != null)
-                {
-                    // Check if password is valid
-                    bool isPasswordValid = await _userManager.CheckPasswordAsync(userFromDb, request.Password);
-                    if (!isPasswordValid)
-                    {
-                        apiResponse.Data = new object();
-                        apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                        apiResponse.Messages = ["Invalid credentials"];
-                        return BadRequest(apiResponse);
-                    }
-
-
-                    JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-                    byte[] key = Encoding.UTF8.GetBytes(_secretKey);
-
-                    // Define JWT
-                    SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor()
-                    {
-                        Subject = new ClaimsIdentity(
-                        [
-                            new ("Id", userFromDb.Id),
-                            new (ClaimTypes.Email, userFromDb.Email!),
-                            new (ClaimTypes.Role, _userManager.GetRolesAsync(userFromDb).Result.FirstOrDefault()!)
-                        ]),
-                        Expires = DateTime.UtcNow.AddDays(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
-                    };
-
-                    // Create JWT
-                    SecurityToken securityToken = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
-
-                    // Serialize the security token to string
-                    var token = jwtSecurityTokenHandler.WriteToken(securityToken);
-
-                    LoginResponse loginResponseDTO = new LoginResponse()
-                    {
-                        Token = token,
-                    };
-
-                    apiResponse.StatusCode = HttpStatusCode.OK;
-                    apiResponse.Data = loginResponseDTO;
-                    apiResponse.IsSuccess = true;
-                    return Ok(apiResponse);
-                }
-
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.Messages = ["User doesn't exist!"];
-                apiResponse.IsSuccess = false;
-                return BadRequest(apiResponse);
-            }
-
-            apiResponse.StatusCode = HttpStatusCode.BadRequest;
-            apiResponse.IsSuccess = false;
-            foreach (var value in ModelState.Values)
-            {
-                foreach (var error in value.Errors)
-                {
-                    apiResponse.Messages = [error.ErrorMessage];
-                }
-
-            }
-            return BadRequest(apiResponse);
-        }
         #endregion
     }
 }

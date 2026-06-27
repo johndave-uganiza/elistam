@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace eListam.Application.Interfaces
+namespace eListam.Application.Services.Abstractions
 {
     public interface IFileStorage
     {

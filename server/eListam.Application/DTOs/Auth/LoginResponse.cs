@@ -1,7 +1,4 @@
-﻿using eListamAPI.Constants;
-using System.ComponentModel.DataAnnotations;
-
-namespace eListam.Application.DTOs.Auth
+﻿namespace eListam.Application.DTOs.Auth
 {
     public class LoginResponse
     {

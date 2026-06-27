@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace eListam.Application.DTOs.Orders
 {
@@ -10,6 +9,6 @@ namespace eListam.Application.DTOs.Orders
         public DateTime? Date { get; set; }
         [Required]
         public string UserId { get; set; } = string.Empty;
-
+        public List<CreateOrderDetailRequest> OrderDetails { get; set; } = [];
     }
 }

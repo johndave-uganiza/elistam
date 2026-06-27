@@ -1,9 +1,7 @@
-﻿using eListam.Infrastructure.Persistence;
-using eListam.Domain.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using eListam.API.Common;
+using eListam.Application.Services.Abstractions.Products;
 
 namespace eListamAPI.Controllers
 {
@@ -13,15 +11,13 @@ namespace eListamAPI.Controllers
     public class ProductController : ControllerBase
     {
         #region Fields
-        private readonly ApplicationDbContext _db;
-        private readonly IWebHostEnvironment _env;
+        private readonly IProductService _service;
         #endregion
 
         #region Constructor
-        public ProductController(ApplicationDbContext db, IWebHostEnvironment env)
+        public ProductController(IProductService service)
         {
-            _db = db;
-            _env = env;
+            _service = service;
         }
         #endregion
 
@@ -30,26 +26,25 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetAsync))]
         public async Task<IActionResult> GetAsync()
         {
-            IEnumerable<Item> products = await _db.Items
-            .Where(item => item.Quantity > 0)
-            .Select(p => new Item()
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                Quantity = p.Quantity,
-                Image = p.Image
-            }).ToListAsync();
+            var result = await _service.GetAsync();
 
-            ApiResponse response = new ApiResponse()
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Data = products,
-            };
-
-            return Ok(response);
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -58,41 +53,24 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse response = new ApiResponse();
-
-            if (id <= 0)
+            var result = await _service.GetByIdAsync(id);
+            if (!result.IsSuccess)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                response.Messages = ["Invalid Product Id!"];
-                return BadRequest();
-            }
-
-            IEnumerable<Item> productFromDb = await _db.Items
-                .Where(p => p.Id == id)
-                .Where(item => item.Quantity > 0)
-                .Select(p => new Item()
+                return BadRequest(new ApiResponse()
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Quantity = p.Quantity,
-                    Image = p.Image
-                }).ToListAsync();
-
-            if (productFromDb == null)
-            {
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.IsSuccess = false;
-                response.Messages = ["Product Not Found!"];
-                return NotFound();
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
             }
 
-            response.StatusCode = HttpStatusCode.OK;
-            response.IsSuccess = true;
-            response.Data = productFromDb;
-            return Ok(response);
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
     }

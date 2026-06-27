@@ -1,10 +1,7 @@
-﻿using eListam.Infrastructure.Persistence;
-using eListam.Domain.Models;
-using eListam.Application.DTOs.Transactions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using eListam.API.Common;
+using eListam.Application.Services.Abstractions.Transactions;
 
 namespace eListamAPI.Controllers
 {
@@ -14,15 +11,13 @@ namespace eListamAPI.Controllers
     public class TransactionController : ControllerBase
     {
         #region Fields
-        private readonly ApplicationDbContext _db;
-        private readonly IWebHostEnvironment _env;
+        private readonly ITransactionService _service;
         #endregion
 
         #region Constructor
-        public TransactionController(ApplicationDbContext db, IWebHostEnvironment env)
+        public TransactionController(ITransactionService service)
         {
-            _db = db;
-            _env = env;
+            _service = service;
         }
         #endregion
 
@@ -30,38 +25,35 @@ namespace eListamAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            var existingTransactions = await _db.Transactions
-            .Include(o => o.TransactionDetails)
-            .ToListAsync();
+            var result = await _service.GetAsync();
 
-
-            var transactionResponse = existingTransactions.Select(t => new GetTransactionResponse()
+            if(!result.IsSuccess)
             {
-                Id = t.Id,
-                OrderNumber = t.OrderNumber,
-                TotalPrice = t.TotalPrice,
-                TotalQuantity = t.TotalQuantity,
-                TransactionDetails = t.TransactionDetails?.Select(td => new GetTransactionDetailResponse()
+                return BadRequest(new ApiResponse()
                 {
-                    Description = td.Description,
-                    Id = td.Id,
-                    Image = td.Image,
-                    Name = td.Name,
-                    Price = td.Price,
-                    ProductId = td.ItemId,
-                    Quantity  = td.Quantity,
-                    TransactionId = td.TransactionId
-                }).ToList()
-            });
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
 
-            ApiResponse apiResponse = new ApiResponse()
+            if (result.Data == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Data = transactionResponse,
-            };
-
-            return Ok(apiResponse);
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -71,51 +63,35 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse apiResponse = new ApiResponse();
+            var result = await _service.GetByIdAsync(id);
 
-            if (id <= 0)
+            if (!result.IsSuccess)
             {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Invalid Product Id!"];
-                return BadRequest();
-            }
-
-            var existingTransaction = await _db.Transactions
-                .Include(t => t.TransactionDetails)
-                .FirstOrDefaultAsync(p => p.Id == id);
-               
-            if (existingTransaction == null)
-            {
-                apiResponse.StatusCode = HttpStatusCode.NotFound;
-                apiResponse.IsSuccess = false;
-                apiResponse.Messages = ["Transaction Not Found!"];
-                return NotFound();
-            }
-
-            var transactionResponse = new GetTransactionResponse()
-            {
-                Id = existingTransaction.Id,
-                OrderNumber = existingTransaction.OrderNumber,
-                TotalPrice = existingTransaction.TotalPrice,
-                TotalQuantity = existingTransaction.TotalQuantity,
-                TransactionDetails = existingTransaction.TransactionDetails?.Select(td => new GetTransactionDetailResponse()
+                return BadRequest(new ApiResponse()
                 {
-                    Description = td.Description,
-                    Id = td.Id,
-                    Image = td.Image,
-                    Name = td.Name,
-                    Price = td.Price,
-                    ProductId = td.ItemId,
-                    Quantity = td.Quantity,
-                    TransactionId = td.TransactionId
-                })
-            };
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
 
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.IsSuccess = true;
-            apiResponse.Data = transactionResponse;
-            return Ok(apiResponse);
+            if (result.Data == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -124,23 +100,35 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            ApiResponse response = new ApiResponse();
+            var result = await _service.DeleteAsync(id);
 
-            var existingTransaction = await _db.Transactions.FirstOrDefaultAsync(p => p.Id == id);
-            if (existingTransaction != null)
+            if(!result.IsSuccess)
             {
-                _db.Transactions.Remove(existingTransaction);
-                await _db.SaveChangesAsync();
-
-                response.StatusCode = HttpStatusCode.OK;
-                response.IsSuccess = true;
-                response.Data = existingTransaction;
-                return Ok(response);
+                return BadRequest(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
             }
 
-            response.StatusCode = HttpStatusCode.NotFound;
-            response.Messages = ["Transaction does not exist!"];
-            return NotFound(response);
+            if(result.Data == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 

@@ -1,9 +1,8 @@
-﻿using eListam.Application.Interfaces;
+﻿using eListam.Application.Services.Abstractions.Items;
 using eListam.Domain.Models;
-using eListam.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace eListam.Infrastructure.Repositories
+namespace eListam.Infrastructure.Persistence.Repositories
 {
     public class ItemRepository : IItemRepository
     {

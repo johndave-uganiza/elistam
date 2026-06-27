@@ -1,6 +1,6 @@
 ﻿using eListam.Domain.Models;
 
-namespace eListam.Application.Interfaces
+namespace eListam.Application.Services.Abstractions.Items
 {
     public interface IItemRepository
     {

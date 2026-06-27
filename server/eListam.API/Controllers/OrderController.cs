@@ -1,10 +1,10 @@
-﻿using eListam.Application.DTOs.Orders;
-using eListam.Infrastructure.Persistence;
-using eListam.Domain.Models;
+﻿using eListam.API.Common;
+using eListam.Application.DTOs.Orders;
+using eListam.Application.Services.Abstractions.Auth;
+using eListam.Application.Services.Abstractions.Items;
+using eListam.Application.Services.Abstractions.Orders;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
-using eListam.API.Common;
 
 namespace eListamAPI.Controllers
 {
@@ -14,15 +14,17 @@ namespace eListamAPI.Controllers
     public class OrderController : ControllerBase
     {
         #region Fields
-        private readonly ApplicationDbContext _db;
-        private readonly IWebHostEnvironment _env;
+        private readonly IOrderService _orderService;
+        private readonly IAuthService _authService;
         #endregion
 
         #region Constructor
-        public OrderController(ApplicationDbContext db, IWebHostEnvironment env)
+        public OrderController(IOrderService orderService,
+            IAuthService authService,
+            IItemService itemService)
         {
-            _db = db;
-            _env = env;
+            _orderService = orderService;
+            _authService = authService;
         }
         #endregion
 
@@ -30,38 +32,35 @@ namespace eListamAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            var existingOrders = await _db.Orders
-            .Include(o => o.OrderDetails)
-            .Where(o => !o.IsPosted)
-            .ToListAsync();
+            var result = await _orderService.GetAsync();
 
-            var getOrderResponse = existingOrders.Select(o => new GetOrderResponse()
+            if (!result.IsSuccess)
             {
-                Id = o.Id,
-                OrderNumber = o.OrderNumber,
-                TotalPrice = o.TotalPrice,
-                TotalQuantity = o.TotalQuantity,
-                UserId = o.UserId,
-                OrderDetails = o.OrderDetails.Select(od => new GetOrderDetailResponse()
+                return BadRequest(new ApiResponse()
                 {
-                    Description = od.Description,
-                    Image = od.Image,
-                    Name = od.Name,
-                    OrderDetailId = od.Id,
-                    Price = od.Price,
-                    ProductId = od.ItemId,
-                    Quantity = od.Quantity
-                })
-            });
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
 
-            ApiResponse response = new ApiResponse()
+            if (result.Data == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Data = getOrderResponse,
-            };
-
-            return Ok(response);
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -71,50 +70,35 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(GetByIdAsync))]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            ApiResponse response = new ApiResponse();
+            var result = await _orderService.GetByIdAsync(id);
 
-            if (id <= 0)
+            if (!result.IsSuccess)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                response.Messages = ["Invalid Product Id!"];
-                return BadRequest();
-            }
-
-            var existingOrder = await _db.Orders
-                .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(p => p.Id == id);
-               
-            if (existingOrder == null)
-            {
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.IsSuccess = false;
-                response.Messages = ["Product Not Found!"];
-                return NotFound();
-            }
-
-            var getOrderResponse = new GetOrderResponse()
-            {
-                Id = existingOrder.Id,
-                OrderNumber = existingOrder.OrderNumber,
-                TotalPrice = existingOrder.TotalPrice,
-                TotalQuantity = existingOrder.TotalQuantity,
-                OrderDetails = existingOrder.OrderDetails.Select(od => new GetOrderDetailResponse()
+                return BadRequest(new ApiResponse()
                 {
-                    Description = od.Description,
-                    Image = od.Image,
-                    Name = od.Name,
-                    OrderDetailId = od.Id,
-                    Price = od.Price,
-                    ProductId = od.ItemId,
-                    Quantity = od.Quantity
-                })
-            };
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
 
-            response.StatusCode = HttpStatusCode.OK;
-            response.IsSuccess = true;
-            response.Data = getOrderResponse;
-            return Ok(response);
+            if (result.Data == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -122,134 +106,36 @@ namespace eListamAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest req)
         {
-            ApiResponse response = new ApiResponse();
-
-            #region Validations
-            if (!ModelState.IsValid)
-            {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                foreach (var value in ModelState.Values)
-                {
-                    var errorMessages = new List<string>();
-                    foreach (var error in value.Errors)
-                    {
-                        errorMessages.Add(error.ErrorMessage);
-                    }
-                    response.Messages = errorMessages;
-                }
-                return BadRequest(response);
-            }
-
-            var applicationUser = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
             if (applicationUser == null)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                response.Messages = ["User does not exists!"];
-                return BadRequest(response);
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    Messages = ["User does not exists!"]
+                });
             }
 
-            var existingProduct = await _db.Items
-                .FirstOrDefaultAsync(p => p.Id == req.ProductId && p.Quantity > 0);
+            var result = await _orderService.CreateAsync(req);
 
-            if (existingProduct == null)
+            if (result.Data == null)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                response.Messages = ["Product Not Found!"];
-                return BadRequest(response);
-            }
-            #endregion
-
-            var pendingOrder = await _db.Orders
-                .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(p => !p.IsPosted);
-
-            // Create new order if pending order doesn't exist
-            if (pendingOrder == null)
-            {
-                // Create new Order
-                Order order = new Order()
+                return BadRequest(new ApiResponse()
                 {
-                    OrderNumber = Guid.NewGuid().ToString(),
-                    Date = req.Date ?? DateTime.UtcNow,
-                    TotalPrice = existingProduct.Price * existingProduct.Quantity,
-                    TotalQuantity = existingProduct.Quantity,
-                    UserId = req.UserId,
-                    IsPosted = false,
-                    OrderDetails = [new OrderDetail()
-                    {
-                        ItemId = existingProduct.Id,
-                        Name = existingProduct.Name,
-                        Description = existingProduct.Description,
-                        Price = existingProduct.Price,
-                        Quantity = existingProduct.Quantity,
-                        Image = existingProduct.Image
-                    }]
-                };
-
-                await _db.Orders.AddAsync(order);
-                await _db.SaveChangesAsync();
-
-                response.StatusCode = HttpStatusCode.Created;
-                response.IsSuccess = true;
-                response.Data = new GetOrderResponse()
-                {
-                    Id = order.Id,
-                    OrderNumber = order.OrderNumber,
-                    Date = order.Date,
-                    TotalPrice = order.TotalPrice,
-                    TotalQuantity = order.TotalQuantity,
-                    IsPosted = order.IsPosted,
-                    UserId = order.UserId
-                };
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = order.Id }, response);
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
             }
 
-            // If user has changed, update UserId
-            pendingOrder.UserId = req.UserId;
-            
-            // Add order detail for pending order
-            var pendingOrderDetails = pendingOrder.OrderDetails;
-            var newOrderDetail = new OrderDetail()
+            return Ok(new ApiResponse()
             {
-                Quantity = existingProduct.Quantity,
-                Description = existingProduct.Description,
-                Image = existingProduct.Image,
-                Name = existingProduct.Name,
-                Price = existingProduct.Price,
-                ItemId = existingProduct.Id
-            };
-
-            await _db.OrderDetails.AddAsync(newOrderDetail);
-            await _db.SaveChangesAsync();
-
-            response.StatusCode = HttpStatusCode.Created;
-            response.IsSuccess= true;
-            response.Data = new GetOrderResponse()
-            {
-                Id = pendingOrder.Id,
-                OrderNumber = pendingOrder.OrderNumber,
-                Date = pendingOrder.Date,
-                TotalPrice = pendingOrder.TotalPrice,
-                TotalQuantity = pendingOrder.TotalQuantity,
-                IsPosted = pendingOrder.IsPosted,
-                UserId = req.UserId,
-                OrderDetails = pendingOrderDetails.Select(od => new GetOrderDetailResponse()
-                {
-                    Quantity = od.Quantity,
-                    Description = od.Description,
-                    Image = od.Image,
-                    Name = od.Name,
-                    Price = od.Price,
-                    ProductId = od.ItemId,
-                    OrderDetailId = od.Id
-
-                })
-            };
-            
-            return Ok(response);
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -258,72 +144,36 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(UpdateAsync))]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderRequest req)
         {
-            ApiResponse response = new ApiResponse();
-
-            if (!ModelState.IsValid)
+            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
+            if (applicationUser == null)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-
-                foreach (var value in ModelState.Values)
+                return NotFound(new ApiResponse()
                 {
-                    var errorMessages = new List<string>();
-                    foreach (var error in value.Errors)
-                    {
-                        errorMessages.Add(error.ErrorMessage);
-                    }
-                    response.Messages = errorMessages;
-                }
-
-                return BadRequest(response);
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    Messages = ["User does not exists!"]
+                });
             }
 
-            if (id != req.OrderId || id == 0)
+            var result = await _orderService.UpdateAsync(id, req);
+
+            if (result.Data == null)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-                return BadRequest(response);
-            }
-
-            var existingOrder = await _db.Orders
-                .Include(e => e.OrderDetails)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (existingOrder == null)
-            {
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.IsSuccess = false;
-                return NotFound(response);
-            }
-
-            existingOrder.Date = req.Date ?? existingOrder.Date;
-
-            await _db.SaveChangesAsync();
-
-            // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
-            response.Data = new GetOrderResponse()
-            {
-                Id = existingOrder.Id,
-                OrderNumber = existingOrder.OrderNumber,
-                Date = existingOrder.Date,
-                TotalPrice = existingOrder.TotalPrice,
-                TotalQuantity = existingOrder.TotalQuantity,
-                IsPosted = existingOrder.IsPosted,
-                OrderDetails = existingOrder.OrderDetails.Select(ed => new GetOrderDetailResponse()
+                return BadRequest(new ApiResponse()
                 {
-                    Description = ed.Description,
-                    Image = ed.Image,
-                    Name = ed.Name,
-                    OrderDetailId = ed.Id,
-                    Price = ed.Price,
-                    ProductId = ed.ItemId,
-                    Quantity = ed.Quantity
-                })
-            };
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
 
-            response.StatusCode = HttpStatusCode.OK;
-            response.IsSuccess = true;
-            return Ok(response);
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -332,23 +182,25 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            ApiResponse response = new ApiResponse();
+            var result = await _orderService.DeleteAsync(id);
 
-            var pendingOrder = await _db.Orders.FirstOrDefaultAsync(p => p.Id == id);
-            if (pendingOrder != null)
+            if (result.Data == null)
             {
-                _db.Orders.Remove(pendingOrder);
-                await _db.SaveChangesAsync();
-
-                response.StatusCode = HttpStatusCode.OK;
-                response.IsSuccess = true;
-                response.Data = pendingOrder;
-                return Ok(response);
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
             }
 
-            response.StatusCode = HttpStatusCode.NotFound;
-            response.Messages = ["There is no pending Order!"];
-            return NotFound(response);
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
         }
         #endregion
 
@@ -356,81 +208,36 @@ namespace eListamAPI.Controllers
         [HttpPost("{id:int}/Place")]
         public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
         {
-            ApiResponse response = new ApiResponse();
-
-            if (!ModelState.IsValid)
+            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
+            if (applicationUser == null)
             {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.IsSuccess = false;
-
-                foreach (var value in ModelState.Values)
+                return NotFound(new ApiResponse()
                 {
-                    var errorMessages = new List<string>();
-                    foreach (var error in value.Errors)
-                    {
-                        errorMessages.Add(error.ErrorMessage);
-                    }
-                    response.Messages = errorMessages;
-                }
-
-                return BadRequest(response);
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    Messages = ["User does not exists!"]
+                });
             }
 
-            var existingOrder = await _db.Orders
-                .Include(e => e.OrderDetails)
-                .FirstOrDefaultAsync(o => o.Id == id && !o.IsPosted);
+            var result = await _orderService.PlaceOrderAsync(id, req);
 
-            if (existingOrder == null)
+            if (result.Data == null)
             {
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.IsSuccess = false;
-                response.Messages = ["Order does not exists!"];
-                return NotFound(response);
+                return BadRequest(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
             }
 
-            existingOrder.UserId = req.UserId;
-            existingOrder.IsPosted = true;
-
-            var existingOrderDetails = existingOrder.OrderDetails;
-
-            var newTransaction = new Transaction()
+            return Ok(new ApiResponse()
             {
-                Date = existingOrder.Date,
-                IsPosted = existingOrder.IsPosted,
-                OrderId = existingOrder.Id,
-                OrderNumber = existingOrder.OrderNumber,
-                TotalPrice = existingOrder.TotalPrice,
-                TotalQuantity = existingOrder.TotalQuantity,
-                UserId = req.UserId,
-                TransactionDetails = existingOrderDetails.Select(od => new TransactionDetail()
-                {
-                    Description = od.Description,
-                    Image = od.Image,
-                    Name = od.Name,
-                    Price = od.Price,
-                    ItemId = od.ItemId,
-                    Quantity = od.Quantity,
-                }).ToList()
-            };
-
-            await _db.Transactions.AddAsync(newTransaction);
-            await _db.SaveChangesAsync();
-
-            // Do not pass existingOrder directly to avoid circular reference issues when using .Include()
-            response.Data = new GetOrderResponse()
-            {
-                Id = existingOrder.Id,
-                OrderNumber = existingOrder.OrderNumber,
-                Date = existingOrder.Date,
-                TotalPrice = existingOrder.TotalPrice,
-                TotalQuantity = existingOrder.TotalQuantity,
-                IsPosted = existingOrder.IsPosted,
-                UserId = existingOrder.UserId
-            };
-
-            response.StatusCode = HttpStatusCode.OK;
-            response.IsSuccess = true;
-            return Ok(response);
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            }); 
         }
         #endregion
     }

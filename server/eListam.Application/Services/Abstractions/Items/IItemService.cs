@@ -1,7 +1,7 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Items;
 
-namespace eListam.Application.Services.Interface
+namespace eListam.Application.Services.Abstractions.Items
 {
     public interface IItemService
     {

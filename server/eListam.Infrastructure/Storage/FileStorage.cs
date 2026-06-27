@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using eListam.Application.Interfaces;
-using eListam.Domain.Models;
+﻿using eListam.Application.Services.Abstractions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
