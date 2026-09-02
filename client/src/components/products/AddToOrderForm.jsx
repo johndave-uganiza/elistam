@@ -25,34 +25,8 @@ function AddToOrderForm({
     }
   }, [showAddToOrderForm, setShowAddToOrderForm]);
 
-  // function handleAddProduct(e) {
-  //   e.preventDefault();
-  //   const formData = new FormData(e.target);
-  //   const name = formData.get("name");
-  //   const price = formData.get("price");
-  //   const quantity = formData.get("quantity");
-  //   const expirationDate = new Date(
-  //     formData.get("expirationDate"),
-  //   ).toLocaleDateString("en-US");
-
-  //   setProducts([
-  //     ...products,
-  //     {
-  //       name: name,
-  //       price: price,
-  //       quantity: quantity,
-  //       expirationDate: expirationDate,
-  //     },
-  //   ]);
-
-  //   bsModalRef.current.hide();
-  //   setShowAddToOrderForm(false);
-  // }
-
-  // const location = useLocation();
-  // const navigate = useNavigate();
   const [itemQuantity, setItemQuantity] = useState(1);
-  const { order, setOrder } = useContext(OrderContext);
+  const { order, setOrder, createOrder } = useContext(OrderContext);
 
   function handleConfirmAddToOrder(e) {
     e.preventDefault();
@@ -91,8 +65,8 @@ function AddToOrderForm({
     };
 
     setOrder(updatedOrder);
-    localStorage.setItem("order", JSON.stringify(updatedOrder));
     setShowAddToOrderForm(false);
+    createOrder(currentProduct);
     bsModalRef.current.hide();
   }
 

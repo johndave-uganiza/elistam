@@ -9,6 +9,6 @@ namespace eListam.Application.DTOs.Orders
         public DateTime? Date { get; set; }
         [Required]
         public string UserId { get; set; } = string.Empty;
-        public List<CreateOrderDetailRequest> OrderDetails { get; set; } = [];
+        public List<UpdateOrderDetailRequest> OrderDetails { get; set; } = [];
     }
 }

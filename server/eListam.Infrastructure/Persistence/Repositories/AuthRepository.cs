@@ -24,12 +24,14 @@ namespace eListam.Infrastructure.Persistence.Repositories
         }
         #endregion
 
-        #region Users
+        #region GetApplicationUsersAsync
         public async Task<List<ApplicationUser>> GetApplicationUsersAsync()
         {
             return await _db.ApplicationUsers.ToListAsync();
         }
+        #endregion
 
+        #region GetApplicationUserByIdAsync
         public async Task<ApplicationUser?> GetApplicationUserByIdAsync(string id)
         {
             return await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == id);

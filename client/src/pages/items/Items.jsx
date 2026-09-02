@@ -1,141 +1,182 @@
-import { useContext, useState } from "react";
-import { ProductContext } from "../../context/ProductContext";
-import ProductCard from "../../components/products/ProductCard";
-import { OrderContext } from "../../context/OrderContext";
-import SearchBar from "../../components/common/SearchBar";
-import SortDropdown from "../../components/common/SortDropdown";
-import ToastAlert from "../../components/common/ToastAlert";
+import { useContext, useState, useEffect } from "react";
 import ItemsToolbar from "../../components/items/ItemsToolbar";
-import AddToOrderForm from "../../components/products/AddToOrderForm";
-import { Modal } from "bootstrap";
-import AddItemForm from "../../components/items/AddItemForm";
-import EditItemForm from "../../components/items/EditItemForm";
-import DeleteItemForm from "../../components/items/DeleteItemForm";
-import ItemCard from "../../components/items/ItemCard";
 import { ItemContext } from "../../context/ItemContext";
+import ItemModal from "../../components/items/ItemModal";
+import ItemTable from "../../components/items/ItemTable";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 function Items() {
-  // const navigate = useNavigate();
-  const { items, setItems } = useContext(ItemContext);
+  const { items, createItem, getItems, updateItem, deleteItem } =
+    useContext(ItemContext);
 
-  // const [showToast, setShowToast] = useState(false);
-  const [showAddItemForm, setShowAddItemForm] = useState(false);
-  const [showEditItemForm, setShowEditItemForm] = useState(false);
-  const [showDeleteItemForm, setShowDeleteItemForm] = useState(false);
+  useEffect(() => {
+    getItems();
+  }, []);
+
   const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [currentItem, setCurrentItem] = useState(null);
-  const [itemDetailForm, setItemDetailForm] = useState({
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const [formData, setFormData] = useState({
     name: "",
-    price: "",
+    description: "",
+    price: 0,
     quantity: 0,
     expirationDate: "",
+    image: null,
   });
 
+  const resetFormData = () => {
+    setFormData({
+      name: "",
+      description: "",
+      price: 0,
+      quantity: 0,
+      expirationDate: "",
+      image: null,
+    });
+  };
+
   // Filter items
-  const filteredItems = items.filter((item) => item.name.includes(searchInput));
+  // const filteredItems = items.filter((item) => item.name.includes(searchInput));
 
-  // Sort items
-  const { name, price } = sortBy;
-  switch (sortBy) {
-    case price?.asc.value:
-      filteredItems.sort((current, next) => current.price - next.price);
-      break;
-    case price?.desc.value:
-      filteredItems.sort((current, next) => next.price - current.price);
-      break;
-    case name?.asc.value:
-      filteredItems.sort((current, next) =>
-        current.name.localeCompare(next.name),
-      );
-      break;
-    case name?.desc.value:
-      filteredItems.sort((current, next) =>
-        next.name.localeCompare(current.name),
-      );
-      break;
-    default:
-      break;
-  }
+  // // Sort items
+  // const { name, price } = sortBy;
+  // switch (sortBy) {
+  //   case price?.asc.value:
+  //     filteredItems.sort((current, next) => current.price - next.price);
+  //     break;
+  //   case price?.desc.value:
+  //     filteredItems.sort((current, next) => next.price - current.price);
+  //     break;
+  //   case name?.asc.value:
+  //     filteredItems.sort((current, next) =>
+  //       current.name.localeCompare(next.name),
+  //     );
+  //     break;
+  //   case name?.desc.value:
+  //     filteredItems.sort((current, next) =>
+  //       next.name.localeCompare(current.name),
+  //     );
+  //     break;
+  //   default:
+  //     break;
+  // }
 
-  function handleSearchInput(e) {
+  const handleSearchInput = (e) => {
     e.preventDefault();
     setSearchInput(e.target.value);
-  }
+  };
 
-  function handleAddItem() {
-    setShowAddItemForm(true);
-  }
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
 
-  function handleEditItem(item) {
-    setCurrentItem(item);
+    if (name == "image") {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
-    setItemDetailForm({
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      expirationDate: item.expirationDate || "",
-    });
+  const handleAddItem = () => {
+    setSelectedItem(null);
+    resetFormData();
+    setShowModal(true);
+  };
 
-    setShowEditItemForm(true);
-  }
+  const handleSubmit = async (formData) => {
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("Name", formData.name);
+      formDataToSend.append("Description", formData.description);
+      formDataToSend.append("Price", formData.price);
+      formDataToSend.append("Quantity", formData.quantity);
+      formDataToSend.append("File", formData.image);
 
-  function handleUpdateItem(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get("name");
-    const price = formData.get("price");
-    const quantity = formData.get("quantity");
-    const expirationDate = new Date(
-      formData.get("expirationDate"),
-    ).toLocaleDateString("en-US");
-
-    const updatedItems = items.map((item) => {
-      if (item.id === currentItem.id) {
-        return {
-          ...item,
-          name: name,
-          price: price,
-          quantity: quantity,
-          expirationDate: expirationDate,
-        };
+      let result;
+      if (selectedItem) {
+        result = await updateItem(selectedItem.id, formDataToSend);
+      } else {
+        result = await createItem(formDataToSend);
       }
 
-      return item;
+      if (result?.isSuccess) {
+        await getItems();
+        setShowModal(false);
+        Swal.fire({
+          title: `Item ${selectedItem ? "updated" : "created"} successfully!`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: true,
+        });
+      }
+
+      // toast.success("Success!");
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const handleEditItem = (item) => {
+    setSelectedItem(item);
+
+    setFormData({
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      quantity: item.quantity,
+      expirationDate: item.expirationDate,
+      image: null,
     });
 
-    setItems(updatedItems);
-    setShowEditItemForm(false);
-    localStorage.setItem("items", JSON.stringify(updatedItems));
-  }
+    setShowModal(true);
+  };
 
-  function handleDeleteItem(item) {
-    setCurrentItem(item);
+  const handleDeleteItem = async (item) => {
+    setSelectedItem(item);
+    try {
+      const result = await Swal.fire({
+        title: `Are you sure you want to delete ${item.name}?`,
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
 
-    // setItemDetailForm({
-    //   name: item.name,
-    //   price: item.price,
-    //   quantity: item.stock,
-    //   expirationDate: item.expirationDate || "",
-    // });
+      if (result.isConfirmed) {
+        const result = await deleteItem(item.id);
 
-    setShowDeleteItemForm(true);
-  }
+        if (result?.isSuccess) {
+          Swal.fire({
+            title: "Deleted!",
+            timer: 2000,
+            text: `${item.name} has been deleted.`,
+            icon: "success",
+          });
 
-  function handleConfirmDeleteItem(item) {
-    const newItems = items.filter((singleItem) => singleItem.id !== item.id);
-    setItems(newItems);
-    localStorage.setItem("items", JSON.stringify(newItems));
-    setShowDeleteItemForm(false);
-  }
+          await getItems();
+        }
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
-  function handleSortBy(e) {
+  const handleSortBy = (e) => {
     setSortBy(e.target.value);
-  }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   return (
     <div className="p-0">
-      <div className="container-fluid">
+      <div className="container">
         <div className="row p-3">
           <div className="p-0 d-flex justify-content-between align-items-center">
             <h3 className="">List of Items</h3>
@@ -144,55 +185,28 @@ function Items() {
         </div>
         <div className="row py-2 mb-2 p-3">
           <ItemsToolbar
-            handleAddItem={handleAddItem}
-            handleSearchInput={handleSearchInput}
-            handleSortBy={handleSortBy}
+            onAdd={handleAddItem}
+            onSearch={handleSearchInput}
+            onSort={handleSortBy}
             items={items}
             sortBy={sortBy}
           />
         </div>
-        <div className="row justify-content-between p-3 gap-5">
-          {filteredItems?.length > 0
-            ? filteredItems.map((item, index) => {
-                return (
-                  <ItemCard
-                    item={item}
-                    key={index}
-                    items={items}
-                    setItems={setItems}
-                    // setShowToast={setShowToast}
-                    // handleAddToBasket={handleAddToBasket}
-                    handleEditItem={handleEditItem}
-                    handleDeleteItem={handleDeleteItem}
-                  />
-                );
-              })
-            : null}
-        </div>
+        <ItemTable
+          items={items}
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
+        />
       </div>
-
-      <AddItemForm
-        showAddItemForm={showAddItemForm}
-        setShowAddItemForm={setShowAddItemForm}
-      />
-
-      <EditItemForm
-        showEditItemForm={showEditItemForm}
-        setShowEditItemForm={setShowEditItemForm}
-        currentItem={currentItem}
-        handleUpdateItem={handleUpdateItem}
-        itemDetailForm={itemDetailForm}
-        setItemDetailForm={setItemDetailForm}
-        setCurrentItem={setCurrentItem}
-      />
-
-      <DeleteItemForm
-        showDeleteItemForm={showDeleteItemForm}
-        setShowDeleteItemForm={setShowDeleteItemForm}
-        currentItem={currentItem}
-        setCurrentItem={setCurrentItem}
-        handleConfirmDeleteItem={handleConfirmDeleteItem}
-      />
+      {showModal && (
+        <ItemModal
+          onClose={handleCloseModal}
+          isEditing={!!selectedItem}
+          onSubmit={handleSubmit}
+          onChange={handleInputChange}
+          formData={formData}
+        />
+      )}
     </div>
   );
 }

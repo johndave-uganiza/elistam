@@ -3,7 +3,7 @@ const { name, price, defaultSortBy } = sortBy;
 function SortDropdown({ handleSortBy, sortBy }) {
   return (
     <select
-      className="form-select form-select-sm"
+      className="form-select"
       onChange={handleSortBy}
       // value={sortBy || ""}
     >

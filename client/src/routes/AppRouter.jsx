@@ -3,7 +3,7 @@ import Home from "../pages/home/Home";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Login from "../pages/auth/Login";
 import Orders from "../pages/orders/Orders";
-import ProductList from "../pages/products/ProductList";
+import Products from "../pages/products/Products";
 import { ProductProvider } from "../context/ProductContext";
 import { OrderProvider } from "../context/OrderContext";
 import AddToOrder from "../pages/orders/AddToOrder";
@@ -12,6 +12,7 @@ import Transactions from "../pages/transactions/Transactions";
 import { ItemProvider } from "../context/ItemContext";
 import { TransactionProvider } from "../context/TransactionContext";
 import ProtectedRoute from "./ProtectedRoute";
+import { AuthProvider } from "../context/AuthContext";
 
 function AppRouter() {
   return (
@@ -22,7 +23,6 @@ function AppRouter() {
       <Route
         path="/dashboard"
         element={
-          // <AuthPage>
           <ProtectedRoute>
             <TransactionProvider>
               <ItemProvider>
@@ -30,7 +30,6 @@ function AppRouter() {
               </ItemProvider>
             </TransactionProvider>
           </ProtectedRoute>
-          // </AuthPage>
         }
       />
 
@@ -50,7 +49,7 @@ function AppRouter() {
         element={
           <ProductProvider>
             <OrderProvider>
-              <ProductList />
+              <Products />
             </OrderProvider>
           </ProductProvider>
         }

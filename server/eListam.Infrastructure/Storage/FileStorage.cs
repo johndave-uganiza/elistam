@@ -12,34 +12,38 @@ namespace eListam.Infrastructure.Storage
             _env = env;
         }
 
-        public async Task SaveImageAsync(IFormFile image)
+        public async Task<string> SaveImageAsync(IFormFile image)
         {
-            if (image != null)
+            if (image == null)
             {
-                // Combine wwwroot and images path --> wwwroot/images
-                var folderPath = Path.Combine(_env.WebRootPath, "images");
-                // Create images folder if it doesn't exists
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-
-                // Combine images path and image filename
-                var filePath = Path.Combine(folderPath, image.FileName);
-
-                // Check if the file path exists
-                if (System.IO.File.Exists(filePath))
-                {
-                    // Delete file path to create new one after
-                    System.IO.File.Delete(filePath);
-                }
-
-                // Upload file
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await image.CopyToAsync(stream);
-                }
+                return string.Empty;
             }
+
+            // Combine wwwroot and images path --> wwwroot/images
+            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            // Create images folder if it doesn't exists
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            // Combine images path and image filename
+            var filePath = Path.Combine(folderPath, image.FileName);
+
+            // Check if the file path exists
+            if (File.Exists(filePath))
+            {
+                // Delete file path to create new one after
+                File.Delete(filePath);
+            }
+
+            // Upload file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            return "images/" + image.FileName;
         }
     }
 }

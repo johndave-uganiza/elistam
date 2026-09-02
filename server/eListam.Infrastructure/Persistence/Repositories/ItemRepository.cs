@@ -18,14 +18,14 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region GetAsync
         public async Task<IEnumerable<Item>> GetAsync()
         {
-            return await _db.Items.AsNoTracking().ToListAsync();
+            return await _db.Items.OrderByDescending(o => o.Id).AsNoTracking().ToListAsync();
         }
         #endregion
 
         #region GetByIdAsync
         public async Task<Item?> GetByIdAsync(int id)
         {
-            return await _db.Items.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
+            return await _db.Items.FirstOrDefaultAsync(item => item.Id == id);
         }
         #endregion
 

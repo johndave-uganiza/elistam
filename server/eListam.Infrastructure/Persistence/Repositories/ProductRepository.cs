@@ -25,7 +25,7 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region GetByIdAsync
         public async Task<Item?> GetByIdAsync(int id)
         {
-            return await _db.Items.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
+            return await _db.Items.FirstOrDefaultAsync(item => item.Id == id);
         }
         #endregion
     }

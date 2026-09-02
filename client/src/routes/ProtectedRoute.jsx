@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
-  const isAuthenticated = localStorage.getItem("auth");
+  const isAuthenticated = localStorage.getItem("token");
   const location = useLocation();
 
   if (!isAuthenticated) {

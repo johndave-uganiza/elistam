@@ -9,7 +9,7 @@ namespace eListam.Application.DTOs.Transactions
     {
         [Required]
         public int OrderId { get; set; }
-        public bool IsPosted { get; set; }
+        public bool IsCompleted { get; set; }
         [Required]
         public string UserId { get; set; } = string.Empty;
     }

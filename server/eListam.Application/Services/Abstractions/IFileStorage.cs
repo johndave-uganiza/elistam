@@ -8,6 +8,6 @@ namespace eListam.Application.Services.Abstractions
 {
     public interface IFileStorage
     {
-        public Task SaveImageAsync(IFormFile image);
+        public Task<string> SaveImageAsync(IFormFile image);
     }
 }

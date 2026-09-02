@@ -26,9 +26,9 @@ namespace eListamAPI.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAsync()
         {
-            var applicationUsers = await _authService.GetApplicationUsersAsync();
+            var result = await _authService.GetApplicationUsersAsync();
 
-            if (applicationUsers == null)
+            if (result == null)
             {
                 return NotFound(new ApiResponse()
                 {
@@ -42,7 +42,7 @@ namespace eListamAPI.Controllers
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
-                Data = applicationUsers,
+                Data = result,
                 Messages = []
             });
         }
@@ -54,9 +54,9 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
             // Find user by email
-            var applicationUser = await _authService.LoginAsync(request);
+            var result = await _authService.LoginAsync(request);
 
-            if (applicationUser == null)
+            if (result == null)
             {
                 return NotFound(new ApiResponse()
                 {
@@ -70,7 +70,7 @@ namespace eListamAPI.Controllers
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
-                Data = applicationUser,
+                Data = result,
                 Messages = []
             });
         }

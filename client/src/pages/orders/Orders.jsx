@@ -12,7 +12,7 @@ function Orders() {
   const [currentOrderDetail, setCurrentOrderDetail] = useState(null);
   const { order, setOrder } = useContext(OrderContext);
   const { transactionCtx, setTransactionCtx } = useContext(TransactionContext);
-  const orderDetails = order?.details || [];
+  const orderDetails = order?.orderDetails || [];
 
   function getTotalOrderQuantity() {
     return orderDetails.reduce(
@@ -118,7 +118,7 @@ function Orders() {
   }
 
   return (
-    <div className="container-fluid flex-fill d-flex flex-column py-3">
+    <div className="container flex-fill d-flex flex-column py-3">
       <div className="row flex-fill">
         <div className="col-12 d-flex flex-column">
           <div className="card bg-primary-subtle flex-fill">

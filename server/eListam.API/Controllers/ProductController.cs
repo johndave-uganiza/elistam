@@ -2,6 +2,7 @@
 using System.Net;
 using eListam.API.Common;
 using eListam.Application.Services.Abstractions.Products;
+using Microsoft.AspNetCore.Authorization;
 
 namespace eListamAPI.Controllers
 {
@@ -21,6 +22,7 @@ namespace eListamAPI.Controllers
         }
         #endregion
 
+        [AllowAnonymous]
         #region GetAsync
         [HttpGet]
         [ActionName(nameof(GetAsync))]

@@ -48,13 +48,12 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetItemResponse>> CreateAsync(CreateItemRequest req)
         {
             var result = new Result<GetItemResponse>();
+            string? imagePath = null;
 
-            if (req.File == null)
-                return result.Failure("Image is required!");
-
-            await _storageRepo.SaveImageAsync(req.File); 
-
-            var item = await _itemRepo.CreateAsync(MapItem(req));
+            if (req.File != null)
+                imagePath = await _storageRepo.SaveImageAsync(req.File);
+            
+            var item = await _itemRepo.CreateAsync(MapItem(req, imagePath));
 
             return result.Success(MapGetItemResponse(item));
         }
@@ -64,6 +63,7 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetItemResponse>> UpdateAsync(int id, UpdateItemRequest req)
         {
             var result = new Result<GetItemResponse>();
+            string? imagePath = null;
 
             var item = await _itemRepo.GetByIdAsync(id);
 
@@ -74,7 +74,11 @@ namespace eListam.Application.Services.Implementations
             item.Description = req.Description;
             item.Price = req.Price;
             item.Quantity = req.Quantity;
-            item.Image = req.File?.FileName;
+
+            if (req.File != null)
+                imagePath = await _storageRepo.SaveImageAsync(req.File);
+
+            item.Image = imagePath ?? item.Image;
 
             await _itemRepo.SaveChangesAsync();
             
@@ -117,7 +121,7 @@ namespace eListam.Application.Services.Implementations
         #endregion
 
         #region MapItem
-        private Item MapItem(CreateItemRequest request)
+        private Item MapItem(CreateItemRequest request, string? imagePath)
         {
             return new Item()
             {
@@ -125,7 +129,7 @@ namespace eListam.Application.Services.Implementations
                 Description = request.Description,
                 Price = request.Price,
                 Quantity = request.Quantity,
-                Image = request.File?.Name,
+                Image = imagePath,
                 UserId = request.UserId,
             };
         }

@@ -1,62 +1,91 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
+import { API_BASE_URL } from "../utilities/constants";
 
 const ItemContext = createContext(null);
 
-// const BASE_URL = "";
-// const jwtToken = "";
-
 function ItemProvider({ children }) {
-  const [items, setItems] = useState(
-    JSON.parse(localStorage.getItem("items")) || [],
-  );
+  const token = localStorage.getItem("token");
+  const [items, setItems] = useState([]);
 
-  function fetchProducts() {
-    fetch("https://dummyjson.com/products", {
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        // Save items to local storage only if data doesn't exist locally
-        if (!JSON.parse(localStorage.getItem("items"))) {
-          const result = res.products.map((item) => ({
-            id: item.id,
-            name: item.title,
-            price: item.price,
-            quantity: item.stock,
-            image: item.thumbnail,
-          }));
-          setItems(result);
-          localStorage.setItem("items", JSON.stringify(result));
-        }
-      })
-      .catch((error) => console.error(error));
-  }
+  const getItems = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/item`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-  // function fetchProducts() {
-  //   fetch(`${BASE_URL}api/Item`, {
-  //     method: "GET",
-  //     headers: {
-  //       Authorization: `Bearer ${jwtToken}`,
-  //       "Content-Type": "application/json",
-  //     },
-  //   })
-  //     .then((res) => res.json())
-  //     .then((res) => {
-  //       // Save items to local storage only if data doesn't exist locally
-  //       if (!JSON.parse(localStorage.getItem("items"))) {
-  //         setItems(res.data);
-  //         localStorage.setItem("items", JSON.stringify(res.data));
-  //       }
-  //     })
-  //     .catch((error) => console.error(error));
-  // }
+      if (response.ok) {
+        const result = await response.json();
+        const items = result.data.map((item) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+        }));
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+        setItems(items);
+      }
+    } catch (error) {
+      console.error("API error:", error);
+    }
+  };
+
+  const createItem = async (formData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/Item`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("API error:", error);
+    }
+  };
+
+  const updateItem = async (id, updatedItem) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/item/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: updatedItem,
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("API error:", error);
+    }
+  };
+
+  const deleteItem = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/item/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("DELETE error:", error);
+    }
+  };
 
   return (
-    <ItemContext.Provider value={{ items, setItems }}>
+    <ItemContext.Provider
+      value={{ items, createItem, getItems, updateItem, deleteItem }}
+    >
       {children}
     </ItemContext.Provider>
   );

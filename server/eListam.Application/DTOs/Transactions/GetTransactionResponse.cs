@@ -11,7 +11,7 @@ namespace eListam.Application.DTOs.Transactions
         public DateTime Date { get; set; }
         public double TotalPrice { get; set; }
         public double TotalQuantity { get; set; }
-        public bool IsPosted { get; set; }
+        public bool IsCompleted { get; set; }
         public string UserId { get; set; } = string.Empty;
         public IEnumerable<GetTransactionDetailResponse>? TransactionDetails { get; set; }
     }

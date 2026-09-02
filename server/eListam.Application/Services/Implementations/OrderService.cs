@@ -1,5 +1,6 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Orders;
+using eListam.Application.Services.Abstractions.Auth;
 using eListam.Application.Services.Abstractions.Items;
 using eListam.Application.Services.Abstractions.Orders;
 using eListam.Application.Services.Abstractions.Transactions;
@@ -12,15 +13,20 @@ namespace eListam.Application.Services.Implementations
         private readonly IOrderRepository _orderRepo;
         private readonly IItemRepository _itemRepo;
         private readonly ITransactionRepository _transactionRepo;
+        private readonly IAuthService _authService;
+        private readonly string _userId;
 
         #region Constructor
         public OrderService(IOrderRepository orderRepo,
             IItemRepository itemRepo,
-            ITransactionRepository transactionRepo)
+            ITransactionRepository transactionRepo,
+            IAuthService authService)
         {
             _orderRepo = orderRepo;
             _itemRepo = itemRepo;
             _transactionRepo = transactionRepo;
+            _authService = authService;
+            _userId = _authService.GetUserId() ?? string.Empty;
         }
         #endregion
 
@@ -28,8 +34,11 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<IEnumerable<GetOrderResponse>>> GetAsync()
         {
             var result = new Result<IEnumerable<GetOrderResponse>>();
-
+           
             var orders = await _orderRepo.GetAsync();
+
+            if (orders == null)
+                return result.Failure($"There are no pending orders.");
 
             return result.Success(orders.Select(MapGetOrderResponse));
         }
@@ -53,14 +62,17 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> CreateAsync(CreateOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
+            var _userId = _authService.GetUserId();
 
+            if (string.IsNullOrEmpty(_userId))
+                return result.Failure($"User does not exist!");
+            
             var item = await _itemRepo.GetByIdAsync(req.OrderDetail.ProductId);
 
             if(item == null || item.Quantity <= 0)
                 return result.Failure($"{nameof(Order)} does not exist!");
-
+            
             var orders = await _orderRepo.GetAsync();
-
             var existingOrder = orders.FirstOrDefault(o => o.IsCompleted == true);
 
             // Create new order if an order doesn't exist
@@ -68,10 +80,10 @@ namespace eListam.Application.Services.Implementations
             {
                 // Create new Order
                 var order = await _orderRepo.CreateAsync(MapOrder(item, req));
-                return result.Failure($"Pending order does not exist!");
+                return result.Success(MapGetOrderResponse(order), $"New Order created successfully!");
             }
 
-            existingOrder.UserId = req.UserId;
+            existingOrder.UserId = _userId;
 
             // Add order detail for an existing order
             existingOrder.OrderDetails.Add(new OrderDetail()
@@ -183,10 +195,10 @@ namespace eListam.Application.Services.Implementations
         {
             return new Order()
             {
-                UserId = req.UserId,
+                UserId = _userId,
                 TotalQuantity = 0,
                 OrderNumber = Guid.NewGuid().ToString(),
-                Date = req.Date ?? DateTime.Now,
+                Date = req.Date ?? DateTime.UtcNow,
                 IsCompleted = false,
                 OrderDetails = [new OrderDetail()
                     {
@@ -207,7 +219,7 @@ namespace eListam.Application.Services.Implementations
             return new Transaction()
             {
                 Date = order.Date,
-                IsPosted = order.IsCompleted,
+                IsCompleted = order.IsCompleted,
                 OrderId = order.Id,
                 OrderNumber = order.OrderNumber,
                 TotalPrice = order.TotalPrice,
@@ -233,7 +245,7 @@ namespace eListam.Application.Services.Implementations
             return new GetOrderResponse()
             {
                 Id = order.Id,
-                IsPosted = order.IsCompleted,
+                IsCompleted = order.IsCompleted,
                 OrderNumber = order.OrderNumber,
                 TotalQuantity = order.TotalQuantity,
                 UserId = order.UserId,

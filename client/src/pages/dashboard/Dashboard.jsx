@@ -40,18 +40,18 @@ function Dashboard() {
 
   return (
     <div
-      className="container-fluid"
+      className="container"
       // style={{
       //   background: "linear-gradient(135deg, #0A2540, #1A3A60, #32607F)",
       // }}
     >
       <div className="row px-3 mt-2">
-        <div className="alert alert-success bg-success-subtle border border-success text-dark d-md-flex align-items-center">
+        <div className="alert alert-success bg-white border border-success text-dark d-md-flex align-items-center">
           <i className="bi bi-check-circle-fill text-success me-1"></i>
           <span className="me-1">
             Everything is looking good. Keep up the good work!
           </span>
-          <i className="bi bi-hand-thumbs-up-fill text-warning"></i>
+          {/* <i className="bi bi-hand-thumbs-up-fill text-warning"></i> */}
         </div>
       </div>
       <div className="row px-3 pb-4">

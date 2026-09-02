@@ -18,7 +18,7 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region GetAsync
         public async Task<IEnumerable<Order>> GetAsync()
         {
-            return await _db.Orders.AsNoTracking().ToListAsync();
+            return await _db.Orders.Include(o => o.OrderDetails).AsNoTracking().ToListAsync();
         }
         #endregion
 
@@ -26,7 +26,6 @@ namespace eListam.Infrastructure.Persistence.Repositories
         public async Task<Order?> GetByIdAsync(int id)
         {
             return await _db.Orders
-                .AsNoTracking()
                 .Include(o => o.OrderDetails)
                 .FirstOrDefaultAsync(item => item.Id == id);
         }

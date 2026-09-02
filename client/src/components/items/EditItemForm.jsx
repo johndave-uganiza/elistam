@@ -62,6 +62,21 @@ function EditItemForm({
                 ></input>
               </div>
               <div className="mb-3">
+                <label className="form-label">Description</label>
+                <input
+                  name="description"
+                  className="form-control"
+                  type="text"
+                  value={itemDetailForm?.description}
+                  onChange={(e) => {
+                    setItemDetailForm({
+                      ...itemDetailForm,
+                      [e.target.name]: e.target.value,
+                    });
+                  }}
+                ></input>
+              </div>
+              <div className="mb-3">
                 <label className="form-label">Price (USD)</label>
                 <input
                   name="price"

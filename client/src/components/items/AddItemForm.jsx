@@ -2,10 +2,14 @@ import { useContext, useEffect, useRef } from "react";
 import { Modal } from "bootstrap";
 import { ItemContext } from "../../context/ItemContext";
 
-function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
+function AddItemForm({
+  showAddItemForm,
+  setShowAddItemForm,
+  setItemDetailForm,
+}) {
   const modalRef = useRef(null);
   const bsModalRef = useRef(null);
-  const { items, setItems } = useContext(ItemContext);
+  const { items, setItems, createItem } = useContext(ItemContext);
 
   useEffect(() => {
     if (!modalRef.current) return;
@@ -30,23 +34,20 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
     const expirationDate = new Date(
       formData.get("expirationDate"),
     ).toLocaleDateString("en-US");
-    const image = formData.get("image");
+    const image = formData.get("file");
 
-    const newItems = [
-      ...items,
-      {
-        name: name,
-        price: price,
-        quantity: quantity,
-        expirationDate: expirationDate,
-        image: URL.createObjectURL(image),
-      },
-    ];
-
+    let newItem = {
+      name: name,
+      price: price,
+      quantity: quantity,
+      expirationDate: expirationDate,
+      image: URL.createObjectURL(image),
+    };
+    const newItems = [...items, newItem];
     setItems(newItems);
 
-    localStorage.setItem("items", JSON.stringify(newItems));
-
+    createItem(formData);
+    setItemDetailForm(null);
     bsModalRef.current.hide();
     setShowAddItemForm(false);
   }
@@ -111,7 +112,7 @@ function AddItemForm({ showAddItemForm, setShowAddItemForm }) {
               </div>
               <div className="mb-3">
                 <label className="form-label">Image:</label>
-                <input type="file" className="form-control" name="image" />
+                <input type="file" className="form-control" name="file" />
               </div>
             </form>
           </div>

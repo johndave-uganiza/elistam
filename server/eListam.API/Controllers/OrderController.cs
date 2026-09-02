@@ -106,8 +106,8 @@ namespace eListamAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest req)
         {
-            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
-            if (applicationUser == null)
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
             {
                 return NotFound(new ApiResponse()
                 {
@@ -117,6 +117,7 @@ namespace eListamAPI.Controllers
                 });
             }
 
+            //req.UserId = userId;
             var result = await _orderService.CreateAsync(req);
 
             if (result.Data == null)
@@ -131,7 +132,7 @@ namespace eListamAPI.Controllers
 
             return Ok(new ApiResponse()
             {
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = HttpStatusCode.Created,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
                 Messages = [result.Message]
@@ -144,8 +145,8 @@ namespace eListamAPI.Controllers
         [ActionName(nameof(UpdateAsync))]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderRequest req)
         {
-            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
-            if (applicationUser == null)
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
             {
                 return NotFound(new ApiResponse()
                 {
@@ -155,6 +156,7 @@ namespace eListamAPI.Controllers
                 });
             }
 
+            req.UserId = userId;
             var result = await _orderService.UpdateAsync(id, req);
 
             if (result.Data == null)
@@ -208,8 +210,8 @@ namespace eListamAPI.Controllers
         [HttpPost("{id:int}/Place")]
         public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
         {
-            var applicationUser = await _authService.GetApplicationUserByIdAsync(req.UserId);
-            if (applicationUser == null)
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
             {
                 return NotFound(new ApiResponse()
                 {
@@ -219,6 +221,7 @@ namespace eListamAPI.Controllers
                 });
             }
 
+            req.UserId = userId;
             var result = await _orderService.PlaceOrderAsync(id, req);
 
             if (result.Data == null)

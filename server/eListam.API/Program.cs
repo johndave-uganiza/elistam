@@ -20,6 +20,8 @@ using eListam.Infrastructure.Persistence.Repositories;
 using eListam.Infrastructure.Seeders;
 using eListam.Infrastructure.Storage;
 using eListam.Application.Services.Abstractions.Auth;
+using eListam.Application.Services.Abstractions.Orders;
+using eListam.Application.Services.Abstractions.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +46,8 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IDummyProductExternalService, DummyProductExternalService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 #endregion
 
@@ -51,9 +55,13 @@ builder.Services.AddScoped<IFileStorage, FileStorage>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 #endregion
 
 #region Auth Services
+builder.Services.AddHttpContextAccessor();
+
 // Get JWT secret key from appsettings.json
 var key = builder.Configuration.GetValue<string>("Jwt:SecretKey");
 
@@ -156,7 +164,10 @@ app.UseExceptionHandler(appBuilder =>
     });
 });
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
+
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
 app.UseAuthentication();
 app.UseAuthorization();

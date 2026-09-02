@@ -1,28 +1,30 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import Background from "../../components/common/Background";
-
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContext";
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname;
+  const { login, isAuthenticated } = useContext(AuthContext);
 
-  function handleLogin(e) {
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from || "/dashboard");
+    }
+  }, [isAuthenticated, navigate, from]);
+
+  async function handleLogin(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const admin = {
-      email: "admin@test.com",
-      password: "Admin123",
-    };
 
-    if (email === admin.email && password === admin.password) {
-      localStorage.setItem("auth", true);
-    }
-
-    const auth = localStorage.getItem("auth");
-    if (auth) {
-      navigate(from || "/dashboard");
+    try {
+      await login({
+        email: formData.get("email"),
+        password: formData.get("password"),
+      });
+    } catch (error) {
+      console.error("Login error:", error);
     }
   }
 
@@ -62,7 +64,7 @@ function LoginPage() {
               <label htmlFor="password">Password</label>
             </div>
             <div className="mt-5">
-              <button type="submit" className="btn btn-success fw-bold w-100">
+              <button type="submit" className="btn btn-primary fw-bold w-100">
                 Login
               </button>
             </div>
