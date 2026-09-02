@@ -10,7 +10,7 @@ Work-in-Progress (WIP): eListam will be a Point Of Sale (POS) web application to
 - Implemented Clean Architecture, Dependency Injection, Repository Pattern, and Results Pattern for scalability and maintainability
 - Utilized JWT Authentication
 - Added Global Exception Handler
-- Created feature branch called "main-api-integration" for API integration changes
+- [Ongoing API integration and UI/UX improvements](https://github.com/johndave-uganiza/elistam/tree/main-api-integration-feature)
 
 ---
 
