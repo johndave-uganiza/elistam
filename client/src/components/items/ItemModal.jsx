@@ -45,7 +45,7 @@ function ItemModal({ onClose, isEditing, onSubmit, onChange, formData }) {
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content">
             <div className="modal-header bg-secondary-subtle">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+              <h1 className="modal-title fs-5">
                 {isEditing ? "Edit Item" : "Add Item"}
               </h1>
               <button

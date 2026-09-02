@@ -30,7 +30,7 @@ function Header() {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className={`collapse navbar-collapse fw-medium`} id="mainNav">
-          <ul className="navbar-nav me-auto">
+          <ul className="navbar-nav me-auto gap-2">
             <li className="nav-item">
               <NavLink className="nav-link" to="/">
                 <i className="bi bi-shop-window"></i>
