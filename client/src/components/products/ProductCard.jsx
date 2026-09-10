@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 
-function ProductCard({ product, onOrder }) {
+function ProductCard({ product, onOrderProduct }) {
   const navigate = useNavigate();
   // const { name, price, image, quantity } = product;
   const location = useLocation();
@@ -78,39 +78,42 @@ function ProductCard({ product, onOrder }) {
           className="align-self-center p-3"
           style={{
             height: "180px",
-            objectFit: "cover",
-            transition: "transform 0.3s ease",
+            // objectFit: "cover",
+            // transition: "transform 0.3s ease",
           }}
         />
 
-        <div className="card-body align-content-end">
-          <h5 className="card-title">{product.name}</h5>
-          <p className="card-text text-black-50">
-            {product.description.substring(0, 50)}...
-          </p>
-          <p className="card-text d-flex align-items-center gap-4">
-            <span>
-              Price: <strong>${product.price.toFixed(2)}</strong>
-            </span>
-            <span
-              className={
-                "badge bg-warning-subtle border border-warning text-black fw-medium"
-              }
+        <div className="card-body d-flex flex-column justify-content-between gap-4">
+          <div>
+            <h4 className="card-title">{product.name}</h4>
+            <p className="card-text text-black-50">
+              {product.description.substring(0, 70)}...
+            </p>
+          </div>
+          <div>
+            <p className="card-text d-flex align-items-center gap-4 fs-5">
+              <span>
+                Price: <strong>${product.price.toFixed(2)}</strong>
+              </span>
+              <span
+                className={
+                  "badge bg-warning-subtle border border-warning text-black fw-medium"
+                }
+              >
+                In Stock - <strong>{product.quantity}</strong>
+              </span>
+            </p>
+            <button
+              onClick={() => {
+                isAuthenticated
+                  ? onOrderProduct(product)
+                  : navigate("/login", { state: { from: location } });
+              }}
+              className="btn btn-success form-control fw-medium "
             >
-              In Stock - <strong>{product.quantity}</strong>
-            </span>
-          </p>
-
-          <button
-            onClick={() => {
-              isAuthenticated
-                ? onOrder(product)
-                : navigate("/login", { state: { from: location } });
-            }}
-            className="btn btn-success form-control fw-medium"
-          >
-            <i className="bi bi-bag-plus"></i> Order Product
-          </button>
+              <i className="bi bi-bag-plus"></i> Order Product
+            </button>
+          </div>
         </div>
       </div>
     </div>

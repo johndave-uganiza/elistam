@@ -1,6 +1,13 @@
 import { toast } from "react-toastify";
 
-function ItemModal({ onClose, isEditing, onSubmit, onChange, formData }) {
+function ItemModal({
+  onClose,
+  isEditing,
+  onSubmit,
+  onChange,
+  formData,
+  isLoading,
+}) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -144,6 +151,14 @@ function ItemModal({ onClose, isEditing, onSubmit, onChange, formData }) {
                 type="submit"
                 className="btn btn-primary"
               >
+                {isLoading ? (
+                  <div
+                    className="spinner-border spinner-border-sm me-1"
+                    role="status"
+                  >
+                    {/* <span className="visually-hidden">Loading...</span> */}
+                  </div>
+                ) : null}
                 {isEditing ? "Update" : "Add"}
               </button>
             </div>

@@ -2,51 +2,18 @@ import { useContext, useState } from "react";
 import { Modal } from "bootstrap";
 import { OrderContext } from "../../context/OrderContext";
 
-function ProductModal({ onClose, selectedProduct }) {
-  const [itemQuantity, setItemQuantity] = useState(1);
-  const { order, setOrder, createOrder } = useContext(OrderContext);
-
-  function handleConfirmAddToOrder(e) {
-    e.preventDefault();
-
-    const transactions = JSON.parse(localStorage.getItem("transactions"));
-
-    const id = transactions ? transactions.length + 1 : 1;
-
-    let details;
-    if (
-      order.details.length > 0 &&
-      order.details.some((item) => item.id === selectedProduct.id)
-    ) {
-      details = order.details.map((item) => {
-        if (item.id === selectedProduct.id) {
-          return {
-            ...item,
-            quantity: Number(item.quantity) + Number(itemQuantity),
-          };
-        }
-        return item;
-      });
-    } else {
-      details = [
-        ...order.details,
-        {
-          ...selectedProduct,
-          quantity: itemQuantity,
-        },
-      ];
-    }
-
-    const updatedOrder = {
-      id: id,
-      details: details,
-    };
-
-    setOrder(updatedOrder);
-    setShowAddToOrderForm(false);
-    createOrder(selectedProduct);
-    // bsModalRef.current.hide();
-  }
+function ProductModal({
+  onClose,
+  selectedProduct,
+  onSubmit,
+  order,
+  onClickOrderQty,
+  onChangeOrderQty,
+}) {
+  const { orderDetail } = order;
+  const handleSubmit = () => {
+    onSubmit(order);
+  };
 
   return (
     <>
@@ -56,8 +23,8 @@ function ProductModal({ onClose, selectedProduct }) {
         tabIndex="-1"
         style={{ display: "block" }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-lg">
-          <form onSubmit={handleConfirmAddToOrder}>
+        <div className="modal-dialog modal-dialog-centered">
+          <form onSubmit={handleSubmit}>
             <div className="modal-content">
               <div className="modal-header bg-secondary-subtle">
                 <h1 className="modal-name fs-5">Product</h1>
@@ -91,24 +58,18 @@ function ProductModal({ onClose, selectedProduct }) {
                       <hr />
                       <div className="mb-3">
                         {/* <strong>Product Name:</strong> */}
-                        <p className="card-text mb-0 small">
-                          {selectedProduct?.name}
-                        </p>
+                        <h5>{selectedProduct?.name}</h5>
                       </div>
 
-                      <div className="d-flex flex-column mb-4 w-75">
-                        <p className="small">
-                          Price: ${selectedProduct?.price}
+                      <div className="d-flex flex-column mb-4">
+                        <p className="fs-5">Price: ${selectedProduct?.price}</p>
+                        <p className="fs-5">
+                          Order Quantity: {orderDetail.quantity}
                         </p>
-                        <p className="small">Quantity: {itemQuantity}</p>
                         <div className="input-group mb-3">
                           <button
-                            onClick={() => {
-                              setItemQuantity((prev) =>
-                                prev > 1 ? prev - 1 : prev,
-                              );
-                            }}
-                            className="btn btn-sm btn-success"
+                            onClick={() => onClickOrderQty(-1)}
+                            className="btn btn-dark fw-bold"
                             type="button"
                           >
                             -
@@ -116,19 +77,18 @@ function ProductModal({ onClose, selectedProduct }) {
                           <input
                             type="number"
                             className="form-control form-control-sm text-center"
-                            onChange={(e) => setItemQuantity(e.target.value)}
-                            value={itemQuantity}
-                            onBlur={() => {
-                              if (!itemQuantity || itemQuantity < 1) {
-                                setItemQuantity(1);
-                              }
-                            }}
+                            style={{ maxWidth: "80px" }}
+                            onChange={onChangeOrderQty}
+                            value={orderDetail.quantity}
+                            // onBlur={() => {
+                            //   if (!order.quantity || order.quantity < 1) {
+                            //     setQuantity(1);
+                            //   }
+                            // }}
                           />
                           <button
-                            onClick={() => {
-                              setItemQuantity((prev) => prev + 1);
-                            }}
-                            className="btn btn-sm btn-success"
+                            onClick={() => onClickOrderQty(1)}
+                            className="btn btn-dark fw-bold"
                             type="button"
                           >
                             +
@@ -141,7 +101,9 @@ function ProductModal({ onClose, selectedProduct }) {
                           Total:{" "}
                           <strong>
                             $
-                            {(itemQuantity * selectedProduct?.price).toFixed(2)}
+                            {(
+                              orderDetail.quantity * selectedProduct?.price
+                            ).toFixed(2)}
                           </strong>
                         </p>
                       </div>

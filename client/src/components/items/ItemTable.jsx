@@ -3,8 +3,8 @@ import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 function ItemTable({ items, onEdit, onDelete }) {
   return (
     <div className="table-responsive-sm">
-      <table className="table table-hover">
-        <thead className="table-dark">
+      <table className="table table-hover table-bordered">
+        <thead className="table-secondary">
           <tr>
             <th>Image</th>
             <th>Name</th>
@@ -21,7 +21,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 <tr key={index}>
                   <td>
                     <img
-                      src={`${item.image.substring(0, 6) === "images" ? API_BASE_URL.concat("/") : ""}${item.image || IMAGE_PLACEHOLDER_URL}`}
+                      src={`${item.image?.substring(0, 6) === "images" ? API_BASE_URL.concat("/") : ""}${item.image || IMAGE_PLACEHOLDER_URL}`}
                       onError={(e) => {
                         e.target.src = IMAGE_PLACEHOLDER_URL;
                       }}

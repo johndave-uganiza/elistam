@@ -14,7 +14,7 @@ function Header() {
       // }}
       // data-bs-theme="dark"
     >
-      <div className="container-fluid px-5">
+      <div className="container-fluid">
         <NavLink className="navbar-brand fw-medium" to="/">
           eListam
         </NavLink>
@@ -31,12 +31,6 @@ function Header() {
         </button>
         <div className={`collapse navbar-collapse fw-medium`} id="mainNav">
           <ul className="navbar-nav me-auto gap-2">
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/">
-                <i className="bi bi-shop-window"></i>
-                <span className="ms-1">Home</span>
-              </NavLink>
-            </li>
             <li className="nav-item">
               <NavLink className="nav-link" to="/dashboard">
                 <i className="bi bi-graph-up-arrow"></i>
@@ -55,12 +49,12 @@ function Header() {
                 <span className="ms-1">Products</span>
               </NavLink>
             </li>
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <NavLink className="nav-link" to="/orders">
                 <i className="bi bi-bag-check"></i>
                 <span className="ms-1">Orders</span>
               </NavLink>
-            </li>
+            </li> */}
             <li className="nav-item">
               <NavLink className="nav-link" to="/transactions">
                 <i className="bi bi-receipt-cutoff"></i>

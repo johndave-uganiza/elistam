@@ -5,19 +5,24 @@ const OrderContext = createContext(null);
 
 function OrderProvider({ children }) {
   const token = localStorage.getItem("token");
-  const [order, setOrder] = useState([]);
+  // const [order, setOrder] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const createOrder = async (product) => {
+  const createOrder = async (formData) => {
+    setIsLoading(true);
+    const { id, name, description, price, quantity, image } =
+      formData.orderDetail;
+
     try {
       const payload = {
-        date: null,
+        date: formData.date,
         orderDetail: {
-          productId: product.id,
-          name: product.name,
-          description: "",
-          price: product.price,
-          quantity: product.quantity,
-          image: product.image,
+          productId: id,
+          name: name,
+          description: description,
+          price: price,
+          quantity: quantity,
+          image: image,
         },
       };
 
@@ -26,41 +31,41 @@ function OrderProvider({ children }) {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Accept: "application/json",
+          // Accept: "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-      console.log("result", result);
+      return await response.json();
     } catch (error) {
       console.error("An error occurred while creating the order:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const getOrders = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/order`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+  // useEffect(() => {
+  const getOrder = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/order`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        const result = await response.json();
-        setOrder(result.data[0]);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    getOrders();
-  }, []);
+  //   getOrder();
+  // }, []);
 
   return (
-    <OrderContext.Provider value={{ order, setOrder, createOrder }}>
+    <OrderContext.Provider value={{ getOrder, createOrder, isLoading }}>
       {children}
     </OrderContext.Provider>
   );

@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import ItemsToolbar from "../../components/items/ItemsToolbar";
+import Toolbar from "../../components/common/Toolbar";
 import { ItemContext } from "../../context/ItemContext";
 import ItemModal from "../../components/items/ItemModal";
 import ItemTable from "../../components/items/ItemTable";
@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 
 function Items() {
-  const { items, createItem, getItems, updateItem, deleteItem } =
+  const { items, createItem, getItems, updateItem, deleteItem, isLoading } =
     useContext(ItemContext);
 
   useEffect(() => {
@@ -184,12 +184,17 @@ function Items() {
           </div>
         </div>
         <div className="row py-2 mb-2 p-3">
-          <ItemsToolbar
-            onAdd={handleAddItem}
+          <Toolbar
+            onShow={handleAddItem}
             onSearch={handleSearchInput}
             onSort={handleSortBy}
             items={items}
             sortBy={sortBy}
+            label={
+              <>
+                <i className="bi bi-plus-circle"></i> Add Item
+              </>
+            }
           />
         </div>
         <ItemTable
@@ -205,6 +210,7 @@ function Items() {
           onSubmit={handleSubmit}
           onChange={handleInputChange}
           formData={formData}
+          isLoading={isLoading}
         />
       )}
     </div>

@@ -73,7 +73,7 @@ namespace eListam.Application.Services.Implementations
                 return result.Failure($"{nameof(Order)} does not exist!");
             
             var orders = await _orderRepo.GetAsync();
-            var existingOrder = orders.FirstOrDefault(o => o.IsCompleted == true);
+            var existingOrder = orders.FirstOrDefault(o => !o.IsCompleted);
 
             // Create new order if an order doesn't exist
             if (existingOrder == null)
@@ -88,7 +88,8 @@ namespace eListam.Application.Services.Implementations
             // Add order detail for an existing order
             existingOrder.OrderDetails.Add(new OrderDetail()
             {
-                Quantity = item.Quantity,
+                //OrderId = existingOrder.Id,
+                Quantity = req.OrderDetail.Quantity,
                 Description = item.Description,
                 Image = item.Image ?? string.Empty,
                 Name = item.Name,
@@ -206,7 +207,7 @@ namespace eListam.Application.Services.Implementations
                         Name = item.Name,
                         Description = item.Description,
                         Price = item.Price,
-                        Quantity = item.Quantity,
+                        Quantity = req.OrderDetail.Quantity,
                         Image = item.Image ?? string.Empty,
                     }]
             };

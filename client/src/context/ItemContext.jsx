@@ -6,8 +6,11 @@ const ItemContext = createContext(null);
 function ItemProvider({ children }) {
   const token = localStorage.getItem("token");
   const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getItems = async () => {
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/item`, {
         method: "GET",
@@ -32,10 +35,14 @@ function ItemProvider({ children }) {
       }
     } catch (error) {
       console.error("API error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const createItem = async (formData) => {
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/Item`, {
         method: "POST",
@@ -48,10 +55,14 @@ function ItemProvider({ children }) {
       return await response.json();
     } catch (error) {
       console.error("API error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateItem = async (id, updatedItem) => {
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/item/${id}`, {
         method: "PUT",
@@ -64,6 +75,8 @@ function ItemProvider({ children }) {
       return await response.json();
     } catch (error) {
       console.error("API error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,7 +97,7 @@ function ItemProvider({ children }) {
 
   return (
     <ItemContext.Provider
-      value={{ items, createItem, getItems, updateItem, deleteItem }}
+      value={{ items, createItem, getItems, updateItem, deleteItem, isLoading }}
     >
       {children}
     </ItemContext.Provider>
