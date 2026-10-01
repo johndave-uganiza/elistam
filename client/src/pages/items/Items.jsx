@@ -7,11 +7,18 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 
 function Items() {
-  const { items, createItem, getItems, updateItem, deleteItem, isLoading } =
+  const { createItem, getItems, updateItem, deleteItem, isLoading } =
     useContext(ItemContext);
 
+  const [items, setItems] = useState(null);
+
   useEffect(() => {
-    getItems();
+    const fetchItems = async () => {
+      const result = await getItems();
+      setItems(result);
+    };
+
+    fetchItems();
   }, []);
 
   const [sortBy, setSortBy] = useState("");
@@ -112,10 +119,8 @@ function Items() {
           showConfirmButton: true,
         });
       }
-
-      // toast.success("Success!");
     } catch (error) {
-      console.log("error", error);
+      console.error(error);
     }
   };
 
@@ -162,7 +167,7 @@ function Items() {
         }
       }
     } catch (error) {
-      console.log("error", error);
+      console.error(error);
     }
   };
 

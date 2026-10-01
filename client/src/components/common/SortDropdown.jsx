@@ -1,6 +1,6 @@
-import { sortBy } from "../../data/products/sortBy";
-const { name, price, defaultSortBy } = sortBy;
-function SortDropdown({ handleSortBy, sortBy }) {
+import { SORT_BY } from "../../utilities/constants";
+const { name, price, defaultSortBy } = SORT_BY;
+function SortDropdown({ handleSortBy }) {
   return (
     <select
       className="form-select"

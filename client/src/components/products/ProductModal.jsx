@@ -1,18 +1,13 @@
-import { useContext, useState } from "react";
-import { Modal } from "bootstrap";
-import { OrderContext } from "../../context/OrderContext";
-
 function ProductModal({
   onClose,
   selectedProduct,
   onSubmit,
-  order,
+  orderDetail,
   onClickOrderQty,
   onChangeOrderQty,
 }) {
-  const { orderDetail } = order;
   const handleSubmit = () => {
-    onSubmit(order);
+    onSubmit(orderDetail);
   };
 
   return (
@@ -23,9 +18,9 @@ function ProductModal({
         tabIndex="-1"
         style={{ display: "block" }}
       >
-        <div className="modal-dialog modal-dialog-centered">
-          <form onSubmit={handleSubmit}>
-            <div className="modal-content">
+        <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-content">
+            <form onSubmit={handleSubmit}>
               <div className="modal-header bg-secondary-subtle">
                 <h1 className="modal-name fs-5">Product</h1>
                 <button
@@ -71,6 +66,7 @@ function ProductModal({
                             onClick={() => onClickOrderQty(-1)}
                             className="btn btn-dark fw-bold"
                             type="button"
+                            disabled={orderDetail.quantity == 0}
                           >
                             -
                           </button>
@@ -124,8 +120,8 @@ function ProductModal({
                   Order
                 </button>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </>

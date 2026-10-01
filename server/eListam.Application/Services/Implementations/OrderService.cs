@@ -31,16 +31,16 @@ namespace eListam.Application.Services.Implementations
         #endregion
 
         #region GetAsync
-        public async Task<Result<IEnumerable<GetOrderResponse>>> GetAsync()
+        public async Task<Result<GetOrderResponse>> GetAsync()
         {
-            var result = new Result<IEnumerable<GetOrderResponse>>();
+            var result = new Result<GetOrderResponse>();
            
-            var orders = await _orderRepo.GetAsync();
+            var order = (await _orderRepo.GetAsync()).FirstOrDefault(o => !o.IsCompleted);
 
-            if (orders == null)
-                return result.Failure($"There are no pending orders.");
+            if (order == null)
+                return result.Success($"There is no pending order.");
 
-            return result.Success(orders.Select(MapGetOrderResponse));
+            return result.Success(MapGetOrderResponse(order));
         }
         #endregion
 
@@ -84,6 +84,8 @@ namespace eListam.Application.Services.Implementations
             }
 
             existingOrder.UserId = _userId;
+            existingOrder.TotalPrice += (item.Price * req.OrderDetail.Quantity);
+            existingOrder.TotalQuantity += req.OrderDetail.Quantity;
 
             // Add order detail for an existing order
             existingOrder.OrderDetails.Add(new OrderDetail()
@@ -106,6 +108,10 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> UpdateAsync(int id, UpdateOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
+            var _userId = _authService.GetUserId();
+
+            if (string.IsNullOrEmpty(_userId))
+                return result.Failure($"User does not exist!");
 
             var order = await _orderRepo.GetByIdAsync(id);
 
@@ -113,36 +119,21 @@ namespace eListam.Application.Services.Implementations
                 return result.Failure($"{nameof(Order)} does not exist!");
             
             
-            // Add or Update existing Order Details
+            // Update existing Order Detail
             foreach(var detail in req.OrderDetails)
             {
                 var existingDetail = order.OrderDetails.FirstOrDefault(od => od.Id == detail.Id);
 
-                if (existingDetail == null)
-                {
-                    order.OrderDetails.Add(new OrderDetail
-                    {
-                        Description = detail.Description,
-                        Image = detail.Image,
-                        ItemId = detail.ProductId,
-                        Price = detail.Price,
-                        Quantity = detail.Quantity,
-                        Name = detail.Name,
-                    });
-                }
-                else
-                {
+                if (existingDetail != null)
                     existingDetail.Quantity = detail.Quantity;
-                }
+                
             }
 
-            // Remove deleted details
-            foreach (var existingDetail in order.OrderDetails)
+            foreach(var detail in order.OrderDetails)
             {
-                if(!req.OrderDetails.Any(od => od.Id == existingDetail.Id))
-                {
-                    order.OrderDetails.Remove(existingDetail);
-                }
+                if (!req.OrderDetails.Any(od => od.Id == detail.Id))
+                    order.OrderDetails.Remove(detail);
+                
             }
 
             order.Date = req.Date ?? order.Date;
@@ -156,6 +147,10 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> DeleteAsync(int id)
         {
             var result = new Result<GetOrderResponse>();
+            var _userId = _authService.GetUserId();
+
+            if (string.IsNullOrEmpty(_userId))
+                return result.Failure($"User does not exist!");
 
             var order = await _orderRepo.GetByIdAsync(id);
 
@@ -168,22 +163,28 @@ namespace eListam.Application.Services.Implementations
         }
         #endregion
 
-        #region PlaceOrderAsync
-        public async Task<Result<GetOrderResponse>> PlaceOrderAsync(int id, PlaceOrderRequest req)
+        #region ConfirmOrderAsync
+        public async Task<Result<GetOrderResponse>> ConfirmOrderAsync(int id)
         {
             var result = new Result<GetOrderResponse>();
+            var _userId = _authService.GetUserId();
+
+            if (string.IsNullOrEmpty(_userId))
+                return result.Failure($"User does not exist!");
+
             var order = await _orderRepo.GetByIdAsync(id);
 
             if(order == null)
                 return result.Failure($"{nameof(Order)} does not exist!");
 
             if(order.IsCompleted)
-                return result.Failure($"{nameof(Order)} was already posted!");
-            
-            order.UserId = req.UserId;
+                return result.Failure($"{nameof(Order)} was already completed!");
+
+            order.UserId = _userId;
+            order.Date = DateTime.UtcNow;
             order.IsCompleted = true;
 
-            await _transactionRepo.CreateAsync(MapTransaction(order, req.UserId));
+            await _transactionRepo.CreateAsync(MapTransaction(order));
 
             return result.Success(MapGetOrderResponse(order));
         }
@@ -197,7 +198,8 @@ namespace eListam.Application.Services.Implementations
             return new Order()
             {
                 UserId = _userId,
-                TotalQuantity = 0,
+                TotalQuantity = req.OrderDetail.Quantity,
+                TotalPrice = req.OrderDetail.Price,
                 OrderNumber = Guid.NewGuid().ToString(),
                 Date = req.Date ?? DateTime.UtcNow,
                 IsCompleted = false,
@@ -215,7 +217,7 @@ namespace eListam.Application.Services.Implementations
         #endregion
 
         #region MapTransaction
-        private Transaction MapTransaction(Order order, string userId)
+        private Transaction MapTransaction(Order order)
         {
             return new Transaction()
             {
@@ -225,7 +227,7 @@ namespace eListam.Application.Services.Implementations
                 OrderNumber = order.OrderNumber,
                 TotalPrice = order.TotalPrice,
                 TotalQuantity = order.TotalQuantity,
-                UserId = userId,
+                UserId = order.UserId,
                 TransactionDetails = order.OrderDetails.Select(od =>
                 new TransactionDetail()
                 {
@@ -258,7 +260,7 @@ namespace eListam.Application.Services.Implementations
                     Description = od.Description,
                     Image = od.Image,
                     Name = od.Name,
-                    OrderDetailId = od.Id,
+                    Id = od.Id,
                     Price = od.Price,
                     ProductId = od.ItemId,
                     Quantity = od.Quantity,
@@ -268,9 +270,5 @@ namespace eListam.Application.Services.Implementations
         #endregion
 
         #endregion
-
-        // NOTES:
-        // Do not return existingOrder directly.
-        // Map it to avoid circular reference issues when using .Include()
     }
 }

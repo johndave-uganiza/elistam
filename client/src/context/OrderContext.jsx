@@ -1,23 +1,22 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import { API_BASE_URL } from "../utilities/constants";
 
 const OrderContext = createContext(null);
 
 function OrderProvider({ children }) {
   const token = localStorage.getItem("token");
-  // const [order, setOrder] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const createOrder = async (formData) => {
+  const createOrder = async (orderDetail) => {
     setIsLoading(true);
-    const { id, name, description, price, quantity, image } =
-      formData.orderDetail;
+    const { productId, name, description, price, quantity, image } =
+      orderDetail;
 
     try {
       const payload = {
-        date: formData.date,
+        date: null,
         orderDetail: {
-          productId: id,
+          productId: productId,
           name: name,
           description: description,
           price: price,
@@ -44,8 +43,52 @@ function OrderProvider({ children }) {
     }
   };
 
-  // useEffect(() => {
+  const updateOrder = async (id, order) => {
+    setIsLoading(true);
+
+    try {
+      const payload = JSON.stringify(order);
+      const response = await fetch(`${API_BASE_URL}/api/order/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmOrder = async (id) => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/order/${id}/confirm`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getOrder = async () => {
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/order`, {
         method: "GET",
@@ -54,18 +97,25 @@ function OrderProvider({ children }) {
           "Content-Type": "application/json",
         },
       });
-
-      return await response.json();
+      const result = await response.json();
+      return result;
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  //   getOrder();
-  // }, []);
-
   return (
-    <OrderContext.Provider value={{ getOrder, createOrder, isLoading }}>
+    <OrderContext.Provider
+      value={{
+        getOrder,
+        createOrder,
+        isLoading,
+        confirmOrder,
+        updateOrder,
+      }}
+    >
       {children}
     </OrderContext.Provider>
   );

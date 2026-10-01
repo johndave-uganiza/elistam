@@ -11,27 +11,27 @@ function Dashboard() {
   const cards = [
     {
       icon: "bi bi-calendar-check-fill",
-      value: eListam.utils.formatCurrencyToPHP(
-        eListam.helpers.getTotalTransactionPriceToday(transactionCtx),
-      ),
+      // value: eListam.utils.formatCurrencyToPHP(
+      //   eListam.helpers.getTotalTransactionPriceToday(transactionCtx),
+      // ),
       label: "Today",
       border: "border-primary",
       color: "text-primary",
     },
     {
       icon: "bi bi-boxes",
-      value: eListam.utils.formatCurrencyToPHP(
-        eListam.helpers.getTotalStockAmount(items),
-      ),
+      // value: eListam.utils.formatCurrencyToPHP(
+      //   eListam.helpers.getTotalStockAmount(items),
+      // ),
       label: "Stocks",
       border: "border-success",
       color: "text-success",
     },
     {
       icon: "bi bi-piggy-bank-fill",
-      value: eListam.utils.formatCurrencyToPHP(
-        eListam.helpers.getTotalProfit(items),
-      ),
+      // value: eListam.utils.formatCurrencyToPHP(
+      //   eListam.helpers.getTotalProfit(items),
+      // ),
       label: "Profit",
       border: "border-warning",
       color: "text-warning",
@@ -45,7 +45,7 @@ function Dashboard() {
       //   background: "linear-gradient(135deg, #0A2540, #1A3A60, #32607F)",
       // }}
     >
-      <div className="row px-3 mt-2">
+      <div className="row px-3 mt-2 pt-3">
         <div className="alert alert-success bg-white border border-success text-dark d-md-flex align-items-center">
           <i className="bi bi-check-circle-fill text-success me-1"></i>
           <span className="me-1">

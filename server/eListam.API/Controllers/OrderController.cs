@@ -15,16 +15,13 @@ namespace eListamAPI.Controllers
     {
         #region Fields
         private readonly IOrderService _orderService;
-        private readonly IAuthService _authService;
         #endregion
 
         #region Constructor
         public OrderController(IOrderService orderService,
-            IAuthService authService,
             IItemService itemService)
         {
             _orderService = orderService;
-            _authService = authService;
         }
         #endregion
 
@@ -39,16 +36,6 @@ namespace eListamAPI.Controllers
                 return BadRequest(new ApiResponse()
                 {
                     StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if (result.Data == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = result.IsSuccess,
                     Messages = [result.Message]
                 });
@@ -106,18 +93,6 @@ namespace eListamAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest req)
         {
-            var userId = _authService.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = false,
-                    Messages = ["User does not exists!"]
-                });
-            }
-
-            //req.UserId = userId;
             var result = await _orderService.CreateAsync(req);
 
             if (result.Data == null)
@@ -126,6 +101,16 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            if (string.IsNullOrEmpty(result.Data.UserId))
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
                     Messages = [result.Message]
                 });
             }
@@ -142,21 +127,9 @@ namespace eListamAPI.Controllers
 
         #region UpdateAsync
         [HttpPut("{id:int}")]
-        [ActionName(nameof(UpdateAsync))]
+        //[ActionName(nameof(UpdateAsync))]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateOrderRequest req)
         {
-            var userId = _authService.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = false,
-                    Messages = ["User does not exists!"]
-                });
-            }
-
-            req.UserId = userId;
             var result = await _orderService.UpdateAsync(id, req);
 
             if (result.Data == null)
@@ -165,6 +138,16 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            if (string.IsNullOrEmpty(result.Data.UserId))
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
                     Messages = [result.Message]
                 });
             }
@@ -181,7 +164,7 @@ namespace eListamAPI.Controllers
 
         #region DeleteAsync
         [HttpDelete("{id:int}")]
-        [ActionName(nameof(DeleteAsync))]
+        //[ActionName(nameof(DeleteAsync))]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var result = await _orderService.DeleteAsync(id);
@@ -196,6 +179,16 @@ namespace eListamAPI.Controllers
                 });
             }
 
+            if (string.IsNullOrEmpty(result.Data.UserId))
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    Messages = [result.Message]
+                });
+            }
+
             return Ok(new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
@@ -206,23 +199,11 @@ namespace eListamAPI.Controllers
         }
         #endregion
 
-        #region PlaceOrderAsync
-        [HttpPost("{id:int}/Place")]
-        public async Task<IActionResult> PlaceOrderAsync(int id, PlaceOrderRequest req)
+        #region ConfirmOrderAsync
+        [HttpPost("{id:int}/confirm")]
+        public async Task<IActionResult> ConfirmOderAsync(int id)
         {
-            var userId = _authService.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = false,
-                    Messages = ["User does not exists!"]
-                });
-            }
-
-            req.UserId = userId;
-            var result = await _orderService.PlaceOrderAsync(id, req);
+            var result = await _orderService.ConfirmOrderAsync(id);
 
             if (result.Data == null)
             {
@@ -230,6 +211,16 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            if (string.IsNullOrEmpty(result.Data.UserId))
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
                     Messages = [result.Message]
                 });
             }

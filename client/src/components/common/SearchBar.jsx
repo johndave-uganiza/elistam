@@ -3,7 +3,7 @@ function SearchBar({ handleSearchInput }) {
     <input
       className=" form-control text-black bg-white"
       type="search"
-      placeholder="Search Items..."
+      placeholder="Search..."
       onChange={handleSearchInput}
     />
   );

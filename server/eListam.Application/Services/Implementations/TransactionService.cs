@@ -62,15 +62,16 @@ namespace eListam.Application.Services.Implementations
         #region Mappers
 
         #region MapGetTransactionResponse
-        private GetTransactionResponse MapGetTransactionResponse(Transaction transaction)
+        private GetTransactionResponse MapGetTransactionResponse(Transaction tran)
         {
             return new GetTransactionResponse()
             {
-                Id = transaction.Id,
-                OrderNumber = transaction.OrderNumber,
-                TotalPrice = transaction.TotalPrice,
-                TotalQuantity = transaction.TotalQuantity,
-                TransactionDetails = transaction.TransactionDetails?.Select(td =>
+                Id = tran.Id,
+                OrderNumber = tran.OrderNumber,
+                Date = tran.Date,
+                TotalPrice = tran.TotalPrice,
+                TotalQuantity = tran.TotalQuantity,
+                TransactionDetails = tran.TransactionDetails?.Select(td =>
                 new GetTransactionDetailResponse()
                 {
                     Description = td.Description,

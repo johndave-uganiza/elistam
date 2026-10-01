@@ -5,7 +5,6 @@ const ItemContext = createContext(null);
 
 function ItemProvider({ children }) {
   const token = localStorage.getItem("token");
-  const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getItems = async () => {
@@ -22,16 +21,7 @@ function ItemProvider({ children }) {
 
       if (response.ok) {
         const result = await response.json();
-        const items = result.data.map((item) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-        }));
-
-        setItems(items);
+        return result.data;
       }
     } catch (error) {
       console.error("API error:", error);
@@ -97,7 +87,7 @@ function ItemProvider({ children }) {
 
   return (
     <ItemContext.Provider
-      value={{ items, createItem, getItems, updateItem, deleteItem, isLoading }}
+      value={{ createItem, getItems, updateItem, deleteItem, isLoading }}
     >
       {children}
     </ItemContext.Provider>

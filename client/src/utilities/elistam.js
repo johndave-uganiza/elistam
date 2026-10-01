@@ -9,16 +9,16 @@ export const eListam = {
             return result;
         },
 
-        getTotalStockAmount: (contex) => {
-            const result = contex.reduce((prev, current) => {
+        getTotalStockAmount: (context) => {
+            const result = context?.reduce((prev, current) => {
                 return prev + Number(current.price);
             }, 0);
 
             return result;
         },
 
-        getTotalProfit: (contex) => {
-            const result = contex.reduce((prev, current) => {
+        getTotalProfit: (context) => {
+            const result = context?.reduce((prev, current) => {
                 return prev + Number(current.price * 0.25);
             }, 0);
 

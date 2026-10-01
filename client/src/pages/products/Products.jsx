@@ -5,13 +5,11 @@ import { OrderContext } from "../../context/OrderContext";
 import Toolbar from "../../components/common/Toolbar";
 import ProductModal from "../../components/products/ProductModal";
 import OrderModal from "../../components/orders/OrderModal";
-import { API_BASE_URL } from "../../utilities/constants";
-import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 function Products() {
-  const { createOrder, isLoading: orderIsLoading } = useContext(OrderContext);
+  const { createOrder } = useContext(OrderContext);
   const { products, isLoading } = useContext(ProductContext);
-
   const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -47,31 +45,28 @@ function Products() {
   //     break;
   // }
 
-  const [order, setOrder] = useState({
-    date: null,
-    orderDetail: {
-      id: 0,
-      name: "",
-      description: "",
-      price: 0,
-      quantity: 0,
-      image: "",
-    },
+  const [orderDetail, setOrderDetail] = useState({
+    productId: null,
+    name: "",
+    description: "",
+    price: 0,
+    quantity: 0,
+    image: "",
   });
 
-  const resetOrder = () => {
-    setOrder({
-      date: null,
-      orderDetail: {
-        id: 0,
-        name: "",
-        description: "",
-        price: 0,
-        quantity: 0,
-        image: "",
-      },
-    });
-  };
+  // const resetOrder = () => {
+  //   setOrder({
+  //     date: null,
+  //     orderDetail: {
+  //       id: 0,
+  //       name: "",
+  //       description: "",
+  //       price: 0,
+  //       quantity: 0,
+  //       image: "",
+  //     },
+  //   });
+  // };
 
   function handleSearchInput(e) {
     e.preventDefault();
@@ -82,16 +77,13 @@ function Products() {
     const { description, id, image, name, price } = product;
     setShowModal(true);
     setSelectedProduct(product);
-    setOrder({
-      date: null,
-      orderDetail: {
-        id: id,
-        name: name,
-        description: description,
-        price: price,
-        quantity: 1,
-        image: "",
-      },
+    setOrderDetail({
+      productId: id,
+      name: name,
+      description: description,
+      price: price,
+      quantity: 1,
+      image: image,
     });
   }
 
@@ -108,53 +100,42 @@ function Products() {
     setShowOrderModal(false);
   };
 
-  const handleViewOrders = () => {
+  const handleViewOrder = () => {
     setShowOrderModal(true);
   };
 
-  const handleSubmit = async (order) => {
+  const handleSubmit = async (orderDetail) => {
     try {
-      const result = await createOrder(order);
-
+      const result = await createOrder(orderDetail);
+      
       if (result?.isSuccess) {
-        // await getItems();
         setShowModal(false);
-        Swal.fire({
-          title: `Product ordered successfully!`,
-          icon: "success",
-          timer: 2000,
-          showConfirmButton: true,
+        toast.success("Product ordered successfully!", {
+          autoClose: 1500,
         });
       }
-
-      console.log(result);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const handleClickOrderQty = (value) => {
-    // debugger;
-
-    setOrder((prev) => {
+    setOrderDetail((prev) => {
+      if (prev.quantity == 0 && value == -1) {
+        return { ...prev };
+      }
       return {
         ...prev,
-        orderDetail: {
-          ...prev.orderDetail,
-          quantity: prev.orderDetail.quantity + value,
-        },
+        quantity: prev.quantity + value,
       };
     });
   };
 
   const handleChangeOrderQty = (e) => {
-    setOrder((prev) => {
+    setOrderDetail((prev) => {
       return {
         ...prev,
-        orderDetail: {
-          ...prev.orderDetail,
-          quantity: e.target.value,
-        },
+        quantity: e.target.value,
       };
     });
   };
@@ -170,14 +151,14 @@ function Products() {
         </div>
         <div className="row py-2 mb-2 p-3">
           <Toolbar
-            onShow={handleViewOrders}
+            onShow={handleViewOrder}
             onSearch={handleSearchInput}
             onSort={handleSortBy}
             // items={items}
             sortBy={sortBy}
             label={
               <>
-                <i className="bi bi-list-ul"></i> View Orders
+                <i className="bi bi-list-ul"></i> View Order
               </>
             }
           />
@@ -222,17 +203,12 @@ function Products() {
               selectedProduct={selectedProduct}
               onClose={handleClose}
               onSubmit={handleSubmit}
-              order={order}
+              orderDetail={orderDetail}
               onClickOrderQty={handleClickOrderQty}
               onChangeOrderQty={handleChangeOrderQty}
             />
           )}
-          {showOrderModal && (
-            <OrderModal
-              onClose={handleCloseOrderModal}
-              isLoading={orderIsLoading}
-            />
-          )}
+          {showOrderModal && <OrderModal onClose={handleCloseOrderModal} />}
         </div>
       </div>
     </>

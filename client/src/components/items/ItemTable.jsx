@@ -5,8 +5,9 @@ function ItemTable({ items, onEdit, onDelete }) {
     <div className="table-responsive-sm">
       <table className="table table-hover table-bordered">
         <thead className="table-secondary">
-          <tr>
+          <tr className="text-nowrap">
             <th>Image</th>
+            <th>Item No.</th>
             <th>Name</th>
             <th>Description</th>
             <th>Price</th>
@@ -28,13 +29,14 @@ function ItemTable({ items, onEdit, onDelete }) {
                       style={{ width: "60px", height: "60px" }}
                     />
                   </td>
+                  <td>ITM-###</td>
                   <td>{item.name}</td>
                   <td>{item.description}</td>
                   <td>{item.price}</td>
                   <td>{item.quantity}</td>
                   <td>{"01/01/1900"}</td>
                   <td>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-1">
                       <button
                         className="btn btn-sm btn-outline-primary fw-medium"
                         onClick={() => onEdit(item)}

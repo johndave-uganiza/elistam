@@ -1,32 +1,68 @@
+import { useState } from "react";
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import OrderDetailModal from "./OrderDetailModal";
 
-function OrderTable({ order }) {
+function OrderTable({ order, onRemove, onUpdate }) {
+  const [showModal, setShowModal] = useState(false);
+  const [orderDetail, setOrderDetail] = useState({
+    id: null,
+    orderId: null,
+    name: "",
+    description: "",
+    price: 0,
+    quantity: 0,
+    image: "",
+  });
+
+  const handleEdit = (detail) => {
+    setOrderDetail({
+      id: detail.id,
+      orderId: order.id,
+      productId: detail.productId,
+      name: detail.name,
+      description: detail.description,
+      price: detail.price,
+      quantity: detail.quantity,
+      image: detail.image,
+    });
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
+  const handleInputChange = (e) => {
+    setOrderDetail((prev) => ({ ...prev, quantity: Number(e.target.value) }));
+  };
+
   return (
     <div
       className="table-responsive-sm overflow-auto"
       style={{
         maxHeight: "350px",
-        // overflowY: "auto",
       }}
     >
       <table className="table table-sm table-bordered table-hover">
-        <thead className="table-dark">
+        <thead className="table-dark text-nowrap">
           <tr>
-            {/* <th scope="col">Order #</th> */}
             <th scope="col">Image</th>
-            <th scope="col">Product</th>
+            <th scope="col">Item No.</th>
+            <th scope="col">Name</th>
             <th scope="col">Qty</th>
             <th scope="col">Price</th>
             <th scope="col">Total</th>
-            <th scope="col">Actions</th>
+            <th scope="col" className="text-center">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody className="align-middle">
-          {order.orderDetails.map((item, index) => (
+          {order?.orderDetails.map((detail, index) => (
             <tr key={index}>
               <td>
                 <img
-                  src={`${item.image?.substring(0, 6) === "images" ? API_BASE_URL.concat("/") : ""}${item.image || IMAGE_PLACEHOLDER_URL}`}
+                  src={`${detail.image?.substring(0, 6) === "images" ? API_BASE_URL.concat("/") : ""}${detail.image || IMAGE_PLACEHOLDER_URL}`}
                   onError={(e) => {
                     e.target.src = IMAGE_PLACEHOLDER_URL;
                   }}
@@ -36,41 +72,49 @@ function OrderTable({ order }) {
                   }}
                 />
               </td>
-              <td
-                className="text-wrap"
-                // style={{ maxWidth: "120px" }}
-              >
-                {item.name}
-              </td>
-              <td>{item.quantity}</td>
+              <td>ITM-###</td>
+              <td className="text-wrap">{detail.name}</td>
               <td>
-                {item.price}
+                <span className="fw-medium">{detail.quantity}</span>
+                <i
+                  className="bi bi-pencil ms-2  text-black-50"
+                  style={{ fontSize: "14px" }}
+                  onClick={() => handleEdit(detail)}
+                ></i>
+              </td>
+              <td>
+                <span className="fw-medium">{detail.price}</span>
                 {/* {eListam.utils.formatCurrencyToPHP(item.price)} */}
               </td>
               <td>
-                {item.quantity * item.price}
+                {detail.quantity * detail.price}
                 {/* {eListam.utils.formatCurrencyToPHP(
                                   item.quantity * item.price,
                                 )} */}
               </td>
-              <td>
-                <a
-                  // onClick={() => handleDeleteOrderDetail(item)}
+              <td className="text-center text-nowrap">
+                <button
+                  type="button"
+                  onClick={() => onRemove(order.id, detail)}
                   className="btn btn-sm btn-outline-danger me-1 mb-1 mb-lg-0"
                 >
-                  <i className="bi bi-x"></i>
-                </a>
-                <a
-                  // onClick={() => handleEditOrderDetail(item)}
-                  className="btn btn-sm btn-outline-success me-1 mb-1 mb-lg-0"
-                >
-                  <i className="bi bi-list"></i>
-                </a>
+                  <i className="bi bi-x-lg"></i>
+                  <span className="ms-1 d-none d-md-inline ">Remove</span>
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {showModal && (
+        <OrderDetailModal
+          onClose={handleClose}
+          // onSave={handleSave}
+          onChange={handleInputChange}
+          orderDetail={orderDetail}
+          onUpdate={onUpdate}
+        />
+      )}
     </div>
   );
 }
