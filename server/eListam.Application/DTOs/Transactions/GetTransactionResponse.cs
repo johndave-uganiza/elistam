@@ -6,6 +6,7 @@ namespace eListam.Application.DTOs.Transactions
     public class GetTransactionResponse
     {
         public int Id { get; set; }
+        public string TransactionNumber { get; set; } = string.Empty;
         public int OrderId { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
         public DateTime Date { get; set; }

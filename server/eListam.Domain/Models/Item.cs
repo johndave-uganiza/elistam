@@ -11,5 +11,6 @@ namespace eListam.Domain.Models
         public double Quantity { get; set; }
         public string? Image { get; set; }
         public string UserId { get; set; } = string.Empty;
+        public DateTime? ExpirationDate { get; set; }
     }
 }

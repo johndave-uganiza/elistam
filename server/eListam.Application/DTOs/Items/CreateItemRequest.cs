@@ -10,5 +10,6 @@ namespace eListam.Application.DTOs.Items
         public double Quantity { get; set; }
         public IFormFile? File { get; set; }
         public string UserId { get; set; } = string.Empty;
+        public DateTime? ExpirationDate { get; set; }
     }
 }

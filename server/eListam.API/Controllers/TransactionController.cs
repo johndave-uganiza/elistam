@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using eListam.API.Common;
+﻿using eListam.API.Common;
 using eListam.Application.Services.Abstractions.Transactions;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace eListamAPI.Controllers
 {
@@ -129,6 +129,39 @@ namespace eListamAPI.Controllers
                 Data = result.Data,
                 Messages = [result.Message]
             });
+        }
+        #endregion
+
+        #region ExportCsvAsync
+        [HttpGet("{id:int}/export")]
+        [ActionName(nameof(ExportCsvAsync))]
+        public async Task<IActionResult> ExportCsvAsync(int id)
+        {
+            var result = await _service.ExportCsvAsync(id);
+
+            if (result == null) return NotFound( new ApiResponse() { StatusCode = HttpStatusCode.NotFound });
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            if (result.Data == null || result.Data.CsvData == null)
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            return File(result.Data.CsvData, "text/csv", "transaction.csv");
         }
         #endregion
 

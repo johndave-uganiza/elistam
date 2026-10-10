@@ -4,10 +4,21 @@ import { API_BASE_URL } from "../utilities/constants";
 const AuthContext = createContext(null);
 
 function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!token);
+  const isTokenValid = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
 
-  async function login(credentials) {
+      return payload?.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  };
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return isTokenValid(localStorage.getItem("token"));
+  });
+
+  const login = async (credentials) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
@@ -20,17 +31,20 @@ function AuthProvider({ children }) {
         }),
       });
 
-      const result = await response.json();
+      const { isSuccess, data } = await response.json();
 
-      if (result.isSuccess && result.data && result.data.token) {
-        localStorage.setItem("token", result.data.token);
-        setToken(result.data.token);
-        setIsAuthenticated(true);
+      if (isSuccess && data?.token) {
+        const isAuthenticated = isTokenValid(data.token);
+
+        if (isAuthenticated) {
+          localStorage.setItem("token", data.token);
+          setIsAuthenticated(isAuthenticated);
+        }
       }
     } catch (error) {
       console.error("API error:", error);
     }
-  }
+  };
 
   return (
     <AuthContext.Provider

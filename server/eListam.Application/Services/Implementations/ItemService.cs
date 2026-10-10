@@ -74,6 +74,7 @@ namespace eListam.Application.Services.Implementations
             item.Description = req.Description;
             item.Price = req.Price;
             item.Quantity = req.Quantity;
+            item.ExpirationDate = req.ExpirationDate;
 
             if (req.File != null)
                 imagePath = await _storageRepo.SaveImageAsync(req.File);
@@ -116,6 +117,7 @@ namespace eListam.Application.Services.Implementations
                 Price = item.Price,
                 Quantity = item.Quantity,
                 UserId = item.UserId,
+                ExpirationDate = item.ExpirationDate
             };
         }
         #endregion
@@ -131,6 +133,7 @@ namespace eListam.Application.Services.Implementations
                 Quantity = request.Quantity,
                 Image = imagePath,
                 UserId = request.UserId,
+                ExpirationDate = request.ExpirationDate
             };
         }
         #endregion

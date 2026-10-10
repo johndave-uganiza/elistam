@@ -9,8 +9,9 @@ function ProductProvider({ children }) {
 
   useEffect(() => {
     const getProducts = async () => {
+      setIsLoading(true);
+
       try {
-        setIsLoading(true);
         const response = await fetch(`${API_BASE_URL}/api/product`, {
           method: "GET",
         });

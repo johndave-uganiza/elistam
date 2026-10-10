@@ -18,7 +18,7 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region GetAsync
         public async Task<IEnumerable<Item>> GetAsync()
         {
-            return await _db.Items.OrderByDescending(o => o.Id).AsNoTracking().ToListAsync();
+            return await _db.Items.AsNoTracking().ToListAsync();
         }
         #endregion
 

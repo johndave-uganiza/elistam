@@ -6,119 +6,302 @@ function ProductModal({
   onClickOrderQty,
   onChangeOrderQty,
 }) {
-  const handleSubmit = () => {
+  const quantity = Number(orderDetail?.quantity) || 0;
+  const price = Number(selectedProduct?.price) || 0;
+  const total = quantity * price;
+  const stock = Number(selectedProduct?.quantity) || 0;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (quantity <= 0) {
+      return;
+    }
+
     onSubmit(orderDetail);
   };
 
   return (
     <>
-      <div className="modal-backdrop show"></div>
+      {/* Backdrop */}
+      <div className="modal-backdrop fade show" />
+
       <div
         className="modal fade show"
         tabIndex="-1"
-        style={{ display: "block" }}
+        role="dialog"
+        aria-modal="true"
+        style={{
+          display: "block",
+        }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-lg">
-          <div className="modal-content">
-            <form onSubmit={handleSubmit}>
-              <div className="modal-header bg-secondary-subtle">
-                <h1 className="modal-name fs-5">Product</h1>
+        <div
+          className="modal-dialog modal-dialog-centered modal-lg"
+          style={{
+            maxWidth: "900px",
+            width: "calc(100% - 1rem)",
+
+            margin: "0.5rem auto",
+          }}
+        >
+          <div
+            className="modal-content border-0 shadow-lg rounded-4 overflow-hidden h-100"
+            style={{
+              maxHeight: "100%",
+            }}
+          >
+            <form onSubmit={handleSubmit} className="d-flex flex-column h-100">
+              {/* Header */}
+              <div className="modal-header bg-dark text-white border-0 px-3 py-2 flex-shrink-0">
+                <div className="d-flex align-items-center gap-2 min-w-0">
+                  <div
+                    className="rounded-3 bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                    }}
+                  >
+                    <i className="bi bi-cart-plus" />
+                  </div>
+
+                  <div className="text-truncate">
+                    <h5 className="modal-title fw-semibold mb-0">
+                      Add to Order
+                    </h5>
+
+                    <small className="text-white-50 d-none d-sm-block">
+                      Select the quantity you'd like to order
+                    </small>
+                  </div>
+                </div>
+
                 <button
                   onClick={onClose}
                   type="button"
-                  className="btn-close"
-                ></button>
+                  className="btn-close btn-close-white flex-shrink-0"
+                  aria-label="Close"
+                />
               </div>
-              <div className="modal-body">
-                <div className="card shadow border bg-light">
-                  <div className="d-flex fs-4">
-                    <div className="col-6 text-dark d-flex flex-column align-items-center p-3">
-                      <h4 className=" text-center">
-                        <strong>{selectedProduct?.name}</strong>
-                      </h4>
-                      <div className="text-center">
-                        <img
-                          src={selectedProduct?.image}
-                          className="w-75"
-                        ></img>
-                      </div>
-                      <p className="card-text text-black">
-                        <small className="text-black">
-                          Stock: {selectedProduct?.quantity}
-                        </small>
-                      </p>
-                    </div>
-                    <div className="card-body bg-white col-6 p-3 rounded">
-                      <h4>Order Details</h4>
-                      <hr />
-                      <div className="mb-3">
-                        {/* <strong>Product Name:</strong> */}
-                        <h5>{selectedProduct?.name}</h5>
+
+              {/* Body */}
+              <div
+                className="modal-body bg-light p-2 p-sm-3 p-md-4 flex-grow-1"
+                style={{
+                  minHeight: 0,
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                <div className="row g-2 g-md-3">
+                  {/* Product Preview */}
+                  <div className="col-12 col-md-5">
+                    <div className="bg-white border rounded-4 p-2 p-sm-3 h-100">
+                      {/* Image */}
+                      <div
+                        className="bg-light rounded-3 d-flex align-items-center justify-content-center overflow-hidden mb-2 mb-md-3"
+                        style={{
+                          height: "clamp(90px, 18vw, 210px)",
+                        }}
+                      >
+                        {selectedProduct?.image ? (
+                          <img
+                            src={selectedProduct.image}
+                            alt={selectedProduct?.name || "Product"}
+                            className="img-fluid"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain",
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <i
+                            className="bi bi-image text-secondary"
+                            style={{
+                              fontSize: "clamp(2rem, 7vw, 4rem)",
+                            }}
+                          />
+                        )}
                       </div>
 
-                      <div className="d-flex flex-column mb-4">
-                        <p className="fs-5">Price: ${selectedProduct?.price}</p>
-                        <p className="fs-5">
-                          Order Quantity: {orderDetail.quantity}
+                      {/* Product Name */}
+                      <h5 className="fw-semibold text-dark mb-1 fs-6">
+                        {selectedProduct?.name || "Product"}
+                      </h5>
+
+                      {/* Description */}
+                      {selectedProduct?.description && (
+                        <p
+                          className="text-muted small mb-2"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {selectedProduct.description}
                         </p>
-                        <div className="input-group mb-3">
-                          <button
-                            onClick={() => onClickOrderQty(-1)}
-                            className="btn btn-dark fw-bold"
-                            type="button"
-                            disabled={orderDetail.quantity == 0}
+                      )}
+
+                      {/* Product Meta */}
+                      <div className="d-flex justify-content-between align-items-center border-top pt-2">
+                        <div>
+                          <small className="text-muted d-block">Price</small>
+
+                          <span className="fs-5 fw-bold text-primary">
+                            ${price.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="text-end">
+                          <small className="text-muted d-block">
+                            Available
+                          </small>
+
+                          <span
+                            className={`badge rounded-pill ${
+                              stock > 0 ? "text-bg-success" : "text-bg-danger"
+                            }`}
                           >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            className="form-control form-control-sm text-center"
-                            style={{ maxWidth: "80px" }}
-                            onChange={onChangeOrderQty}
-                            value={orderDetail.quantity}
-                            // onBlur={() => {
-                            //   if (!order.quantity || order.quantity < 1) {
-                            //     setQuantity(1);
-                            //   }
-                            // }}
-                          />
-                          <button
-                            onClick={() => onClickOrderQty(1)}
-                            className="btn btn-dark fw-bold"
-                            type="button"
-                          >
-                            +
-                          </button>
+                            {stock} in stock
+                          </span>
                         </div>
                       </div>
-                      <hr />
-                      <div className="mb-3">
-                        <p className="card-text">
-                          Total:{" "}
-                          <strong>
-                            $
-                            {(
-                              orderDetail.quantity * selectedProduct?.price
-                            ).toFixed(2)}
-                          </strong>
-                        </p>
+                    </div>
+                  </div>
+
+                  {/* Order Details */}
+                  <div className="col-12 col-md-7">
+                    <div className="bg-white border rounded-4 p-2 p-sm-3 p-md-4 h-100">
+                      {/* Title */}
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <i className="bi bi-bag-check text-primary" />
+
+                        <div>
+                          <h6 className="fw-semibold mb-0">Order details</h6>
+
+                          <small className="text-muted">
+                            Choose your quantity
+                          </small>
+                        </div>
                       </div>
-                      <hr />
+
+                      {/* Unit Price */}
+                      <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span className="text-muted">Unit price</span>
+
+                        <span className="fw-semibold">${price.toFixed(2)}</span>
+                      </div>
+
+                      {/* Quantity */}
+                      <div className="py-2 border-bottom">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span className="text-muted">Quantity</span>
+
+                          <small className="text-muted">Max: {stock}</small>
+                        </div>
+
+                        <div className="d-flex align-items-center justify-content-center">
+                          <button
+                            onClick={() => onClickOrderQty(-1)}
+                            className="btn btn-outline-secondary d-flex align-items-center justify-content-center flex-shrink-0"
+                            type="button"
+                            disabled={quantity <= 0}
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                            }}
+                          >
+                            <i className="bi bi-dash-lg" />
+                          </button>
+
+                          <input
+                            type="number"
+                            min="0"
+                            max={stock}
+                            className="form-control text-center fw-semibold mx-2"
+                            style={{
+                              height: "40px",
+                              width: "80px",
+                            }}
+                            onChange={onChangeOrderQty}
+                            value={quantity}
+                          />
+
+                          <button
+                            onClick={() => onClickOrderQty(1)}
+                            className="btn btn-outline-secondary d-flex align-items-center justify-content-center flex-shrink-0"
+                            type="button"
+                            disabled={quantity >= stock || stock <= 0}
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                            }}
+                          >
+                            <i className="bi bi-plus-lg" />
+                          </button>
+                        </div>
+
+                        {stock <= 0 && (
+                          <small className="text-danger d-block mt-2">
+                            <i className="bi bi-exclamation-circle me-1" />
+                            This product is out of stock.
+                          </small>
+                        )}
+                      </div>
+
+                      {/* Summary */}
+                      <div className="pt-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="text-muted">
+                            {quantity} {quantity === 1 ? "item" : "items"}
+                          </span>
+
+                          <span className="text-muted">Subtotal</span>
+                        </div>
+
+                        <div className="d-flex justify-content-between align-items-center mt-1">
+                          <span className="fw-semibold">Total</span>
+
+                          <span
+                            className="fw-bold text-primary"
+                            style={{
+                              fontSize: "clamp(1.5rem, 6vw, 2rem)",
+                            }}
+                          >
+                            ${total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer bg-secondary-subtle">
-                <button
-                  onClick={onClose}
-                  type="button"
-                  className="btn btn-dark"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Order
-                </button>
+
+              {/* Footer */}
+              <div className="modal-footer bg-white border-top px-2 py-2 flex-shrink-0">
+                <div className="d-flex w-100 gap-2">
+                  <button
+                    onClick={onClose}
+                    type="button"
+                    className="btn btn-light border flex-fill"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary flex-fill"
+                    disabled={quantity <= 0 || stock <= 0}
+                  >
+                    <i className="bi bi-cart-plus me-2" />
+                    Add to Order
+                  </button>
+                </div>
               </div>
             </form>
           </div>

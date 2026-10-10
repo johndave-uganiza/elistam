@@ -1,4 +1,8 @@
 function OrderDetailModal({ onClose, onChange, onUpdate, orderDetail }) {
+  const onClickOk =(orderId, orderDetail) => {
+    onUpdate(orderId, orderDetail)
+  }
+  
   return (
     <>
       <div className="modal-backdrop show"></div>
@@ -34,7 +38,7 @@ function OrderDetailModal({ onClose, onChange, onUpdate, orderDetail }) {
               </button>
               <button
                 className="btn btn-primary"
-                onClick={() => onUpdate(orderDetail.orderId, orderDetail)}
+                onClick={() => onClickOk(orderDetail.orderId, orderDetail)}
               >
                 Ok
               </button>

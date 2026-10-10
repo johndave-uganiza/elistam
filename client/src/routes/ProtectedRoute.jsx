@@ -1,15 +1,20 @@
 import { Navigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function ProtectedRoute({ children }) {
-  const isAuthenticated = localStorage.getItem("token");
+  const { isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  return isAuthenticated ? (
+    children
+  ) : (
     // The state property stores the original location which the user tries to access through a named property.
-    return <Navigate to="/login" state={{ from: location }} />;
-  }
-  return children;
+    <Navigate to="/login" state={{ from: location }} />
+  );
+
+  
 }
 
 export default ProtectedRoute;

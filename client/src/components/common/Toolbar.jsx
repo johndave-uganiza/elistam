@@ -1,17 +1,22 @@
-import SearchBar from "../common/SearchBar";
-import SortDropdown from "../common/SortDropdown";
-
-function Toolbar({ onShow, onSearch, onSort, sortBy, label }) {
+function Toolbar({ onShow, onSearch, label }) {
   return (
-    <div className="p-0 d-flex">
-      <div className="col-6 d-flex align-items-center gap-2 flex-column flex-md-row">
-        <SearchBar handleSearchInput={onSearch} />
-        <SortDropdown handleSortBy={onSort} sortBy={sortBy} />
-      </div>
-      <div className="col-6 text-end p-0">
-        <button onClick={onShow} className="btn btn-md btn-dark">
-          <span>{label}</span>
-        </button>
+    <div className="card border-0 shadow-sm mb-2">
+      <div className="card-body d-flex">
+        <div className="col-6 d-flex align-items-center gap-2 flex-column flex-md-row">
+          <input
+            className=" form-control text-black bg-white"
+            type="search"
+            placeholder="Search..."
+            onChange={onSearch}
+          />
+        </div>
+        {label && (
+          <div className="col-6 text-end p-0">
+            <button onClick={onShow} className="btn btn-dark">
+              <span>{label}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

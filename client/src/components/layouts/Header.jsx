@@ -1,19 +1,37 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import "../../assets/css/layouts/header.css";
 
 function Header() {
   const navigate = useNavigate();
-
   const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    navigate("/login");
+  };
+
+  const navLinkClass = ({ isActive }) =>
+    `nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 ${
+      isActive ? "active" : ""
+    }`;
+
   return (
-    <nav className="navbar navbar-expand-md bg-white shadow-sm sticky-top px-3">
-      <div className="container-fluid">
-        <NavLink className="navbar-brand fw-medium" to="/">
-          eListam
+    <nav className="navbar navbar-expand-md bg-white border-bottom sticky-top py-2">
+      <div className="container-fluid px-3 px-lg-4">
+        {/* Brand */}
+        <NavLink
+          className="navbar-brand d-flex align-items-center gap-2 fw-bold"
+          to="/"
+        >
+          <span className="text-white bg-dark p-2 px-3">eListam</span>
         </NavLink>
+
+        {/* Mobile Toggle */}
         <button
-          className="navbar-toggler"
+          className="navbar-toggler border-0 shadow-none p-2"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#mainNav"
@@ -21,112 +39,166 @@ function Header() {
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span className="navbar-toggler-icon"></span>
+          <i className="bi bi-list fs-3"></i>
         </button>
-        <div className={`collapse navbar-collapse fw-medium`} id="mainNav">
-          <ul className="navbar-nav me-auto gap-2">
+
+        <div className="collapse navbar-collapse" id="mainNav">
+          {/* Main Navigation */}
+          <ul className="navbar-nav me-auto gap-md-1 mt-3 mt-md-0">
+            {isAuthenticated && (
+              <>
+                <li className="nav-item">
+                  <NavLink className={navLinkClass} to="/dashboard">
+                    <i className="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink className={navLinkClass} to="/items">
+                    <i className="bi bi-box-seam"></i>
+                    <span>Items</span>
+                  </NavLink>
+                </li>
+              </>
+            )}
+
             <li className="nav-item">
-              <NavLink className="nav-link" to="/dashboard">
-                <i className="bi bi-graph-up-arrow"></i>
-                <span className="ms-1">Dashboard</span>
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/items">
-                <i className="bi bi-boxes"></i>
-                <span className="ms-1">Items</span>
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/products">
+              <NavLink className={navLinkClass} to="/products">
                 <i className="bi bi-ui-checks-grid"></i>
-                <span className="ms-1">Products</span>
+                <span>Products</span>
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/transactions">
-                <i className="bi bi-receipt-cutoff"></i>
-                <span className="ms-1">Transactions</span>
-              </NavLink>
-            </li>
-            <hr className=" d-md-inline-block m-0 p-0"></hr>
-            <div className=" d-md-none">
+
+            {isAuthenticated && (
               <li className="nav-item">
-                <NavLink className="nav-link" to="/transactions">
-                  <i className="bi bi-bag-check-fill"></i>
-                  <span className="ms-1">My Orders</span>
+                <NavLink className={navLinkClass} to="/transactions">
+                  <i className="bi bi-receipt"></i>
+                  <span>Transactions</span>
                 </NavLink>
               </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/transactions">
-                  <i className="bi bi-gear"></i>
-                  <span className="ms-1">Settings</span>
-                </NavLink>
-              </li>
-              <hr className=" d-md-inline-block m-0 p-1"></hr>
-              <li className="nav-item">
-                <NavLink
-                  className="nav-link text-danger"
-                  to="/login"
-                  onClick={() => {
-                    isAuthenticated && localStorage.removeItem("token");
-                    setIsAuthenticated(false);
-                    navigate("/login");
-                  }}
-                >
-                  <i className="bi bi-box-arrow-left"></i>
-                  <span className="ms-1">Logout</span>
-                </NavLink>
-              </li>
+            )}
+
+            {/* Mobile-only links */}
+            <div className="d-md-none">
+              <hr className="my-2" />
+
+              {isAuthenticated && (
+                <>
+                  <li className="nav-item">
+                    <NavLink className={navLinkClass} to="/orders">
+                      <i className="bi bi-bag-check"></i>
+                      <span>My Orders</span>
+                    </NavLink>
+                  </li>
+
+                  <li className="nav-item">
+                    <NavLink className={navLinkClass} to="/settings">
+                      <i className="bi bi-gear"></i>
+                      <span>Settings</span>
+                    </NavLink>
+                  </li>
+
+                  <hr className="my-2" />
+
+                  <li className="nav-item">
+                    <button
+                      type="button"
+                      className="nav-link text-danger border-0 bg-transparent w-100 text-start d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+                      onClick={handleLogout}
+                    >
+                      <i className="bi bi-box-arrow-right"></i>
+                      <span>Logout</span>
+                    </button>
+                  </li>
+                </>
+              )}
+
+              {!isAuthenticated && (
+                <li className="nav-item mt-2">
+                  <button
+                    type="button"
+                    className="btn w-100 rounded-3"
+                    onClick={() => navigate("/login")}
+                  >
+                    Login
+                  </button>
+                </li>
+              )}
             </div>
           </ul>
-          <div className="d-flex gap-2 align-items-center d-none d-md-block">
+
+          {/* Desktop User Menu */}
+          <div className="d-none d-md-flex align-items-center">
             {isAuthenticated ? (
-              <NavLink className="nav-link">
-                <ul className="navbar-nav">
-                  <li className="nav-item dropdown">
-                    <span
-                      className="dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                      // aria-expanded="false"
+              <div className="dropdown">
+                <button
+                  className="btn d-flex align-items-center gap-2 border-0 bg-light rounded-pill px-3 py-2"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <span
+                    className="d-flex align-items-center justify-content-center bg-dark text-white rounded-circle"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    A
+                  </span>
+
+                  <span className="fw-semibold">Admin</span>
+
+                  <i className="bi bi-chevron-down small text-secondary"></i>
+                </button>
+
+                <ul className="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2 p-2">
+                  <li>
+                    <NavLink
+                      className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2"
+                      to="/orders"
                     >
-                      <span className="me-2">Hi, Admin</span>
-                      <i className="bi bi-person-circle"></i>
-                    </span>
-                    <ul className="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <span className="dropdown-item">
-                          <i className="bi bi-bag-check-fill"></i>
-                          <span className="ms-2">My Orders</span>
-                        </span>
-                      </li>
-                      <li>
-                        <span className="dropdown-item">
-                          <i className="bi bi-gear"></i>
-                          <span className="ms-2">Settings</span>
-                        </span>
-                      </li>
-                      <hr className="mx-2 my-0 pt-2" />
-                      <li>
-                        <span
-                          className="dropdown-item text-danger"
-                          to="/login"
-                          onClick={() => {
-                            isAuthenticated && localStorage.removeItem("token");
-                            setIsAuthenticated(false);
-                            navigate("/login");
-                          }}
-                        >
-                          <i className="bi bi-box-arrow-left"></i>
-                          <span className="ms-2">Logout</span>
-                        </span>
-                      </li>
-                    </ul>
+                      <i className="bi bi-bag-check"></i>
+                      <span>My Orders</span>
+                    </NavLink>
+                  </li>
+
+                  <li>
+                    <NavLink
+                      className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2"
+                      to="/settings"
+                    >
+                      <i className="bi bi-gear"></i>
+                      <span>Settings</span>
+                    </NavLink>
+                  </li>
+
+                  <li>
+                    <hr className="dropdown-divider my-2" />
+                  </li>
+
+                  <li>
+                    <button
+                      type="button"
+                      className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2 text-danger"
+                      onClick={handleLogout}
+                    >
+                      <i className="bi bi-box-arrow-right"></i>
+                      <span>Logout</span>
+                    </button>
                   </li>
                 </ul>
-              </NavLink>
+              </div>
             ) : (
-              <button className={`btn btn-dark fw-medium`}>Login</button>
+              <button
+                type="button"
+                className="btn bg-success-subtle rounded-pill px-4 fw-semibold"
+                onClick={() => navigate("/login")}
+              >
+                Sign In
+              </button>
             )}
           </div>
         </div>

@@ -1,26 +1,15 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import Toolbar from "../../components/common/Toolbar";
 import { ItemContext } from "../../context/ItemContext";
 import ItemModal from "../../components/items/ItemModal";
 import ItemTable from "../../components/items/ItemTable";
 import Swal from "sweetalert2";
-import { toast } from "react-toastify";
 
 function Items() {
   const { createItem, getItems, updateItem, deleteItem, isLoading } =
     useContext(ItemContext);
 
-  const [items, setItems] = useState(null);
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      const result = await getItems();
-      setItems(result);
-    };
-
-    fetchItems();
-  }, []);
-
+  const [items, setItems] = useState([]);
   const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -35,6 +24,21 @@ function Items() {
     image: null,
   });
 
+  // Fetch items
+  const fetchItems = async () => {
+    try {
+      const result = await getItems();
+      setItems(result || []);
+    } catch (error) {
+      console.error("Failed to fetch items:", error);
+      setItems([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
   const resetFormData = () => {
     setFormData({
       name: "",
@@ -46,44 +50,23 @@ function Items() {
     });
   };
 
-  // Filter items
-  // const filteredItems = items.filter((item) => item.name.includes(searchInput));
-
-  // // Sort items
-  // const { name, price } = sortBy;
-  // switch (sortBy) {
-  //   case price?.asc.value:
-  //     filteredItems.sort((current, next) => current.price - next.price);
-  //     break;
-  //   case price?.desc.value:
-  //     filteredItems.sort((current, next) => next.price - current.price);
-  //     break;
-  //   case name?.asc.value:
-  //     filteredItems.sort((current, next) =>
-  //       current.name.localeCompare(next.name),
-  //     );
-  //     break;
-  //   case name?.desc.value:
-  //     filteredItems.sort((current, next) =>
-  //       next.name.localeCompare(current.name),
-  //     );
-  //     break;
-  //   default:
-  //     break;
-  // }
-
   const handleSearchInput = (e) => {
-    e.preventDefault();
     setSearchInput(e.target.value);
   };
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (name == "image") {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    if (name === "image") {
+      setFormData((prev) => ({
+        ...prev,
+        image: files?.[0] || null,
+      }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
@@ -96,13 +79,19 @@ function Items() {
   const handleSubmit = async (formData) => {
     try {
       const formDataToSend = new FormData();
+
       formDataToSend.append("Name", formData.name);
       formDataToSend.append("Description", formData.description);
       formDataToSend.append("Price", formData.price);
       formDataToSend.append("Quantity", formData.quantity);
-      formDataToSend.append("File", formData.image);
+      formDataToSend.append("ExpirationDate", formData.expirationDate);
+
+      if (formData.image) {
+        formDataToSend.append("File", formData.image);
+      }
 
       let result;
+
       if (selectedItem) {
         result = await updateItem(selectedItem.id, formDataToSend);
       } else {
@@ -110,9 +99,12 @@ function Items() {
       }
 
       if (result?.isSuccess) {
-        await getItems();
+        await fetchItems();
         setShowModal(false);
-        Swal.fire({
+        setSelectedItem(null);
+        resetFormData();
+
+        await Swal.fire({
           title: `Item ${selectedItem ? "updated" : "created"} successfully!`,
           icon: "success",
           timer: 2000,
@@ -120,7 +112,13 @@ function Items() {
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to save item:", error);
+
+      Swal.fire({
+        title: "Something went wrong",
+        text: "Unable to save the item.",
+        icon: "error",
+      });
     }
   };
 
@@ -128,11 +126,11 @@ function Items() {
     setSelectedItem(item);
 
     setFormData({
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      quantity: item.quantity,
-      expirationDate: item.expirationDate,
+      name: item.name || "",
+      description: item.description || "",
+      price: item.price || 0,
+      quantity: item.quantity || 0,
+      expirationDate: item.expirationDate || "",
       image: null,
     });
 
@@ -140,34 +138,51 @@ function Items() {
   };
 
   const handleDeleteItem = async (item) => {
-    setSelectedItem(item);
     try {
       const result = await Swal.fire({
-        title: `Are you sure you want to delete ${item.name}?`,
-        text: "You won't be able to revert this!",
+        title: `Delete ${item.name}`,
+        html: `
+        <p style="margin-bottom: 8px; color: #555;">
+            Are you sure you want to delete
+            <strong style="color: #d33;">${item.name}</strong>?
+        </p>
+        <p style="font-size: 13px; color: #888; margin-bottom: 0;">
+            This action cannot be undone.
+        </p>
+    `,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        focusCancel: true,
       });
 
       if (result.isConfirmed) {
-        const result = await deleteItem(item.id);
+        const deleteResult = await deleteItem(item.id);
 
-        if (result?.isSuccess) {
-          Swal.fire({
+        if (deleteResult?.isSuccess) {
+          await fetchItems();
+
+          await Swal.fire({
             title: "Deleted!",
-            timer: 2000,
             text: `${item.name} has been deleted.`,
             icon: "success",
+            timer: 2000,
+            showConfirmButton: true,
           });
-
-          await getItems();
         }
       }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to delete item:", error);
+
+      Swal.fire({
+        title: "Something went wrong",
+        text: "Unable to delete the item.",
+        icon: "error",
+      });
     }
   };
 
@@ -177,37 +192,57 @@ function Items() {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setSelectedItem(null);
+    resetFormData();
   };
 
+  const totalItems = items.length;
+
   return (
-    <div className="p-0">
-      <div className="container">
-        <div className="row p-3">
-          <div className="p-0 d-flex justify-content-between align-items-center">
-            <h3 className="">List of Items</h3>
-            <h6 className="">Total Items:{items?.length}</h6>
-          </div>
+    <div className="container px-2 px-sm-3 px-md-4 py-2">
+      {/* Header */}
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+        <div className="min-w-0">
+          <h3 className="fw-bold mb-0">Item List</h3>
+
+          <p className="text-muted small mb-0">
+            Manage your products, inventory, and item details.
+          </p>
         </div>
-        <div className="row py-2 mb-2 p-3">
-          <Toolbar
-            onShow={handleAddItem}
-            onSearch={handleSearchInput}
-            onSort={handleSortBy}
-            items={items}
-            sortBy={sortBy}
-            label={
-              <>
-                <i className="bi bi-plus-circle"></i> Add Item
-              </>
-            }
-          />
-        </div>
+
+        <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2 flex-shrink-0">
+          <i className="bi bi-box-seam me-1"></i>
+          {totalItems} {totalItems === 1 ? "Item" : "Items"}
+        </span>
+      </div>
+
+      {/* Toolbar */}
+
+      <Toolbar
+        onShow={handleAddItem}
+        onSearch={handleSearchInput}
+        onSort={handleSortBy}
+        items={items}
+        sortBy={sortBy}
+        searchInput={searchInput}
+        label={
+          <>
+            <i className="bi bi-plus-circle me-1"></i>
+            Add Item
+          </>
+        }
+      />
+
+      {/* Items Table */}
+      <div className="card border-0 shadow-sm p-3">
         <ItemTable
           items={items}
           onEdit={handleEditItem}
           onDelete={handleDeleteItem}
         />
       </div>
+
+      {/* Item Modal */}
       {showModal && (
         <ItemModal
           onClose={handleCloseModal}

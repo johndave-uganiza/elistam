@@ -2,31 +2,36 @@ import { useContext, useEffect, useState } from "react";
 import { OrderContext } from "../../context/OrderContext";
 import OrderTable from "./OrderTable";
 import Swal from "sweetalert2";
+import { PAYMENT_METHODS } from "../../utilities/constants";
 
 function OrderModal({ onClose }) {
-  const { getOrder, confirmOrder, isLoading, updateOrder } =
-    useContext(OrderContext);
+  const { getOrder, confirmOrder, isLoading } = useContext(OrderContext);
+
   const [order, setOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   useEffect(() => {
     const fetchOrder = async () => {
       const result = await getOrder();
+
       if (result?.data) {
         const { id, date, totalPrice, orderDetails } = result.data;
+
         setOrder({
-          date: date,
-          id: id,
-          totalPrice: totalPrice,
-          orderDetails: orderDetails?.map((detail) => ({
-            id: detail.id,
-            orderId: id,
-            productId: detail.productId,
-            name: detail.name,
-            description: detail.description,
-            price: detail.price,
-            quantity: detail.quantity,
-            image: detail.image,
-          })),
+          id,
+          date,
+          totalPrice,
+          orderDetails:
+            orderDetails?.map((detail) => ({
+              id: detail.id,
+              orderId: id,
+              productId: detail.productId,
+              name: detail.name,
+              description: detail.description,
+              price: detail.price,
+              quantity: detail.quantity,
+              image: detail.image,
+            })) || [],
         });
       }
     };
@@ -36,188 +41,244 @@ function OrderModal({ onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!order?.id || !paymentMethod) return;
+
     const result = await confirmOrder(order.id);
+
     if (result?.isSuccess) {
-      Swal.fire({
-        title: `Order confirmed successfully!`,
+      await Swal.fire({
+        title: "Order confirmed!",
         icon: "success",
-        timer: 2000,
+        // confirmButtonColor: "#0d6efd",
+        timer: 1800,
         showConfirmButton: true,
       });
-      const result = await getOrder();
-      setOrder(result.data);
+
+      const updatedOrder = await getOrder();
+      setOrder(updatedOrder?.data || null);
+      setPaymentMethod("");
     }
   };
 
-  const handleRemove = async (orderId, orderDetail) => {
-    try {
-      const updatedOrder = {
-        ...order,
-        orderDetails: order.orderDetails.filter(
-          (detail) => detail.id !== orderDetail.id,
-        ),
-      };
+  const hasItems = order?.orderDetails?.length > 0;
 
-      setOrder(updatedOrder);
+  const formattedDate = order?.date
+    ? new Date(order.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 
-      const result = await updateOrder(orderId, updatedOrder);
-
-      if (result.isSuccess) {
-        const order = await getOrder();
-        setOrder(order.data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleUpdate = async (orderId, orderDetail) => {
-    try {
-      const updatedOrder = {
-        ...order,
-        orderDetails: order.orderDetails.map((detail) =>
-          detail.id == orderDetail.id && orderDetail.orderId == orderId
-            ? orderDetail
-            : detail,
-        ),
-      };
-
-      setOrder(updatedOrder);
-
-      const result = await updateOrder(orderId, updatedOrder);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const itemCount =
+    order?.orderDetails?.reduce(
+      (total, item) => total + (item.quantity || 0),
+      0,
+    ) || 0;
 
   return (
     <>
-      <div className="modal-backdrop show"></div>
+      <div className="modal-backdrop fade show"></div>
+
       <div
         className="modal fade show"
         tabIndex="-1"
+        role="dialog"
+        aria-modal="true"
         style={{ display: "block" }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-lg">
-          <div className="modal-content">
-            <div className="modal-header bg-secondary-subtle">
-              <h1 className="modal-title fs-5">Order-###</h1>
+        <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div
+            className="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+            style={{
+              minHeight: "calc(100vh - 2rem)",
+              marginTop: "1rem",
+              marginBottom: "1rem",
+            }}
+          >
+            {/* Header */}
+            <div className="modal-header px-3 py-2 bg-dark text-white border-0">
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="rounded-3 bg-primary d-flex align-items-center justify-content-center"
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                  }}
+                >
+                  <i className="bi bi-bag-check"></i>
+                </div>
+
+                <div>
+                  <h6 className="modal-title mb-0 fw-semibold">
+                    Order #{order?.id || "—"}
+                  </h6>
+
+                  {formattedDate && (
+                    <small className="text-white-50">
+                      {formattedDate} · {itemCount} item
+                      {itemCount !== 1 ? "s" : ""}
+                    </small>
+                  )}
+                </div>
+              </div>
+
               <button
                 onClick={onClose}
                 type="button"
-                className="btn-close"
-              ></button>
+                className="btn-close btn-close-white"
+                aria-label="Close"
+              />
             </div>
-            <div className="modal-body">
+
+            {/* Body */}
+            <div className="modal-body p-3 bg-light">
+              {/* Loading */}
               {!order && isLoading && (
                 <div
-                  className="card d-flex justify-content-center align-items-center text-secondary"
-                  style={{ minHeight: "400px" }}
+                  className="bg-white rounded-3 d-flex align-items-center justify-content-center gap-2"
+                  style={{ minHeight: "300px" }}
                 >
-                  <div className="d-flex justify-content-center">
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <h3 className="ms-2">Loading...</h3>
-                  </div>
+                  <div
+                    className="spinner-border spinner-border-sm text-primary"
+                    role="status"
+                  />
+
+                  <span className="text-muted">Loading order...</span>
                 </div>
               )}
 
-              {(!order || order?.orderDetails?.length === 0) && !isLoading && (
+              {/* Empty */}
+              {!isLoading && !hasItems && (
                 <div
-                  className="card d-flex justify-content-center align-items-center text-secondary"
-                  style={{ minHeight: "400px" }}
+                  className="bg-white rounded-3 d-flex flex-column justify-content-center align-items-center text-center"
+                  style={{ minHeight: "500px" }}
                 >
-                  <div className="d-flex flex-column justify-content-center align-items-center">
-                    <h3>There are 0 pending items.</h3>
-                    <i
-                      className="bi bi-bag text-secondary"
-                      style={{ fontSize: "7rem" }}
-                    ></i>
-                  </div>
+                  <i
+                    className="bi bi-bag-x text-secondary mb-2"
+                    style={{ fontSize: "3rem" }}
+                  />
+
+                  <h6 className="fw-semibold mb-1">No pending items</h6>
+
+                  <small className="text-muted">
+                    Your order doesn't have any pending items.
+                  </small>
                 </div>
               )}
-              {order?.orderDetails?.length > 0 && (
-                <form
-                  id="confirmOrderForm"
-                  onSubmit={handleSubmit}
-                  className="flex-fill d-flex flex-column"
-                  style={{ minHeight: "400px" }}
-                >
+
+              {/* Order */}
+              {hasItems && (
+                <form id="confirmOrderForm" onSubmit={handleSubmit}>
                   <fieldset disabled={isLoading}>
-                    <div className="d-flex justify-content-between">
-                      <div className="d-flex align-items-center gap-2 justify-content-end">
-                        <div className="dropdown">
-                          <button
-                            className="btn btn-sm dropdown-toggle border-black text-muted"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            Select Payment Method *
-                          </button>
-                          <ul className="dropdown-menu">
-                            <hr className="p-0 m-0 mx-1" />
-                            <li>
-                              <a className="dropdown-item">Cash</a>
-                            </li>
-                            <hr className="p-0 m-0 mx-1" />
-                            <li>
-                              <a className="dropdown-item">Stripe</a>
-                            </li>
-                            <hr className="p-0 m-0 mx-1" />
-                            <li>
-                              <a className="dropdown-item">Credit</a>
-                            </li>
-                            <hr className="p-0 m-0 mx-1" />
-                          </ul>
+                    <div className="bg-black rounded-3 border p-3 mb-2 text-white">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                          <h6 className="mb-0 fw-semibold">
+                            <i className="bi bi-info-circle text-warning me-2"></i>
+                            Pay with ·
+                            {paymentMethod ? (
+                              <small className="text-white-50 ms-1">
+                                {paymentMethod}
+                              </small>
+                            ) : (
+                              <span className="text-white-50 ms-1">--</span>
+                            )}
+                          </h6>
+
+                          <small className="text-white-50">
+                            Select a Payment Method
+                          </small>
+                        </div>
+
+                        <div>
+                          <h6 className="mb-0 fw-semibold">Total</h6>
+
+                          <span className="fs-5 fw-bold">
+                            ${Number(order.totalPrice || 0).toFixed(2)}
+                          </span>
                         </div>
                       </div>
+
+                      <div className="row g-2">
+                        {PAYMENT_METHODS.map((method) => {
+                          const selected = paymentMethod === method.value;
+
+                          return (
+                            <div className="col-4" key={method.value}>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMethod(method.value)}
+                                className={`btn btn-sm w-100 py-2 ${
+                                  selected ? "btn-primary" : "btn-light"
+                                }`}
+                              >
+                                <i className={`bi ${method.icon} me-1`}></i>
+
+                                {method.value}
+
+                                {selected && (
+                                  <i className="bi bi-check ms-1"></i>
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <hr className="my-2" />
-                    <div className="row flex-fill">
-                      <OrderTable
-                        order={order}
-                        onRemove={handleRemove}
-                        onUpdate={handleUpdate}
-                      />
-                    </div>
-                    <hr className="py-1 my-0" />
-                    <div className="d-flex justify-content-end">
-                      <div className="d-flex align-items-center gap-2 justify-content-end col-2">
-                        <label className="fw-medium">Total:</label>
-                        <input
-                          className="form-control bg-white fw-bold text-end"
-                          style={{ minWidth: "100px" }}
-                          disabled
-                          placeholder="$0.00"
-                          value={`$${order?.totalPrice?.toFixed(2)}`}
-                        />
+
+                    {/* Order Items */}
+                    <div className="bg-white rounded-3 border overflow-hidden">
+                      <div className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                        <h6 className="mb-0 fw-semibold">Order items</h6>
+
+                        <small className="text-muted">
+                          {itemCount} item
+                          {itemCount !== 1 ? "s" : ""}
+                        </small>
+                      </div>
+
+                      <div className="p-1">
+                        <OrderTable order={order} setOrder={setOrder} />
                       </div>
                     </div>
                   </fieldset>
                 </form>
               )}
             </div>
-            <div className="modal-footer bg-secondary-subtle">
-              <button onClick={onClose} type="button" className="btn btn-dark">
+
+            {/* Footer */}
+            <div className="modal-footer px-3 py-2 bg-white border-top">
+              <button
+                onClick={onClose}
+                type="button"
+                className="btn btn-light border px-3 fw-medium"
+              >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-success px-3 fw-medium"
                 form="confirmOrderForm"
-                disabled={!order}
+                disabled={!hasItems || !paymentMethod || isLoading}
               >
-                {isLoading && (
-                  <div
-                    className="spinner-border spinner-border-sm me-1"
-                    role="status"
-                  >
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
+                {isLoading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-1"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    Confirming...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-circle me-1"></i>
+                    Confirm Order
+                  </>
                 )}
-                Confirm Order
               </button>
             </div>
           </div>

@@ -137,6 +137,7 @@ namespace eListam.Application.Services.Implementations
             }
 
             order.Date = req.Date ?? order.Date;
+            order.TotalPrice = req.OrderDetails.Sum(o => o.Price * o.Quantity);
 
             await _orderRepo.SaveChangesAsync();
             return result.Success(MapGetOrderResponse(order));
@@ -183,8 +184,9 @@ namespace eListam.Application.Services.Implementations
             order.UserId = _userId;
             order.Date = DateTime.UtcNow;
             order.IsCompleted = true;
+            var transactionNumber = await _transactionRepo.GenerateTransactionNumberAsync();
 
-            await _transactionRepo.CreateAsync(MapTransaction(order));
+            await _transactionRepo.CreateAsync(MapTransaction(order, transactionNumber));
 
             return result.Success(MapGetOrderResponse(order));
         }
@@ -217,10 +219,12 @@ namespace eListam.Application.Services.Implementations
         #endregion
 
         #region MapTransaction
-        private Transaction MapTransaction(Order order)
+        private Transaction MapTransaction(Order order, string transactionNumber)
         {
+            
             return new Transaction()
             {
+                TransactionNumber = transactionNumber,
                 Date = order.Date,
                 IsCompleted = order.IsCompleted,
                 OrderId = order.Id,
