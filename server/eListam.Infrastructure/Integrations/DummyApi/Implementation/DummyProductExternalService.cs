@@ -1,10 +1,11 @@
-﻿using eListam.Data.Seeder.SeedData;
+﻿using eListam.Infrastructure.Integrations.DummyApi.Interface;
+using eListam.Infrastructure.Persistence.Seeders.SeedData;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace eListam.Infrastructure.ExternalServices.Implementation
+namespace eListam.Infrastructure.Integrations.DummyApi.Implementation
 {
     public class DummyProductExternalService : IDummyProductExternalService
     {

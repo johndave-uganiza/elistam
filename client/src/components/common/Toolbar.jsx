@@ -1,7 +1,7 @@
 function Toolbar({ onShow, onSearch, label }) {
   return (
     <div className="card border-0 shadow-sm mb-2">
-      <div className="card-body d-flex">
+      <div className="card-body d-flex p-2 p-md-3">
         <div className="col-6 d-flex align-items-center gap-2 flex-column flex-md-row">
           <input
             className=" form-control text-black bg-white"

@@ -1,5 +1,6 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Products;
+using eListam.Application.Services.Abstractions.Items;
 using eListam.Application.Services.Abstractions.Products;
 using eListam.Domain.Models;
 
@@ -7,12 +8,12 @@ namespace eListam.Application.Services.Implementations
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepo;
+        private readonly IItemRepository _itemRepository;
 
         #region Constructor
-        public ProductService(IProductRepository productRepo)
+        public ProductService(IItemRepository itemRepository)
         {
-            _productRepo = productRepo;
+            _itemRepository = itemRepository;
         }
         #endregion
 
@@ -21,7 +22,9 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetProductResponse>>();
 
-            var products = await _productRepo.GetAsync();
+            var products = (await _itemRepository.GetAsync())
+                .Where(o => o.Stock > 0)
+                .OrderByDescending(o => o.Id);
 
             return result.Success(products.Select(MapGetProductResponse));
         }
@@ -32,7 +35,7 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetProductResponse>();
 
-            var item = await _productRepo.GetByIdAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
                 return result.Success("Product does not exist!");
@@ -48,12 +51,12 @@ namespace eListam.Application.Services.Implementations
         {
             return new GetProductResponse()
             {
-                Id = item.Id,
+                ItemId = item.Id,
                 Name = item.Name,
                 Description = item.Description,
                 Image = item.Image ?? "",
                 Price = item.Price,
-                Quantity = item.Quantity,
+                Stock = item.Stock,
             };
         }
         #endregion

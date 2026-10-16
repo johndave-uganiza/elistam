@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace eListam.Application.DTOs.Orders
 {
     public class ConfirmOrderRequest
     {
-        [Required]
-        public int OrderId { get; set; }
-        public bool IsCompleted { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
     }
 }

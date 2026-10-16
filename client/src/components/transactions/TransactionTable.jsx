@@ -1,6 +1,5 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import TransactionModal from "./TransactionModal";
-import { TransactionContext } from "../../context/TransactionContext";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
 import eListam from "@/utilities//eListam";
@@ -137,6 +136,13 @@ function TransactionTable({ transactions, exportTransaction }) {
                 />
 
                 <SortHeader
+                  label="Payment Method"
+                  sortKey="paymentMethod"
+                  sortConfig={sortConfig}
+                  onSort={handleSort}
+                />
+
+                <SortHeader
                   label="Status"
                   sortKey="status"
                   sortConfig={sortConfig}
@@ -218,6 +224,17 @@ function TransactionTable({ transactions, exportTransaction }) {
                             {eListam.utils.formatDate(tran.date)}
                           </span>
                         </div>
+                      </td>
+
+                      {/* Status */}
+                      <td>
+                        <span
+                          className={`badge rounded-pill ${getStatusClass(
+                            status,
+                          )}`}
+                        >
+                          {status}
+                        </span>
                       </td>
 
                       {/* Status */}
@@ -437,7 +454,7 @@ function TransactionTable({ transactions, exportTransaction }) {
 
                           <div className="small text-muted mt-1">
                             <span className="font-monospace">
-                              {tran.orderNumber || "ORDER-###"}
+                              {tran.orderNumber}
                             </span>
                           </div>
                         </div>
@@ -468,7 +485,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                             </small>
 
                             <span className="badge rounded-pill bg-white text-dark border mt-1">
-                              {tran.totalQuantity ?? 0}
+                              {tran.totalQuantity}
                             </span>
                           </div>
                         </div>

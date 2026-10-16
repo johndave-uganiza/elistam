@@ -114,7 +114,7 @@ function ProductCard({ product, onOrderProduct }) {
               >
                 <span className="d-none d-sm-inline">Available - </span>
                 <span className="d-inline d-sm-none">Avail. </span>
-                <strong>{product.quantity}</strong>
+                <strong>{product.stock}</strong>
               </span>
             </div>
 

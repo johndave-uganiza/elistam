@@ -8,48 +8,22 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
-using eListam.Application.Services.Abstractions;
 using eListam.Application.Services.Abstractions.Items;
 using eListam.Application.Services.Abstractions.Products;
 using eListam.Application.Services.Implementations;
-using eListam.Domain.Models;
-using eListam.Infrastructure.ExternalServices;
-using eListam.Infrastructure.ExternalServices.Implementation;
 using eListam.Infrastructure.Persistence;
-using eListam.Infrastructure.Persistence.Repositories;
-using eListam.Infrastructure.Seeders;
-using eListam.Infrastructure.Storage;
 using eListam.Application.Services.Abstractions.Auth;
 using eListam.Application.Services.Abstractions.Orders;
 using eListam.Application.Services.Abstractions.Transactions;
+using eListam.Application.Services.Abstractions.Dashboard;
+using eListam.Infrastructure.Generators;
+using eListam.Infrastructure;
+using eListam.Infrastructure.Persistence.Seeders;
+using eListam.Application.Common.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Add ApplicationDbContext in the container and configure database options
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-// Add Identity System in the container
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-// Add HttpClient service
-builder.Services.AddHttpClient();
-
-#region Infrastructure Services
-builder.Services.AddScoped<IdentitySeeder>();
-builder.Services.AddScoped<DummyProductSeeder>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IDummyProductExternalService, DummyProductExternalService>();
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IFileStorage, FileStorage>();
-#endregion
+builder.Services.AddInfrastructure(builder.Configuration);
 
 #region Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -57,6 +31,8 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDocumentNumberGenerator, DocumentNumberGenerator>();
 #endregion
 
 #region Auth Services

@@ -1,31 +1,41 @@
 ﻿using eListam.Application.Common;
+using eListam.Application.Common.Interfaces;
 using eListam.Application.DTOs.Orders;
+using eListam.Application.DTOs.Transactions;
 using eListam.Application.Services.Abstractions.Auth;
 using eListam.Application.Services.Abstractions.Items;
 using eListam.Application.Services.Abstractions.Orders;
 using eListam.Application.Services.Abstractions.Transactions;
+using eListam.Domain.Constants;
 using eListam.Domain.Models;
 
 namespace eListam.Application.Services.Implementations
 {
     public class OrderService : IOrderService
     {
-        private readonly IOrderRepository _orderRepo;
-        private readonly IItemRepository _itemRepo;
-        private readonly ITransactionRepository _transactionRepo;
+        #region Fields
+        private readonly IOrderRepository _orderRepository;
+        private readonly IItemService _itemService;
+        private readonly ITransactionService _transactionService;
         private readonly IAuthService _authService;
+        private readonly IDocumentNumberGenerator _documentNumberGenerator;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly string _userId;
+        #endregion
 
         #region Constructor
-        public OrderService(IOrderRepository orderRepo,
-            IItemRepository itemRepo,
-            ITransactionRepository transactionRepo,
-            IAuthService authService)
+        public OrderService(IOrderRepository orderRepository,
+            IItemService itemService,
+            ITransactionService transactionService,
+            IAuthService authService,
+            IDocumentNumberGenerator documentNumberGenerator, IUnitOfWork unitOfWork)
         {
-            _orderRepo = orderRepo;
-            _itemRepo = itemRepo;
-            _transactionRepo = transactionRepo;
+            _orderRepository = orderRepository;
+            _itemService = itemService;
+            _transactionService = transactionService;
             _authService = authService;
+            _documentNumberGenerator = documentNumberGenerator;
+            _unitOfWork = unitOfWork;
             _userId = _authService.GetUserId() ?? string.Empty;
         }
         #endregion
@@ -35,7 +45,7 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
            
-            var order = (await _orderRepo.GetAsync()).FirstOrDefault(o => !o.IsCompleted);
+            var order = (await _orderRepository.GetAsync()).FirstOrDefault(o => !o.IsCompleted);
 
             if (order == null)
                 return result.Success($"There is no pending order.");
@@ -49,7 +59,7 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var order = await _orderRepo.GetByIdAsync(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
                 return result.Failure($"{nameof(Order)} does not exist!");
@@ -67,40 +77,88 @@ namespace eListam.Application.Services.Implementations
             if (string.IsNullOrEmpty(_userId))
                 return result.Failure($"User does not exist!");
             
-            var item = await _itemRepo.GetByIdAsync(req.OrderDetail.ProductId);
+            var item = (await _itemService.GetByIdAsync(req.OrderDetails.First().ItemId)).Data;
 
-            if(item == null || item.Quantity <= 0)
-                return result.Failure($"{nameof(Order)} does not exist!");
-            
-            var orders = await _orderRepo.GetAsync();
-            var existingOrder = orders.FirstOrDefault(o => !o.IsCompleted);
+            if(item == null || item.Stock <= 0)
+                return result.Failure($"Order does not exist!");
 
-            // Create new order if an order doesn't exist
-            if (existingOrder == null)
+            var quantity = req.OrderDetails.First().Quantity;
+            var price = req.OrderDetails.First().Price;
+            var date = req.Date ?? DateTime.UtcNow;
+            var orderNumber = await _documentNumberGenerator.GenerateDocumentNumberAsync(DocumentType.Order);
+
+            var order = await _orderRepository.CreateAsync(new Order()
             {
-                // Create new Order
-                var order = await _orderRepo.CreateAsync(MapOrder(item, req));
-                return result.Success(MapGetOrderResponse(order), $"New Order created successfully!");
-            }
-
-            existingOrder.UserId = _userId;
-            existingOrder.TotalPrice += (item.Price * req.OrderDetail.Quantity);
-            existingOrder.TotalQuantity += req.OrderDetail.Quantity;
-
-            // Add order detail for an existing order
-            existingOrder.OrderDetails.Add(new OrderDetail()
-            {
-                //OrderId = existingOrder.Id,
-                Quantity = req.OrderDetail.Quantity,
-                Description = item.Description,
-                Image = item.Image ?? string.Empty,
-                Name = item.Name,
-                Price = item.Price,
-                ItemId = item.Id
+                UserId = _userId,
+                TotalQuantity = quantity,
+                TotalPrice = quantity * price,
+                OrderNumber = orderNumber,
+                Date = date,
+                IsCompleted = false,
+                OrderDetails = [new OrderDetail()
+                    {
+                        ItemId = item.Id,
+                        Name = item.Name,
+                        Description = item.Description,
+                        Price = item.Price,
+                        Quantity = quantity,
+                        Image = item.Image ?? string.Empty,
+                    }]
             });
 
-            await _orderRepo.SaveChangesAsync();
-            return result.Success(MapGetOrderResponse(existingOrder));
+            await _unitOfWork.SaveChangesAsync();
+               
+            return result.Success(MapGetOrderResponse(order));
+        }
+        #endregion
+
+        #region AddOrderDetailAsync
+        public async Task<Result<GetOrderResponse>> AddOrderDetailAsync(int orderId, CreateOrderDetailRequest req)
+        {
+            var result = new Result<GetOrderResponse>();
+
+            var userId = _authService.GetUserId();
+
+            if (string.IsNullOrEmpty(userId))
+                return result.Failure("User does not exist!");
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+
+            if (order == null)
+                return result.Failure("Order does not exist!");
+
+            var item = (await _itemService.GetByIdAsync(req.ItemId)).Data;
+
+            if (item == null)
+                return result.Failure("Item does not exist!");
+
+            // Check whether this product is already in the order.
+            var existingDetail = order.OrderDetails.FirstOrDefault(od => od.ItemId == item.Id);
+
+            if (existingDetail != null)
+            {
+                existingDetail.Quantity += req.Quantity;
+            }
+            else
+            {
+                order.OrderDetails.Add(new OrderDetail
+                {
+                    ItemId = item.Id,
+                    Quantity = req.Quantity,
+                    Description = item.Description,
+                    Image = item.Image ?? string.Empty,
+                    Name = item.Name,
+                    Price = item.Price
+                });
+            }
+
+            // Recalculate totals using the actual order details.
+            order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity);
+            order.TotalQuantity = order.OrderDetails.Sum(od => od.Quantity);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return result.Success(MapGetOrderResponse(order));
         }
         #endregion
 
@@ -113,33 +171,31 @@ namespace eListam.Application.Services.Implementations
             if (string.IsNullOrEmpty(_userId))
                 return result.Failure($"User does not exist!");
 
-            var order = await _orderRepo.GetByIdAsync(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
                 return result.Failure($"{nameof(Order)} does not exist!");
-            
-            
+
             // Update existing Order Detail
-            foreach(var detail in req.OrderDetails)
+            foreach (var detail in req.OrderDetails)
             {
                 var existingDetail = order.OrderDetails.FirstOrDefault(od => od.Id == detail.Id);
 
                 if (existingDetail != null)
-                    existingDetail.Quantity = detail.Quantity;
-                
+                    existingDetail?.Quantity = detail.Quantity;
             }
 
             foreach(var detail in order.OrderDetails)
             {
                 if (!req.OrderDetails.Any(od => od.Id == detail.Id))
                     order.OrderDetails.Remove(detail);
-                
             }
 
             order.Date = req.Date ?? order.Date;
             order.TotalPrice = req.OrderDetails.Sum(o => o.Price * o.Quantity);
+            order.TotalQuantity = req.OrderDetails.Sum(o => o.Quantity);
 
-            await _orderRepo.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return result.Success(MapGetOrderResponse(order));
         }
         #endregion
@@ -153,19 +209,20 @@ namespace eListam.Application.Services.Implementations
             if (string.IsNullOrEmpty(_userId))
                 return result.Failure($"User does not exist!");
 
-            var order = await _orderRepo.GetByIdAsync(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
                 return result.Failure($"{nameof(Order)} does not exist!");
 
-            await _orderRepo.DeleteAsync(order);
+            await _orderRepository.DeleteAsync(order);
+            await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetOrderResponse(order));
         }
         #endregion
 
         #region ConfirmOrderAsync
-        public async Task<Result<GetOrderResponse>> ConfirmOrderAsync(int id)
+        public async Task<Result<GetOrderResponse>> ConfirmOrderAsync(int id, ConfirmOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
             var _userId = _authService.GetUserId();
@@ -173,76 +230,60 @@ namespace eListam.Application.Services.Implementations
             if (string.IsNullOrEmpty(_userId))
                 return result.Failure($"User does not exist!");
 
-            var order = await _orderRepo.GetByIdAsync(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if(order == null)
-                return result.Failure($"{nameof(Order)} does not exist!");
+                return result.Failure($"Order does not exist!");
 
             if(order.IsCompleted)
-                return result.Failure($"{nameof(Order)} was already completed!");
+                return result.Failure($"Order was already completed!");
 
-            order.UserId = _userId;
-            order.Date = DateTime.UtcNow;
-            order.IsCompleted = true;
-            var transactionNumber = await _transactionRepo.GenerateTransactionNumberAsync();
+            await _unitOfWork.BeginTransactionAsync();
 
-            await _transactionRepo.CreateAsync(MapTransaction(order, transactionNumber));
-
-            return result.Success(MapGetOrderResponse(order));
-        }
-        #endregion
-
-        #region Mappers
-
-        #region MapOrder
-        private Order MapOrder(Item item, CreateOrderRequest req)
-        {
-            return new Order()
+            try
             {
-                UserId = _userId,
-                TotalQuantity = req.OrderDetail.Quantity,
-                TotalPrice = req.OrderDetail.Price,
-                OrderNumber = Guid.NewGuid().ToString(),
-                Date = req.Date ?? DateTime.UtcNow,
-                IsCompleted = false,
-                OrderDetails = [new OrderDetail()
-                    {
-                        ItemId = item.Id,
-                        Name = item.Name,
-                        Description = item.Description,
-                        Price = item.Price,
-                        Quantity = req.OrderDetail.Quantity,
-                        Image = item.Image ?? string.Empty,
-                    }]
-            };
-        }
-        #endregion
+                order.UserId = _userId;
+                order.IsCompleted = true;
+                order.PaymentMethod = req.PaymentMethod;
 
-        #region MapTransaction
-        private Transaction MapTransaction(Order order, string transactionNumber)
-        {
-            
-            return new Transaction()
-            {
-                TransactionNumber = transactionNumber,
-                Date = order.Date,
-                IsCompleted = order.IsCompleted,
-                OrderId = order.Id,
-                OrderNumber = order.OrderNumber,
-                TotalPrice = order.TotalPrice,
-                TotalQuantity = order.TotalQuantity,
-                UserId = order.UserId,
-                TransactionDetails = order.OrderDetails.Select(od =>
-                new TransactionDetail()
+                var transaction = new CreateTransactionRequest()
                 {
-                    Description = od.Description,
-                    Image = od.Image,
-                    Name = od.Name,
-                    Price = od.Price,
-                    ItemId = od.ItemId,
-                    Quantity = od.Quantity,
-                }).ToList()
-            };
+                    Date = DateTime.UtcNow,
+                    IsCompleted = order.IsCompleted,
+                    OrderId = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    TotalPrice = order.TotalPrice,
+                    TotalQuantity = order.TotalQuantity,
+                    UserId = order.UserId,
+                    PaymentMethod = order.PaymentMethod,
+                    TransactionDetails = order.OrderDetails.Select(od =>
+                    new CreateTransactionDetailRequest()
+                    {
+                        Description = od.Description,
+                        Image = od.Image,
+                        Name = od.Name,
+                        Price = od.Price,
+                        ItemId = od.ItemId,
+                        Quantity = od.Quantity,
+                    }).ToList()
+                };
+
+                foreach (var detail in transaction.TransactionDetails)
+                {
+                    var item = (await _itemService.GetByIdAsync(detail.ItemId)).Data;
+                    item?.Stock -= detail.Quantity;
+                }
+
+                await _transactionService.CreateAsync(transaction);
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+            
+            return result.Success(MapGetOrderResponse(order));
         }
         #endregion
 
@@ -266,13 +307,11 @@ namespace eListam.Application.Services.Implementations
                     Name = od.Name,
                     Id = od.Id,
                     Price = od.Price,
-                    ProductId = od.ItemId,
+                    ItemId = od.ItemId,
                     Quantity = od.Quantity,
                 }),
             };
         }
-        #endregion
-
-        #endregion
+        #endregion  
     }
 }

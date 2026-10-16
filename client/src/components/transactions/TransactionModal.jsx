@@ -1,13 +1,11 @@
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 
 function TransactionModal({ selectedTransaction, onClose }) {
-  const transactionNo = selectedTransaction?.id
-    ? `TRAN-${selectedTransaction.id}`
-    : "TRAN-###";
+  const transactionNumber = selectedTransaction.transactionNumber;
 
-  const orderNo = selectedTransaction?.orderNumber || "ORDER-###";
+  const orderNo = selectedTransaction.orderNumber;
 
-  const status = selectedTransaction?.isCompleted ? "Completed" : "Pending";
+  const status = selectedTransaction.isCompleted ? "Completed" : "Pending";
 
   const totalQuantity = Number(selectedTransaction?.totalQuantity) || 0;
 
@@ -92,7 +90,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                   </h6>
 
                   <small className="text-white-50 text-truncate d-block">
-                    {transactionNo}
+                    {transactionNumber}
                   </small>
                 </div>
               </div>
@@ -127,7 +125,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                     </small>
 
                     <span className="fw-semibold text-truncate d-block">
-                      {transactionNo}
+                      {transactionNumber}
                     </span>
                   </div>
 
@@ -179,44 +177,40 @@ function TransactionModal({ selectedTransaction, onClose }) {
                 {transactionDetails.length > 0 ? (
                   <>
                     {/* -----------------------------------------
-                        DESKTOP PRODUCT TABLE
-                    ------------------------------------------ */}
-                    <div className="d-none d-md-block table-responsive">
+                          DESKTOP PRODUCT TABLE - VERTICAL SCROLL
+                      ------------------------------------------ */}
+                    <div
+                      className="d-none d-md-block table-responsive"
+                      style={{
+                        maxHeight: "300px",
+                        overflowY: "auto",
+                        overflowX: "auto",
+                      }}
+                    >
                       <table className="table table-hover align-middle mb-0">
-                        <thead className="table-light">
+                        <thead
+                          className="table-light"
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                          }}
+                        >
                           <tr>
-                            <th
-                              style={{
-                                minWidth: "250px",
-                              }}
-                            >
-                              Product
-                            </th>
+                            <th style={{ minWidth: "250px" }}>Product</th>
 
                             <th
                               className="text-center"
-                              style={{
-                                width: "80px",
-                              }}
+                              style={{ width: "80px" }}
                             >
                               Qty
                             </th>
 
-                            <th
-                              className="text-end"
-                              style={{
-                                width: "120px",
-                              }}
-                            >
+                            <th className="text-end" style={{ width: "120px" }}>
                               Price
                             </th>
 
-                            <th
-                              className="text-end"
-                              style={{
-                                width: "130px",
-                              }}
-                            >
+                            <th className="text-end" style={{ width: "130px" }}>
                               Subtotal
                             </th>
                           </tr>
@@ -225,14 +219,11 @@ function TransactionModal({ selectedTransaction, onClose }) {
                         <tbody>
                           {transactionDetails.map((item, index) => {
                             const quantity = Number(item.quantity) || 0;
-
                             const price = Number(item.price) || 0;
-
                             const subtotal = quantity * price;
 
                             return (
                               <tr key={item.id || index}>
-                                {/* Product */}
                                 <td>
                                   <div className="d-flex align-items-center gap-2">
                                     <img
@@ -240,7 +231,6 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                       alt={item.name || "Product"}
                                       onError={(e) => {
                                         e.currentTarget.onerror = null;
-
                                         e.currentTarget.src =
                                           IMAGE_PLACEHOLDER_URL;
                                       }}
@@ -252,11 +242,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                       }}
                                     />
 
-                                    <div
-                                      style={{
-                                        minWidth: 0,
-                                      }}
-                                    >
+                                    <div style={{ minWidth: 0 }}>
                                       <div
                                         className="fw-semibold text-truncate"
                                         title={item.name}
@@ -267,9 +253,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                       {item.description && (
                                         <small
                                           className="text-muted d-block text-truncate"
-                                          style={{
-                                            maxWidth: "250px",
-                                          }}
+                                          style={{ maxWidth: "250px" }}
                                           title={item.description}
                                         >
                                           {item.description}
@@ -279,19 +263,16 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                   </div>
                                 </td>
 
-                                {/* Quantity */}
                                 <td className="text-center">
                                   <span className="badge text-bg-light border">
                                     {quantity}
                                   </span>
                                 </td>
 
-                                {/* Price */}
                                 <td className="text-end text-nowrap">
                                   ${price.toFixed(2)}
                                 </td>
 
-                                {/* Subtotal */}
                                 <td className="text-end text-nowrap fw-semibold">
                                   ${subtotal.toFixed(2)}
                                 </td>
@@ -426,7 +407,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                   TOTALS
               ================================================ */}
               <div className="bg-white border rounded-3 p-3">
-                <div className="row g-3 align-items-center">
+                <div className="row g-3 align-items-center px-2">
                   {/* Total Items */}
                   <div className="col-12 col-sm-6">
                     <div className="d-flex align-items-center gap-2">

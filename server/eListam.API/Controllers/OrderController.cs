@@ -125,6 +125,42 @@ namespace eListamAPI.Controllers
         }
         #endregion
 
+        #region AddOrderDetailAsync
+        [HttpPost("{orderId:int}/details")]
+        public async Task<IActionResult> AddOrderDetailAsync(int orderId, [FromBody] CreateOrderDetailRequest req)
+        {
+            var result = await _orderService.AddOrderDetailAsync(orderId, req);
+
+            if (result.Data == null)
+            {
+                return BadRequest(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = result.IsSuccess,
+                    Messages = [result.Message]
+                });
+            }
+
+            if (string.IsNullOrEmpty(result.Data.UserId))
+            {
+                return NotFound(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    Messages = [result.Message]
+                });
+            }
+
+            return Ok(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.Created,
+                IsSuccess = result.IsSuccess,
+                Data = result.Data,
+                Messages = [result.Message]
+            });
+        }
+        #endregion
+
         #region UpdateAsync
         [HttpPut("{id:int}")]
         //[ActionName(nameof(UpdateAsync))]
@@ -200,10 +236,10 @@ namespace eListamAPI.Controllers
         #endregion
 
         #region ConfirmOrderAsync
-        [HttpPost("{id:int}/confirm")]
-        public async Task<IActionResult> ConfirmOderAsync(int id)
+        [HttpPost("{id:int}")]
+        public async Task<IActionResult> ConfirmOderAsync(int id, [FromBody] ConfirmOrderRequest req)
         {
-            var result = await _orderService.ConfirmOrderAsync(id);
+            var result = await _orderService.ConfirmOrderAsync(id, req);
 
             if (result.Data == null)
             {

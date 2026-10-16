@@ -1,7 +1,10 @@
 ﻿using eListam.Application.Common;
+using eListam.Application.Common.Interfaces;
 using eListam.Application.DTOs.Transactions;
 using eListam.Application.Services.Abstractions.Transactions;
+using eListam.Domain.Constants;
 using eListam.Domain.Models;
+using System.Data;
 using System.Text;
 
 namespace eListam.Application.Services.Implementations
@@ -9,11 +12,13 @@ namespace eListam.Application.Services.Implementations
     public class TransactionService : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepo;
+        private readonly IDocumentNumberGenerator _documentNumberGenerator;
 
         #region Constructor
-        public TransactionService(ITransactionRepository transactionRepo)
+        public TransactionService(ITransactionRepository transactionRepo, IDocumentNumberGenerator documentNumberGenerator)
         {
             _transactionRepo = transactionRepo;
+            _documentNumberGenerator = documentNumberGenerator;
         }
         #endregion
 
@@ -45,6 +50,37 @@ namespace eListam.Application.Services.Implementations
         }
         #endregion
 
+        #region CreateAsync
+        public async Task<Result<GetTransactionResponse>> CreateAsync(CreateTransactionRequest req)
+        {
+            var result = new Result<GetTransactionResponse>();
+
+            var transactionNumber = await _documentNumberGenerator.GenerateDocumentNumberAsync(DocumentType.Transaction);
+
+            var transaction = await _transactionRepo.CreateAsync(new Transaction()
+            {
+                TransactionNumber = transactionNumber,
+                Date = req.Date,
+                IsCompleted = req.IsCompleted,
+                OrderNumber = req.OrderNumber,
+                TotalPrice = req.TotalPrice,
+                TotalQuantity = req.TotalQuantity,
+                OrderId = req.OrderId,    
+                TransactionDetails = req.TransactionDetails.Select(td => new TransactionDetail()
+                {
+                    Description = td.Description,
+                    Image = td.Image,
+                    ItemId = td.ItemId,
+                    Name = td.Name,
+                    Price = td.Price,
+                    Quantity = td.Quantity,
+                }).ToList()
+            });
+
+            return result.Success(MapGetTransactionResponse(transaction));
+        }
+        #endregion
+
         #region DeleteAsync
         public async Task<Result<GetTransactionResponse>> DeleteAsync(int id)
         {
@@ -69,8 +105,14 @@ namespace eListam.Application.Services.Implementations
             if (transaction != null)
             {
                 var csv = new StringBuilder();
-                csv.AppendLine("Transaction_Id,Order_Number,Date,Total_Quantity,Total_Price");
-                csv.AppendLine($"{transaction.Id}, {transaction.OrderNumber}, {transaction.Date}, {transaction.TotalQuantity} {transaction.TotalPrice}");
+                csv.AppendLine("Transaction_Id,Transaction_Number,Order_Number,Date,Total_Quantity,Total_Price");
+                csv.AppendLine(
+                    $"{transaction.Id}," +
+                    $"{transaction.TransactionNumber}," +
+                    $"{transaction.OrderNumber}," +
+                    $"{transaction.Date}," +
+                    $"{transaction.TotalQuantity}," +
+                    $"{transaction.TotalPrice}");
 
                 var exportCsvData = new ExportTransactionResponse
                 {
@@ -84,8 +126,6 @@ namespace eListam.Application.Services.Implementations
             return result.Failure();
         }
         #endregion
-
-        #region Mappers
 
         #region MapGetTransactionResponse
         private GetTransactionResponse MapGetTransactionResponse(Transaction tran)
@@ -106,14 +146,12 @@ namespace eListam.Application.Services.Implementations
                     Image = td.Image,
                     Name = td.Name,
                     Price = td.Price,
-                    ProductId = td.ItemId,
+                    ItemId = td.ItemId,
                     Quantity = td.Quantity,
                     TransactionId = td.TransactionId
                 })
             };
         }
-        #endregion
-
         #endregion
     }
 }

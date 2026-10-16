@@ -20,30 +20,63 @@ function Header() {
 
   return (
     <nav className="navbar navbar-expand-md bg-white border-bottom sticky-top py-2">
-      <div className="container-fluid px-3 px-lg-4">
-        {/* Brand */}
-        <NavLink
-          className="navbar-brand d-flex align-items-center gap-2 fw-bold"
-          to="/"
-        >
-          <span className="text-white bg-dark p-2 px-3">eListam</span>
-        </NavLink>
+      <div className="container-fluid px-3 px-lg-4 header-container">
+        {/* Top Header Row */}
+        <div className="header-top-row">
+          {/* Brand */}
+          <NavLink
+            className="navbar-brand d-flex align-items-center gap-2 fw-bold mb-0"
+            to="/"
+          >
+            <span className="text-white bg-dark p-2 px-3">eListam</span>
+          </NavLink>
 
-        {/* Mobile Toggle */}
-        <button
-          className="navbar-toggler border-0 shadow-none p-2"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#mainNav"
-          aria-controls="mainNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <i className="bi bi-list fs-3"></i>
-        </button>
+          {/* Mobile Toggle */}
+          <button
+            className="navbar-toggler border-0 shadow-none p-2"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNav"
+            aria-controls="mainNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i className="bi bi-list fs-3"></i>
+          </button>
+        </div>
 
+        {/* Mobile Quick Navigation */}
+        <div className="mobile-quick-nav d-md-none">
+          {isAuthenticated && (
+            <NavLink to="/dashboard" className={navLinkClass}>
+              <i className="bi bi-grid-1x2-fill"></i>
+              <span>Dashboard</span>
+            </NavLink>
+          )}
+
+          {isAuthenticated && (
+            <NavLink to="/items" className={navLinkClass}>
+              <i className="bi bi-box-seam"></i>
+              <span>Items</span>
+            </NavLink>
+          )}
+
+          <NavLink to="/products" className={navLinkClass}>
+            <i className="bi bi-ui-checks-grid"></i>
+            <span>Products</span>
+          </NavLink>
+
+          {isAuthenticated && (
+            <NavLink to="/transactions" className={navLinkClass}>
+              <i className="bi bi-receipt"></i>
+              <span>Transactions</span>
+            </NavLink>
+          )}
+        </div>
+
+        {/* Collapsible Navigation */}
         <div className="collapse navbar-collapse" id="mainNav">
-          {/* Main Navigation */}
+          {/* Main Navigation - Desktop */}
           <ul className="navbar-nav me-auto gap-md-1 mt-3 mt-md-0">
             {isAuthenticated && (
               <>
@@ -79,7 +112,7 @@ function Header() {
               </li>
             )}
 
-            {/* Mobile-only links */}
+            {/* Mobile Secondary Links */}
             <div className="d-md-none">
               <hr className="my-2" />
 
@@ -118,9 +151,10 @@ function Header() {
                 <li className="nav-item mt-2">
                   <button
                     type="button"
-                    className="btn w-100 rounded-3"
+                    className="btn btn-success w-100 rounded-3"
                     onClick={() => navigate("/login")}
                   >
+                    <i className="bi bi-box-arrow-in-right me-2"></i>
                     Login
                   </button>
                 </li>

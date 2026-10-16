@@ -1,6 +1,6 @@
 ﻿using eListam.Application.Common;
+using eListam.Application.Common.Interfaces;
 using eListam.Application.DTOs.Items;
-using eListam.Application.Services.Abstractions;
 using eListam.Application.Services.Abstractions.Items;
 using eListam.Domain.Models;
 
@@ -8,14 +8,18 @@ namespace eListam.Application.Services.Implementations
 {
     public class ItemService : IItemService
     {
+        #region Fields
         private readonly IItemRepository _itemRepo;
         private readonly IFileStorage _storageRepo;
+        private readonly IUnitOfWork _unitOfWork;
+        #endregion
 
         #region Constructor
-        public ItemService(IItemRepository itemRepo, IFileStorage storageRepo)
+        public ItemService(IItemRepository itemRepo, IFileStorage storageRepo, IUnitOfWork unitOfWork)
         {
             _itemRepo = itemRepo;
             _storageRepo = storageRepo;
+            _unitOfWork = unitOfWork;
         }
         #endregion
 
@@ -24,7 +28,7 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetItemResponse>>();
 
-            var items = await _itemRepo.GetAsync();
+            var items = (await _itemRepo.GetAsync()).OrderByDescending(o => o.Id);
 
             return result.Success(items.Select(MapGetItemResponse));
         }
@@ -50,10 +54,12 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
 
-            if (req.File != null)
-                imagePath = await _storageRepo.SaveImageAsync(req.File);
+            if (req.ImageFile != null)
+                imagePath = await _storageRepo.SaveImageAsync(req.ImageFile);
             
             var item = await _itemRepo.CreateAsync(MapItem(req, imagePath));
+
+            await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetItemResponse(item));
         }
@@ -72,16 +78,17 @@ namespace eListam.Application.Services.Implementations
             
             item.Name = req.Name;
             item.Description = req.Description;
+            item.Cost = req.Cost;
             item.Price = req.Price;
-            item.Quantity = req.Quantity;
+            item.Stock = req.Stock;
             item.ExpirationDate = req.ExpirationDate;
 
-            if (req.File != null)
-                imagePath = await _storageRepo.SaveImageAsync(req.File);
+            if (req.ImageFile != null)
+                imagePath = await _storageRepo.SaveImageAsync(req.ImageFile);
 
             item.Image = imagePath ?? item.Image;
 
-            await _itemRepo.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             
             return result.Success(MapGetItemResponse(item));
         }
@@ -98,7 +105,8 @@ namespace eListam.Application.Services.Implementations
                 return result.Success($"{nameof(Item)} does not exist!");
 
             await _itemRepo.DeleteAsync(item);
-            
+            await _unitOfWork.SaveChangesAsync();
+
             return result.Success(MapGetItemResponse(item));
         }
         #endregion
@@ -115,7 +123,8 @@ namespace eListam.Application.Services.Implementations
                 Description = item.Description,
                 Image = item.Image,
                 Price = item.Price,
-                Quantity = item.Quantity,
+                Cost = item.Cost,
+                Stock = item.Stock,
                 UserId = item.UserId,
                 ExpirationDate = item.ExpirationDate
             };
@@ -130,7 +139,8 @@ namespace eListam.Application.Services.Implementations
                 Name = request.Name,
                 Description = request.Description,
                 Price = request.Price,
-                Quantity = request.Quantity,
+                Cost= request.Cost,
+                Stock = request.Stock,
                 Image = imagePath,
                 UserId = request.UserId,
                 ExpirationDate = request.ExpirationDate

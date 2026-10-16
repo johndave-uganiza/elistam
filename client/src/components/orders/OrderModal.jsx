@@ -4,59 +4,57 @@ import OrderTable from "./OrderTable";
 import Swal from "sweetalert2";
 import { PAYMENT_METHODS } from "../../utilities/constants";
 
-function OrderModal({ onClose }) {
+function OrderModal({ onClose, onSubmit }) {
   const { getOrder, confirmOrder, isLoading } = useContext(OrderContext);
-
   const [order, setOrder] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
 
+  const fetchOrder = async () => {
+    const result = await getOrder();
+
+    if (result?.data) {
+      const { id, date, totalPrice, orderDetails } = result.data;
+
+      setOrder({
+        id,
+        date,
+        totalPrice,
+        paymentMethod,
+        orderDetails:
+          orderDetails?.map((detail) => ({
+            id: detail.id,
+            orderId: id,
+            itemId: detail.itemId,
+            name: detail.name,
+            description: detail.description,
+            price: detail.price,
+            quantity: detail.quantity,
+            image: detail.image,
+          })) || [],
+      });
+    }
+  };
+
   useEffect(() => {
-    const fetchOrder = async () => {
-      const result = await getOrder();
-
-      if (result?.data) {
-        const { id, date, totalPrice, orderDetails } = result.data;
-
-        setOrder({
-          id,
-          date,
-          totalPrice,
-          orderDetails:
-            orderDetails?.map((detail) => ({
-              id: detail.id,
-              orderId: id,
-              productId: detail.productId,
-              name: detail.name,
-              description: detail.description,
-              price: detail.price,
-              quantity: detail.quantity,
-              image: detail.image,
-            })) || [],
-        });
-      }
-    };
-
     fetchOrder();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!order?.id || !paymentMethod) return;
-
-    const result = await confirmOrder(order.id);
+    const result = await confirmOrder(order.id, {
+      paymentMethod: paymentMethod,
+    });
 
     if (result?.isSuccess) {
       await Swal.fire({
         title: "Order confirmed!",
         icon: "success",
-        // confirmButtonColor: "#0d6efd",
         timer: 1800,
         showConfirmButton: true,
       });
-
-      const updatedOrder = await getOrder();
-      setOrder(updatedOrder?.data || null);
+      onSubmit();
+      setOrder((await getOrder()).data);
       setPaymentMethod("");
     }
   };
@@ -79,8 +77,10 @@ function OrderModal({ onClose }) {
 
   return (
     <>
+      {/* Backdrop */}
       <div className="modal-backdrop fade show"></div>
 
+      {/* Modal */}
       <div
         className="modal fade show"
         tabIndex="-1"
@@ -172,6 +172,7 @@ function OrderModal({ onClose }) {
               {hasItems && (
                 <form id="confirmOrderForm" onSubmit={handleSubmit}>
                   <fieldset disabled={isLoading}>
+                    {/* Payment and Total */}
                     <div className="bg-black rounded-3 border p-3 mb-2 text-white">
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <div>
@@ -201,6 +202,7 @@ function OrderModal({ onClose }) {
                         </div>
                       </div>
 
+                      {/* Payment Methods */}
                       <div className="row g-2">
                         {PAYMENT_METHODS.map((method) => {
                           const selected = paymentMethod === method.value;
@@ -230,7 +232,8 @@ function OrderModal({ onClose }) {
 
                     {/* Order Items */}
                     <div className="bg-white rounded-3 border overflow-hidden">
-                      <div className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                      {/* Fixed Header */}
+                      <div className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-white">
                         <h6 className="mb-0 fw-semibold">Order items</h6>
 
                         <small className="text-muted">
@@ -239,7 +242,15 @@ function OrderModal({ onClose }) {
                         </small>
                       </div>
 
-                      <div className="p-1">
+                      {/* Vertically Scrollable Table */}
+                      <div
+                        className="p-1"
+                        style={{
+                          maxHeight: "300px",
+                          overflowY: "auto",
+                          overflowX: "hidden",
+                        }}
+                      >
                         <OrderTable order={order} setOrder={setOrder} />
                       </div>
                     </div>

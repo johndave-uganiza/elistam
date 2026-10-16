@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ProductContext } from "../../context/ProductContext";
 import ProductCard from "../../components/products/ProductCard";
 import { OrderContext } from "../../context/OrderContext";
@@ -6,11 +6,13 @@ import Toolbar from "../../components/common/Toolbar";
 import ProductModal from "../../components/products/ProductModal";
 import OrderModal from "../../components/orders/OrderModal";
 import { toast } from "react-toastify";
+import PageTitle from "../../components/common/PageTitle";
 
 function Products() {
-  const { createOrder } = useContext(OrderContext);
-  const { products, isLoading } = useContext(ProductContext);
+  const { createOrder, addOrderDetail, getOrder } = useContext(OrderContext);
+  const { getProducts, isLoading } = useContext(ProductContext);
 
+  const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -18,13 +20,31 @@ function Products() {
   const [showOrderModal, setShowOrderModal] = useState(false);
 
   const [orderDetail, setOrderDetail] = useState({
-    productId: null,
+    itemId: null,
     name: "",
     description: "",
     price: 0,
     quantity: 1,
     image: "",
   });
+
+  const fetchProducts = async () => {
+    const { data } = await getProducts();
+    const products = data.map((product) => ({
+      itemId: product.itemId,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      image: product.image,
+    }));
+
+    setProducts(products);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   /*
    * Filter and sort products.
@@ -76,8 +96,6 @@ function Products() {
     return result;
   }, [products, searchInput, sortBy]);
 
-  const totalProducts = products?.length ?? 0;
-
   function handleSearchInput(e) {
     setSearchInput(e.target.value);
   }
@@ -87,12 +105,12 @@ function Products() {
   }
 
   function handleOrderProduct(product) {
-    const { description, id, image, name, price } = product;
+    const { description, itemId, image, name, price } = product;
 
     setSelectedProduct(product);
 
     setOrderDetail({
-      productId: id,
+      itemId: itemId,
       name: name,
       description: description,
       price: price,
@@ -117,14 +135,43 @@ function Products() {
   }
 
   async function handleSubmit(orderDetail) {
+    const { data: order } = await getOrder();
+
+    const product = products?.find(
+      (product) => product.itemId === orderDetail.itemId,
+    );
+
+    const detail = order?.orderDetails?.find(
+      (current) => current.itemId === orderDetail.itemId,
+    );
+
+    if (product?.stock <= detail?.quantity) {
+      toast.warn(
+        <span>
+          Maximum quantity for <strong>{product.name}</strong> was already added
+          to order.
+        </span>,
+        {
+          autoClose: 3500,
+        },
+      );
+
+      return;
+    }
+
     try {
-      const result = await createOrder(orderDetail);
+      let result;
+      if (!order) {
+        result = await createOrder(orderDetail);
+      } else {
+        result = await addOrderDetail(order?.id, orderDetail);
+      }
 
       if (result?.isSuccess) {
         setShowModal(false);
         setSelectedProduct(null);
 
-        toast.success("Product ordered successfully!", {
+        toast.success("Product added successfully!", {
           autoClose: 1500,
         });
       }
@@ -161,25 +208,19 @@ function Products() {
     }));
   }
 
+  const handleConfirmOrder = async () => {
+    await fetchProducts();
+  };
+
   return (
     <div className="container px-3 px-md-4 py-2">
-      {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-        <div>
-          <h3 className="fw-bold mb-0">Product Catalog</h3>
-
-          <p className="text-muted small mb-0">
-            Browse available products and place your orders.
-          </p>
-        </div>
-
-        <div className="mt-2 mt-md-0">
-          <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
-            <i className="bi bi-box-seam me-1"></i>
-            {totalProducts} {totalProducts === 1 ? "Product" : "Products"}
-          </span>
-        </div>
-      </div>
+      {/* Page Title */}
+      <PageTitle
+        title={"Product Catalog"}
+        description={"Browse available products and place your orders."}
+        label={"Product"}
+        total={products?.length ?? 0}
+      />
 
       {/* Toolbar */}
 
@@ -204,7 +245,7 @@ function Products() {
           {/* Loading State */}
           {isLoading && (
             <div className="row g-3">
-              {[1, 2, 3, 4].map((item) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
                 <div className="col-12 col-sm-6 col-lg-4 col-xl-3" key={item}>
                   <div className="card border-0 shadow-sm h-100">
                     <div
@@ -212,10 +253,9 @@ function Products() {
                       style={{ minHeight: "100%" }}
                     >
                       <div
-                        className="placeholder w-100"
+                        className="placeholder w-100 rounded-2"
                         style={{
                           height: "180px",
-                          borderRadius: "0.375rem 0.375rem 0 0",
                         }}
                       ></div>
 
@@ -240,7 +280,7 @@ function Products() {
               {filteredProducts.map((product) => (
                 <ProductCard
                   product={product}
-                  key={product.id}
+                  key={product.itemId}
                   onOrderProduct={handleOrderProduct}
                 />
               ))}
@@ -284,7 +324,12 @@ function Products() {
       )}
 
       {/* Order Modal */}
-      {showOrderModal && <OrderModal onClose={handleCloseOrderModal} />}
+      {showOrderModal && (
+        <OrderModal
+          onClose={handleCloseOrderModal}
+          onSubmit={handleConfirmOrder}
+        />
+      )}
     </div>
   );
 }

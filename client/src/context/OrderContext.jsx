@@ -9,20 +9,21 @@ function OrderProvider({ children }) {
 
   const createOrder = async (orderDetail) => {
     setIsLoading(true);
-    const { productId, name, description, price, quantity, image } =
-      orderDetail;
+    const { itemId, name, description, price, quantity, image } = orderDetail;
 
     try {
       const payload = {
         date: null,
-        orderDetail: {
-          productId: productId,
-          name: name,
-          description: description,
-          price: price,
-          quantity: quantity,
-          image: image,
-        },
+        orderDetails: [
+          {
+            itemId: itemId,
+            name: name,
+            description: description,
+            price: price,
+            quantity: quantity,
+            image: image,
+          },
+        ],
       };
 
       const response = await fetch(`${API_BASE_URL}/api/order`, {
@@ -34,6 +35,41 @@ function OrderProvider({ children }) {
         },
         body: JSON.stringify(payload),
       });
+
+      return await response.json();
+    } catch (error) {
+      console.error("An error occurred while creating the order:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addOrderDetail = async (orderId, orderDetail) => {
+    setIsLoading(true);
+    const { itemId, name, description, price, quantity, image } = orderDetail;
+
+    try {
+      const payload = {
+        itemId: itemId,
+        name: name,
+        description: description,
+        price: price,
+        quantity: quantity,
+        image: image,
+      };
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/order/${orderId}/details`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            // Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
 
       return await response.json();
     } catch (error) {
@@ -66,15 +102,18 @@ function OrderProvider({ children }) {
     }
   };
 
-  const confirmOrder = async (id) => {
+  const confirmOrder = async (id, paymentMethod) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/order/${id}/confirm`, {
+      const payload = JSON.stringify(paymentMethod);
+      const response = await fetch(`${API_BASE_URL}/api/order/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
+        body: payload,
       });
 
       const result = await response.json();
@@ -114,6 +153,7 @@ function OrderProvider({ children }) {
         isLoading,
         confirmOrder,
         updateOrder,
+        addOrderDetail,
       }}
     >
       {children}

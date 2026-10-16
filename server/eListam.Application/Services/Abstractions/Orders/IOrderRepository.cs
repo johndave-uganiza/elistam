@@ -7,7 +7,6 @@ namespace eListam.Application.Services.Abstractions.Orders
         public Task<IEnumerable<Order>> GetAsync();
         public Task<Order?> GetByIdAsync(int id);
         public Task<Order> CreateAsync(Order order);
-        public Task<int> SaveChangesAsync();
-        public Task<int> DeleteAsync(Order order);
+        public Task DeleteAsync(Order order);
     }
 }

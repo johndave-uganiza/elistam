@@ -32,24 +32,15 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region CreateAsync
         public async Task<Item> CreateAsync(Item item)
         {
-            await _db.Items.AddAsync(item);
-            await SaveChangesAsync(); 
+            await _db.Items.AddAsync(item); 
             return item;
         }
         #endregion
 
-        #region SaveChangesAsync
-        public async Task<int> SaveChangesAsync()
-        {
-            return await _db.SaveChangesAsync();
-        }
-        #endregion
-
         #region DeleteAsync
-        public async Task<int> DeleteAsync(Item item)
+        public async Task DeleteAsync(Item item)
         {
             _db.Items.Remove(item);
-            return await SaveChangesAsync();
         }
         #endregion
     }

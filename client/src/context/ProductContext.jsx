@@ -1,44 +1,29 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import { API_BASE_URL } from "../utilities/constants";
 
 const ProductContext = createContext(null);
 
 function ProductProvider({ children }) {
-  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const getProducts = async () => {
-      setIsLoading(true);
+  const getProducts = async () => {
+    setIsLoading(true);
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/product`, {
-          method: "GET",
-        });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/product`, {
+        method: "GET",
+      });
 
-        const result = await response.json();
-        const products = result.data.map((product) => ({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          quantity: product.quantity,
-          image: product.image,
-        }));
-
-        setProducts(products);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getProducts();
-  }, []);
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <ProductContext.Provider value={{ products, setProducts, isLoading }}>
+    <ProductContext.Provider value={{ getProducts, isLoading }}>
       {children}
     </ProductContext.Provider>
   );

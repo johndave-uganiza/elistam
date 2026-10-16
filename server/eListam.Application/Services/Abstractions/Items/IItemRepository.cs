@@ -7,7 +7,6 @@ namespace eListam.Application.Services.Abstractions.Items
         public Task<IEnumerable<Item>> GetAsync();
         public Task<Item?> GetByIdAsync(int id);
         public Task<Item> CreateAsync(Item item);
-        public Task<int> SaveChangesAsync();
-        public Task<int> DeleteAsync(Item item);
+        public Task DeleteAsync(Item item);
     }
 }

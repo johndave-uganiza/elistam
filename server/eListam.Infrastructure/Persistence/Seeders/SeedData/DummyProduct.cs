@@ -1,4 +1,4 @@
-﻿namespace eListam.Data.Seeder.SeedData
+﻿namespace eListam.Infrastructure.Persistence.Seeders.SeedData
 {
     public class DummyProduct
     {

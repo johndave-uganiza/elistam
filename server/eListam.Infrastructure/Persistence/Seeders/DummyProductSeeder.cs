@@ -1,9 +1,9 @@
 ﻿using eListam.Infrastructure.Persistence;
-using eListam.Infrastructure.ExternalServices;
 using eListam.Domain.Models;
 using Microsoft.AspNetCore.Hosting;
+using eListam.Infrastructure.Integrations.DummyApi.Interface;
 
-namespace eListam.Infrastructure.Seeders
+namespace eListam.Infrastructure.Persistence.Seeders
 {
     public class DummyProductSeeder
     {
@@ -45,7 +45,7 @@ namespace eListam.Infrastructure.Seeders
                         Name = product.Title,
                         Description = product.Description,
                         Price = product.Price,
-                        Quantity = product.Stock,
+                        Stock = product.Stock,
                         Image = product.ThumbNail,
                     }
                 );

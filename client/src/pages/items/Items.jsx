@@ -4,6 +4,7 @@ import { ItemContext } from "../../context/ItemContext";
 import ItemModal from "../../components/items/ItemModal";
 import ItemTable from "../../components/items/ItemTable";
 import Swal from "sweetalert2";
+import PageTitle from "../../components/common/PageTitle";
 
 function Items() {
   const { createItem, getItems, updateItem, deleteItem, isLoading } =
@@ -19,6 +20,7 @@ function Items() {
     name: "",
     description: "",
     price: 0,
+    cost: 0,
     quantity: 0,
     expirationDate: "",
     image: null,
@@ -44,6 +46,7 @@ function Items() {
       name: "",
       description: "",
       price: 0,
+      cost: 0,
       quantity: 0,
       expirationDate: "",
       image: null,
@@ -83,11 +86,12 @@ function Items() {
       formDataToSend.append("Name", formData.name);
       formDataToSend.append("Description", formData.description);
       formDataToSend.append("Price", formData.price);
-      formDataToSend.append("Quantity", formData.quantity);
+      formDataToSend.append("Cost", formData.cost);
+      formDataToSend.append("Stock", formData.stock);
       formDataToSend.append("ExpirationDate", formData.expirationDate);
 
       if (formData.image) {
-        formDataToSend.append("File", formData.image);
+        formDataToSend.append("ImageFile", formData.image);
       }
 
       let result;
@@ -128,9 +132,12 @@ function Items() {
     setFormData({
       name: item.name || "",
       description: item.description || "",
-      price: item.price || 0,
-      quantity: item.quantity || 0,
-      expirationDate: item.expirationDate || "",
+      price: item.price ?? 0,
+      quantity: item.quantity ?? 0,
+      cost: item.cost ?? 0,
+      expirationDate: item.expirationDate
+        ? String(item.expirationDate).split("T")[0]
+        : "",
       image: null,
     });
 
@@ -196,28 +203,17 @@ function Items() {
     resetFormData();
   };
 
-  const totalItems = items.length;
-
   return (
     <div className="container px-2 px-sm-3 px-md-4 py-2">
-      {/* Header */}
-      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
-        <div className="min-w-0">
-          <h3 className="fw-bold mb-0">Item List</h3>
-
-          <p className="text-muted small mb-0">
-            Manage your products, inventory, and item details.
-          </p>
-        </div>
-
-        <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2 flex-shrink-0">
-          <i className="bi bi-box-seam me-1"></i>
-          {totalItems} {totalItems === 1 ? "Item" : "Items"}
-        </span>
-      </div>
+      {/* Page Title */}
+      <PageTitle
+        title={"Item List"}
+        description={"Manage your products, inventory, and item details."}
+        label={"Item"}
+        total={items?.length ?? 0}
+      />
 
       {/* Toolbar */}
-
       <Toolbar
         onShow={handleAddItem}
         onSearch={handleSearchInput}
@@ -232,7 +228,6 @@ function Items() {
           </>
         }
       />
-
       {/* Items Table */}
       <div className="card border-0 shadow-sm p-3">
         <ItemTable
@@ -241,7 +236,6 @@ function Items() {
           onDelete={handleDeleteItem}
         />
       </div>
-
       {/* Item Modal */}
       {showModal && (
         <ItemModal

@@ -83,7 +83,7 @@ namespace eListam.Application.Services.Implementations
                     new (ClaimTypes.Email, user.Email!),
                     new (ClaimTypes.Role, roles.FirstOrDefault()!)
                 ]),
-                Expires = DateTime.UtcNow.AddDays(1),
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
 

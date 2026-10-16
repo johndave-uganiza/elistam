@@ -1,9 +1,6 @@
 import { useContext, useState } from "react";
 import { OrderContext } from "../../context/OrderContext";
-import {
-  API_BASE_URL,
-  IMAGE_PLACEHOLDER_URL,
-} from "../../utilities/constants";
+import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 import OrderDetailModal from "./OrderDetailModal";
 
 function OrderTable({ order, setOrder }) {
@@ -15,7 +12,7 @@ function OrderTable({ order, setOrder }) {
   const [orderDetail, setOrderDetail] = useState({
     id: null,
     orderId: null,
-    productId: null,
+    itemId: null,
     name: "",
     description: "",
     price: 0,
@@ -48,15 +45,14 @@ function OrderTable({ order, setOrder }) {
     const previousOrder = order;
 
     const updatedOrderDetails = order.orderDetails.filter(
-      (detail) => detail.id !== detailToRemove.id
+      (detail) => detail.id !== detailToRemove.id,
     );
 
     const updatedOrder = {
       ...order,
       totalPrice: updatedOrderDetails.reduce(
-        (sum, detail) =>
-          sum + Number(detail.price) * Number(detail.quantity),
-        0
+        (sum, detail) => sum + Number(detail.price) * Number(detail.quantity),
+        0,
       ),
       orderDetails: updatedOrderDetails,
     };
@@ -95,18 +91,16 @@ function OrderTable({ order, setOrder }) {
     const previousOrder = order;
 
     const updatedOrderDetails = order.orderDetails.map((detail) =>
-      detail.id === updatedDetail.id &&
-      updatedDetail.orderId === orderId
+      detail.id === updatedDetail.id && updatedDetail.orderId === orderId
         ? updatedDetail
-        : detail
+        : detail,
     );
 
     const updatedOrder = {
       ...order,
       totalPrice: updatedOrderDetails.reduce(
-        (sum, detail) =>
-          sum + Number(detail.price) * Number(detail.quantity),
-        0
+        (sum, detail) => sum + Number(detail.price) * Number(detail.quantity),
+        0,
       ),
       orderDetails: updatedOrderDetails,
     };
@@ -142,7 +136,7 @@ function OrderTable({ order, setOrder }) {
     setOrderDetail({
       id: detail.id,
       orderId: order.id,
-      productId: detail.productId,
+      itemId: detail.itemId,
       name: detail.name,
       description: detail.description,
       price: detail.price,
@@ -203,10 +197,7 @@ function OrderTable({ order, setOrder }) {
               }}
             >
               <tr className="text-muted small text-uppercase">
-                <th
-                  className="border-0 ps-3 py-2"
-                  style={{ width: "45%" }}
-                >
+                <th className="border-0 ps-3 py-2" style={{ width: "45%" }}>
                   Product
                 </th>
 
@@ -217,17 +208,11 @@ function OrderTable({ order, setOrder }) {
                   Qty
                 </th>
 
-                <th
-                  className="border-0 text-end py-2"
-                  style={{ width: "15%" }}
-                >
+                <th className="border-0 text-end py-2" style={{ width: "15%" }}>
                   Price
                 </th>
 
-                <th
-                  className="border-0 text-end py-2"
-                  style={{ width: "18%" }}
-                >
+                <th className="border-0 text-end py-2" style={{ width: "18%" }}>
                   Total
                 </th>
 
@@ -235,9 +220,7 @@ function OrderTable({ order, setOrder }) {
                   className="border-0 text-center pe-3 py-2"
                   style={{ width: "10%" }}
                 >
-                  <span className="visually-hidden">
-                    Actions
-                  </span>
+                  <span className="visually-hidden">Actions</span>
                 </th>
               </tr>
             </thead>
@@ -245,14 +228,10 @@ function OrderTable({ order, setOrder }) {
             <tbody>
               {orderItems.map((detail) => {
                 const itemTotal =
-                  Number(detail.price) *
-                  Number(detail.quantity);
+                  Number(detail.price) * Number(detail.quantity);
 
                 return (
-                  <tr
-                    key={detail.id}
-                    className="border-bottom"
-                  >
+                  <tr key={detail.id} className="border-bottom">
                     {/* Product */}
                     <td className="ps-3 py-2">
                       <div className="d-flex align-items-center gap-2">
@@ -268,8 +247,7 @@ function OrderTable({ order, setOrder }) {
                             alt={detail.name || "Product"}
                             onError={(e) => {
                               e.currentTarget.onerror = null;
-                              e.currentTarget.src =
-                                IMAGE_PLACEHOLDER_URL;
+                              e.currentTarget.src = IMAGE_PLACEHOLDER_URL;
                             }}
                             style={{
                               width: "100%",
@@ -305,9 +283,10 @@ function OrderTable({ order, setOrder }) {
                           )}
 
                           <small className="text-muted">
-                            ITM-{String(detail.productId || detail.id).padStart(
+                            ITM-
+                            {String(detail.itemId || detail.id).padStart(
                               3,
-                              "0"
+                              "0",
                             )}
                           </small>
                         </div>
@@ -323,9 +302,7 @@ function OrderTable({ order, setOrder }) {
                         disabled={isUpdating}
                         title="Edit quantity"
                       >
-                        <span className="fw-semibold">
-                          {detail.quantity}
-                        </span>
+                        <span className="fw-semibold">{detail.quantity}</span>
 
                         <i className="bi bi-pencil ms-1 text-muted small"></i>
                       </button>
@@ -349,9 +326,7 @@ function OrderTable({ order, setOrder }) {
                     <td className="text-center pe-3">
                       <button
                         type="button"
-                        onClick={() =>
-                          handleRemove(order.id, detail)
-                        }
+                        onClick={() => handleRemove(order.id, detail)}
                         className="btn btn-sm btn-light text-danger rounded-circle"
                         style={{
                           width: "32px",

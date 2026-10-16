@@ -7,7 +7,6 @@ namespace eListam.Application.Services.Abstractions.Transactions
         public Task<IEnumerable<Transaction>> GetAsync();
         public Task<Transaction?> GetByIdAsync(int id);
         public Task<Transaction> CreateAsync(Transaction transaction);
-        public Task<int> DeleteAsync(Transaction transaction);
-        public Task<string> GenerateTransactionNumberAsync();
+        public Task DeleteAsync(Transaction transaction);
     }
 }

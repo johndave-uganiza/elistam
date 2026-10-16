@@ -14,7 +14,7 @@ function ItemTable({ items, onEdit, onDelete }) {
 
     price: (item) => Number(item.price) || 0,
 
-    quantity: (item) => Number(item.quantity) || 0,
+    stock: (item) => Number(item.stock) || 0,
 
     expirationDate: (item) => {
       if (!item.expirationDate) {
@@ -172,6 +172,14 @@ function ItemTable({ items, onEdit, onDelete }) {
               />
 
               <SortHeader
+                label="Cost"
+                sortKey="cost"
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                className="text-center"
+              />
+
+              <SortHeader
                 label="Price"
                 sortKey="price"
                 sortConfig={sortConfig}
@@ -180,8 +188,8 @@ function ItemTable({ items, onEdit, onDelete }) {
               />
 
               <SortHeader
-                label="Quantity"
-                sortKey="quantity"
+                label="Stock"
+                sortKey="stock"
                 sortConfig={sortConfig}
                 onSort={handleSort}
                 className="text-center"
@@ -280,6 +288,13 @@ function ItemTable({ items, onEdit, onDelete }) {
                       </span>
                     </td>
 
+                    {/* Cost */}
+                    <td className="text-center text-nowrap">
+                      <span className="fw-normal">
+                        {formatCurrency(item.cost)}
+                      </span>
+                    </td>
+
                     {/* Price */}
                     <td className="text-center text-nowrap">
                       <span className="fw-semibold">
@@ -287,10 +302,10 @@ function ItemTable({ items, onEdit, onDelete }) {
                       </span>
                     </td>
 
-                    {/* Quantity */}
+                    {/* Stock */}
                     <td className="text-center">
                       <span className="badge rounded-pill bg-light text-dark border px-3 py-2">
-                        {item.quantity ?? 0}
+                        {item.stock ?? 0}
                       </span>
                     </td>
 
@@ -408,9 +423,9 @@ function ItemTable({ items, onEdit, onDelete }) {
                   <button
                     type="button"
                     className="dropdown-item"
-                    onClick={() => handleSort("quantity")}
+                    onClick={() => handleSort("stock")}
                   >
-                    Quantity
+                    Stock
                   </button>
                 </li>
 
@@ -520,13 +535,13 @@ function ItemTable({ items, onEdit, onDelete }) {
                         </div>
                       </div>
 
-                      {/* Quantity */}
+                      {/* Stock */}
                       <div className="col-6">
                         <div className="bg-light rounded-3 px-2 py-2 h-100">
-                          <small className="text-muted d-block">Quantity</small>
+                          <small className="text-muted d-block">Stock</small>
 
                           <span className="badge rounded-pill bg-white text-dark border mt-1">
-                            {item.quantity ?? 0}
+                            {item.stock ?? 0}
                           </span>
                         </div>
                       </div>

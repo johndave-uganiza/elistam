@@ -1,8 +1,6 @@
 ﻿using eListam.Application.Services.Abstractions.Transactions;
 using eListam.Domain.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace eListam.Infrastructure.Persistence.Repositories
 {
@@ -38,46 +36,15 @@ namespace eListam.Infrastructure.Persistence.Repositories
         public async Task<Transaction> CreateAsync(Transaction transaction)
         {
             await _db.Transactions.AddAsync(transaction);
-            await SaveChangesAsync(); 
             return transaction;
         }
         #endregion
 
         #region DeleteAsync
-        public async Task<int> DeleteAsync(Transaction transaction)
+        public async Task DeleteAsync(Transaction transaction)
         {
             _db.Transactions.Remove(transaction);
-            return await SaveChangesAsync();
         }
-        #endregion
-
-        #region SaveChangesAsync
-        public async Task<int> SaveChangesAsync()
-        {
-            return await _db.SaveChangesAsync();
-        }
-        #endregion
-
-        public async Task<string> GenerateTransactionNumberAsync()
-        {
-            var parameter = new SqlParameter(
-                "@TransactionNumber",
-                SqlDbType.NVarChar,
-                30)
-            {
-                Direction = ParameterDirection.Output
-            };
-
-            await _db.Database.ExecuteSqlRawAsync(
-                """
-        EXEC dbo.GenerateTransactionNumber
-            @TransactionNumber = @TransactionNumber OUTPUT
-        """,
-                parameter);
-
-            return parameter.Value?.ToString()
-                ?? throw new InvalidOperationException(
-                    "Failed to generate transaction number.");
-        }
+        #endregion       
     }
 }

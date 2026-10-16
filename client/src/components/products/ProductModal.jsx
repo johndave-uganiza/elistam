@@ -1,3 +1,6 @@
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../utilities/constants";
+
 function ProductModal({
   onClose,
   selectedProduct,
@@ -9,17 +12,21 @@ function ProductModal({
   const quantity = Number(orderDetail?.quantity) || 0;
   const price = Number(selectedProduct?.price) || 0;
   const total = quantity * price;
-  const stock = Number(selectedProduct?.quantity) || 0;
+  const stock = Number(selectedProduct?.stock) || 0;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (quantity <= 0) {
       return;
     }
 
     onSubmit(orderDetail);
   };
+
+  const imageUrl =
+    selectedProduct.image?.substring(0, 6) === "images"
+      ? API_BASE_URL.concat("/", selectedProduct.image)
+      : selectedProduct.image || IMAGE_PLACEHOLDER_URL;
 
   return (
     <>
@@ -105,7 +112,7 @@ function ProductModal({
                       >
                         {selectedProduct?.image ? (
                           <img
-                            src={selectedProduct.image}
+                            src={imageUrl}
                             alt={selectedProduct?.name || "Product"}
                             className="img-fluid"
                             style={{

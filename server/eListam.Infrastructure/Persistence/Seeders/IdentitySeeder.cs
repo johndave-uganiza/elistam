@@ -3,7 +3,7 @@ using eListamAPI.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
-namespace eListam.Infrastructure.Seeders
+namespace eListam.Infrastructure.Persistence.Seeders
 {
     public class IdentitySeeder
     {

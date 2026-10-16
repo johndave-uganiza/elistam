@@ -1,53 +1,42 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useState } from "react";
 import BarChart from "../../components/dashboard/BarChart";
-import { TransactionContext } from "../../context/TransactionContext";
-import { ItemContext } from "../../context/ItemContext";
+import { DashboardContext } from "../../context/DashboardContext";
 import eListam from "@/utilities/elistam";
 
 function Dashboard() {
-  const { transactionCtx = [] } = useContext(TransactionContext);
-  const { items = [] } = useContext(ItemContext);
+  const [metrics, setMetrics] = useState({
+    revenue: 0,
+    cogs: 0,
+    grossProfit: 0,
+    netProfit: 0,
+    operatingExpenses: 0,
+    stockAmount: 0,
+  });
+  const { getDashboardMetrics } = useContext(DashboardContext);
 
-  /*
-   * Financial metrics
-   *
-   * Revenue
-   *   ↓
-   * COGS
-   *   ↓
-   * Gross Profit
-   *   ↓
-   * Opex
-   *   ↓
-   * Net Profit
-   */
-  const metrics = useMemo(() => {
-    const revenue =
-      eListam.helpers.getTotalTransactionPriceToday(transactionCtx);
+  useEffect(() => {
+    const fetchDashboardMetrics = async () => {
+      try {
+        const response = await getDashboardMetrics();
 
-    /*
-     * Replace these with your actual financial helpers
-     * when they are available.
-     */
-    const cogs = eListam.helpers.getTotalCOGS?.(transactionCtx) || 0;
+        // Supports an Axios response or a direct data object.
+        const data = response?.data ?? response ?? {};
 
-    const opex = eListam.helpers.getTotalOpex?.() || 0;
-
-    const grossProfit = revenue - cogs;
-
-    const netProfit = grossProfit - opex;
-
-    const stockValue = eListam.helpers.getTotalStockAmount(items);
-
-    return {
-      revenue,
-      cogs,
-      opex,
-      grossProfit,
-      netProfit,
-      stockValue,
+        setMetrics({
+          revenue: Number(data.revenue) || 0,
+          cogs: Number(data.cogs) || 0,
+          grossProfit: Number(data.grossProfit) || 0,
+          netProfit: Number(data.netProfit) || 0,
+          operatingExpenses: Number(data.operatingExpenses) || 0,
+          stockAmount: Number(data.stockAmount) || 0,
+        });
+      } catch (error) {
+        console.error(error);
+      }
     };
-  }, [transactionCtx, items]);
+
+    fetchDashboardMetrics();
+  }, []);
 
   const cards = [
     {
@@ -194,7 +183,7 @@ function Dashboard() {
                   <h6 className="fw-bold mb-1">Financial Overview</h6>
 
                   <p className="text-muted small mb-0">
-                    Revenue, COGS and operating expenses
+                    Revenue, cogs and operating expenses
                   </p>
                 </div>
 
@@ -296,7 +285,7 @@ function Dashboard() {
                 <span className="text-muted small">Current stock value</span>
 
                 <span className="fw-bold text-dark text-nowrap">
-                  {eListam.utils.formatCurrencyToPHP(metrics.stockValue)}
+                  {eListam.utils.formatCurrencyToPHP(metrics.stockAmount)}
                 </span>
               </div>
             </div>

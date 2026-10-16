@@ -15,7 +15,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 function BarChart() {
@@ -35,21 +35,18 @@ function BarChart() {
   ];
 
   const revenue = [
-    45000, 52000, 48000, 60000,
-    65000, 58000, 72000, 68000,
-    75000, 80000, 85000, 92000,
+    45000, 52000, 48000, 60000, 65000, 58000, 72000, 68000, 75000, 80000, 85000,
+    92000,
   ];
 
   const cogs = [
-    22000, 26000, 24000, 30000,
-    32000, 29000, 36000, 34000,
-    37000, 40000, 42000, 45000,
+    22000, 26000, 24000, 30000, 32000, 29000, 36000, 34000, 37000, 40000, 42000,
+    45000,
   ];
 
   const opex = [
-    10000, 11000, 10500, 12000,
-    13000, 12500, 14000, 13500,
-    15000, 15500, 16000, 17000,
+    10000, 11000, 10500, 12000, 13000, 12500, 14000, 13500, 15000, 15500, 16000,
+    17000,
   ];
 
   const formatCurrency = (value) =>
@@ -210,9 +207,7 @@ function BarChart() {
 
         callbacks: {
           label: (context) =>
-            `${context.dataset.label}: ${formatCurrency(
-              context.raw
-            )}`,
+            `${context.dataset.label}: ${formatCurrency(context.raw)}`,
 
           afterBody: (items) => {
             if (!items.length) return "";
@@ -223,13 +218,9 @@ function BarChart() {
             const monthlyCogs = cogs[index];
             const monthlyOpex = opex[index];
 
-            const grossProfit =
-              monthlyRevenue - monthlyCogs;
+            const grossProfit = monthlyRevenue - monthlyCogs;
 
-            const netProfit =
-              monthlyRevenue -
-              monthlyCogs -
-              monthlyOpex;
+            const netProfit = monthlyRevenue - monthlyCogs - monthlyOpex;
 
             return [
               "",
