@@ -9,16 +9,16 @@ namespace eListam.Application.Services.Implementations
     public class ItemService : IItemService
     {
         #region Fields
-        private readonly IItemRepository _itemRepo;
-        private readonly IFileStorage _storageRepo;
+        private readonly IItemRepository _itemRepository;
+        private readonly IFileStorage _fileStorage;
         private readonly IUnitOfWork _unitOfWork;
         #endregion
 
         #region Constructor
-        public ItemService(IItemRepository itemRepo, IFileStorage storageRepo, IUnitOfWork unitOfWork)
+        public ItemService(IItemRepository itemRepository, IFileStorage fileStorage, IUnitOfWork unitOfWork)
         {
-            _itemRepo = itemRepo;
-            _storageRepo = storageRepo;
+            _itemRepository = itemRepository;
+            _fileStorage = fileStorage;
             _unitOfWork = unitOfWork;
         }
         #endregion
@@ -28,7 +28,7 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetItemResponse>>();
 
-            var items = (await _itemRepo.GetAsync()).OrderByDescending(o => o.Id);
+            var items = (await _itemRepository.GetAsync()).OrderByDescending(o => o.Id);
 
             return result.Success(items.Select(MapGetItemResponse));
         }
@@ -39,10 +39,10 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetItemResponse>();
 
-            var item = await _itemRepo.GetByIdAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
-                return result.Success($"{nameof(Item)} does not exist!");
+                return result.Success(message: "Item does not exist!");
 
             return result.Success(MapGetItemResponse(item));
         }
@@ -55,9 +55,9 @@ namespace eListam.Application.Services.Implementations
             string? imagePath = null;
 
             if (req.ImageFile != null)
-                imagePath = await _storageRepo.SaveImageAsync(req.ImageFile);
+                imagePath = await _fileStorage.SaveImageAsync(req.ImageFile);
             
-            var item = await _itemRepo.CreateAsync(MapItem(req, imagePath));
+            var item = await _itemRepository.CreateAsync(MapItem(req, imagePath));
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -71,10 +71,10 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
 
-            var item = await _itemRepo.GetByIdAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
-                return result.Success($"{nameof(Item)} does not exist!");
+                return result.Success(message: "Item does not exist!");
             
             item.Name = req.Name;
             item.Description = req.Description;
@@ -84,7 +84,7 @@ namespace eListam.Application.Services.Implementations
             item.ExpirationDate = req.ExpirationDate;
 
             if (req.ImageFile != null)
-                imagePath = await _storageRepo.SaveImageAsync(req.ImageFile);
+                imagePath = await _fileStorage.SaveImageAsync(req.ImageFile);
 
             item.Image = imagePath ?? item.Image;
 
@@ -99,12 +99,12 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetItemResponse>();
 
-            var item = await _itemRepo.GetByIdAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
-                return result.Success($"{nameof(Item)} does not exist!");
+                return result.Success(message: "Item does not exist!");
 
-            await _itemRepo.DeleteAsync(item);
+            await _itemRepository.DeleteAsync(item);
             await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetItemResponse(item));

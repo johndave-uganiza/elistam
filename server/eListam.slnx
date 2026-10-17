@@ -1,6 +1,7 @@
 <Solution>
-  <Project Path="eListam.API/eListam.API.csproj" />
-  <Project Path="eListam.Application/eListam.Application.csproj" Id="b207dba3-8377-4a64-9ee5-2eeb9db2bcf5" />
-  <Project Path="eListam.Domain/eListam.Domain.csproj" />
-  <Project Path="eListam.Infrastructure/eListam.Infrastructure.csproj" Id="89580f28-15ec-4bde-b58b-3d86a08a9b69" />
+  <Project Path="src/eListam.API/eListam.API.csproj" />
+  <Project Path="src/eListam.Application/eListam.Application.csproj" />
+  <Project Path="src/eListam.Domain/eListam.Domain.csproj" />
+  <Project Path="src/eListam.Infrastructure/eListam.Infrastructure.csproj" />
+  <Project Path="tests/eListam.Application.Tests/eListam.Application.Tests.csproj" />
 </Solution>

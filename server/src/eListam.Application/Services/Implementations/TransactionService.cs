@@ -30,7 +30,7 @@ namespace eListam.Application.Services.Implementations
             var transactions = (await _transactionRepo.GetAsync())?.OrderByDescending(o => o.Id);
             
             if (transactions == null)
-                return result.Success($"There are no existing transactions!");
+                return result.Success(message: "There are no existing transactions!");
             
             return result.Success(transactions.Select(MapGetTransactionResponse));
         }
@@ -44,7 +44,7 @@ namespace eListam.Application.Services.Implementations
             var transaction = await _transactionRepo.GetByIdAsync(id);
 
             if (transaction == null)
-                return result.Success($"{nameof(Transaction)} does not exist!");
+                return result.Success(message: "Transaction does not exist!");
 
             return result.Success(MapGetTransactionResponse(transaction));
         }
@@ -88,7 +88,7 @@ namespace eListam.Application.Services.Implementations
 
             var transaction = await _transactionRepo.GetByIdAsync(id);
             if (transaction == null)
-                return result.Success($"The transaction doesn't exist!");
+                return result.Success(message: "The transaction doesn't exist!");
 
             await _transactionRepo.DeleteAsync(transaction);
 

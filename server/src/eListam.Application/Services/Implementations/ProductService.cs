@@ -22,7 +22,8 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetProductResponse>>();
 
-            var products = (await _itemRepository.GetAsync())
+            var items = await _itemRepository.GetAsync();
+            var products = items
                 .Where(o => o.Stock > 0)
                 .OrderByDescending(o => o.Id);
 
@@ -38,7 +39,7 @@ namespace eListam.Application.Services.Implementations
             var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
-                return result.Success("Product does not exist!");
+                return result.Success(message: "Product does not exist!");
 
             return result.Success(MapGetProductResponse(item));
         }

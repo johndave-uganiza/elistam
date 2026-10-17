@@ -48,7 +48,7 @@ namespace eListam.Application.Services.Implementations
             var order = (await _orderRepository.GetAsync()).FirstOrDefault(o => !o.IsCompleted);
 
             if (order == null)
-                return result.Success($"There is no pending order.");
+                return result.Success(message: "There is no pending order.");
 
             return result.Success(MapGetOrderResponse(order));
         }
@@ -62,7 +62,7 @@ namespace eListam.Application.Services.Implementations
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure($"{nameof(Order)} does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             return result.Success(MapGetOrderResponse(order));
         }
@@ -75,12 +75,12 @@ namespace eListam.Application.Services.Implementations
             var _userId = _authService.GetUserId();
 
             if (string.IsNullOrEmpty(_userId))
-                return result.Failure($"User does not exist!");
+                return result.Failure(message: "User does not exist!");
             
             var item = (await _itemService.GetByIdAsync(req.OrderDetails.First().ItemId)).Data;
 
             if(item == null || item.Stock <= 0)
-                return result.Failure($"Order does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             var quantity = req.OrderDetails.First().Quantity;
             var price = req.OrderDetails.First().Price;
@@ -120,17 +120,17 @@ namespace eListam.Application.Services.Implementations
             var userId = _authService.GetUserId();
 
             if (string.IsNullOrEmpty(userId))
-                return result.Failure("User does not exist!");
+                return result.Failure(message: "User does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(orderId);
 
             if (order == null)
-                return result.Failure("Order does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             var item = (await _itemService.GetByIdAsync(req.ItemId)).Data;
 
             if (item == null)
-                return result.Failure("Item does not exist!");
+                return result.Failure(message: "Item does not exist!");
 
             // Check whether this product is already in the order.
             var existingDetail = order.OrderDetails.FirstOrDefault(od => od.ItemId == item.Id);
@@ -169,12 +169,12 @@ namespace eListam.Application.Services.Implementations
             var _userId = _authService.GetUserId();
 
             if (string.IsNullOrEmpty(_userId))
-                return result.Failure($"User does not exist!");
+                return result.Failure(message: "User does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure($"{nameof(Order)} does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             // Update existing Order Detail
             foreach (var detail in req.OrderDetails)
@@ -207,12 +207,12 @@ namespace eListam.Application.Services.Implementations
             var _userId = _authService.GetUserId();
 
             if (string.IsNullOrEmpty(_userId))
-                return result.Failure($"User does not exist!");
+                return result.Failure(message: "User does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure($"{nameof(Order)} does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             await _orderRepository.DeleteAsync(order);
             await _unitOfWork.SaveChangesAsync();
@@ -228,15 +228,15 @@ namespace eListam.Application.Services.Implementations
             var _userId = _authService.GetUserId();
 
             if (string.IsNullOrEmpty(_userId))
-                return result.Failure($"User does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
 
             if(order == null)
-                return result.Failure($"Order does not exist!");
+                return result.Failure(message: "Order does not exist!");
 
             if(order.IsCompleted)
-                return result.Failure($"Order was already completed!");
+                return result.Failure(message: "Order was already completed!");
 
             await _unitOfWork.BeginTransactionAsync();
 
