@@ -1,8 +1,7 @@
-﻿using eListam.Application.Common;
-using eListam.Application.DTOs.Products;
-using eListam.Application.Services.Abstractions.Items;
-using eListam.Application.Services.Abstractions.Products;
-using eListam.Domain.Models;
+﻿using eListam.Application.DTOs.Products;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Application.Services.Interfaces.Products;
+using eListam.Domain.Models.Entities;
 
 namespace eListam.Application.Services.Implementations
 {

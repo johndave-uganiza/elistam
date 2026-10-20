@@ -1,5 +1,5 @@
 ﻿using eListam.API.Common;
-using eListam.Application.Services.Abstractions.Dashboard;
+using eListam.Application.Services.Interfaces.Dashboards;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

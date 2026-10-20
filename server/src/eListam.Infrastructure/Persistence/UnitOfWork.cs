@@ -1,4 +1,5 @@
-﻿using eListam.Application.Common.Interfaces;
+﻿using eListam.Application.Services.Interfaces;
+using eListam.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace eListam.Infrastructure.Persistence

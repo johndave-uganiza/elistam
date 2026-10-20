@@ -118,7 +118,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="transactionNumber"
                   sortConfig={sortConfig}
                   onSort={handleSort}
-                  className="ps-3"
+                  className="ps-3 text-nowrap"
                 />
 
                 <SortHeader
@@ -126,6 +126,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="orderNumber"
                   sortConfig={sortConfig}
                   onSort={handleSort}
+                  className="text-nowrap"
                 />
 
                 <SortHeader
@@ -133,6 +134,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="date"
                   sortConfig={sortConfig}
                   onSort={handleSort}
+                  className="text-nowrap"
                 />
 
                 <SortHeader
@@ -140,6 +142,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="paymentMethod"
                   sortConfig={sortConfig}
                   onSort={handleSort}
+                  className="text-nowrap"
                 />
 
                 <SortHeader
@@ -147,6 +150,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="status"
                   sortConfig={sortConfig}
                   onSort={handleSort}
+                  className="text-nowrap"
                 />
 
                 <SortHeader
@@ -154,7 +158,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="totalQuantity"
                   sortConfig={sortConfig}
                   onSort={handleSort}
-                  className="text-center"
+                  className="text-center text-nowrap"
                 />
 
                 <SortHeader
@@ -162,7 +166,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                   sortKey="totalPrice"
                   sortConfig={sortConfig}
                   onSort={handleSort}
-                  className="text-center"
+                  className="ps-3 text-center text-nowrap"
                 />
 
                 <th
@@ -226,15 +230,11 @@ function TransactionTable({ transactions, exportTransaction }) {
                         </div>
                       </td>
 
-                      {/* Status */}
+                      {/* Payment Method */}
                       <td>
-                        <span
-                          className={`badge rounded-pill ${getStatusClass(
-                            status,
-                          )}`}
-                        >
-                          {status}
-                        </span>
+                        <div className="text-center border border-1 col-8 py-1">
+                          {tran.paymentMethod}
+                        </div>
                       </td>
 
                       {/* Status */}

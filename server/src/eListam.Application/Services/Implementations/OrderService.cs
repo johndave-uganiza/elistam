@@ -1,13 +1,12 @@
-﻿using eListam.Application.Common;
-using eListam.Application.Common.Interfaces;
-using eListam.Application.DTOs.Orders;
+﻿using eListam.Application.DTOs.Orders;
 using eListam.Application.DTOs.Transactions;
-using eListam.Application.Services.Abstractions.Auth;
-using eListam.Application.Services.Abstractions.Items;
-using eListam.Application.Services.Abstractions.Orders;
-using eListam.Application.Services.Abstractions.Transactions;
+using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Auth;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Application.Services.Interfaces.Orders;
+using eListam.Application.Services.Interfaces.Transactions;
 using eListam.Domain.Constants;
-using eListam.Domain.Models;
+using eListam.Domain.Models.Entities;
 
 namespace eListam.Application.Services.Implementations
 {
@@ -15,7 +14,7 @@ namespace eListam.Application.Services.Implementations
     {
         #region Fields
         private readonly IOrderRepository _orderRepository;
-        private readonly IItemService _itemService;
+        private readonly IItemRepository _itemRepository;
         private readonly ITransactionService _transactionService;
         private readonly IAuthService _authService;
         private readonly IDocumentNumberGenerator _documentNumberGenerator;
@@ -25,13 +24,13 @@ namespace eListam.Application.Services.Implementations
 
         #region Constructor
         public OrderService(IOrderRepository orderRepository,
-            IItemService itemService,
+            IItemRepository itemRepository,
             ITransactionService transactionService,
             IAuthService authService,
             IDocumentNumberGenerator documentNumberGenerator, IUnitOfWork unitOfWork)
         {
             _orderRepository = orderRepository;
-            _itemService = itemService;
+            _itemRepository = itemRepository;
             _transactionService = transactionService;
             _authService = authService;
             _documentNumberGenerator = documentNumberGenerator;
@@ -76,8 +75,8 @@ namespace eListam.Application.Services.Implementations
 
             if (string.IsNullOrEmpty(_userId))
                 return result.Failure(message: "User does not exist!");
-            
-            var item = (await _itemService.GetByIdAsync(req.OrderDetails.First().ItemId)).Data;
+
+            var item = await _itemRepository.GetByIdAsync(req.OrderDetails.First().ItemId);
 
             if(item == null || item.Stock <= 0)
                 return result.Failure(message: "Order does not exist!");
@@ -127,7 +126,7 @@ namespace eListam.Application.Services.Implementations
             if (order == null)
                 return result.Failure(message: "Order does not exist!");
 
-            var item = (await _itemService.GetByIdAsync(req.ItemId)).Data;
+            var item = await _itemRepository.GetByIdAsync(req.ItemId);
 
             if (item == null)
                 return result.Failure(message: "Item does not exist!");
@@ -214,7 +213,7 @@ namespace eListam.Application.Services.Implementations
             if (order == null)
                 return result.Failure(message: "Order does not exist!");
 
-            await _orderRepository.DeleteAsync(order);
+            _orderRepository.Delete(order);
             await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetOrderResponse(order));
@@ -270,7 +269,7 @@ namespace eListam.Application.Services.Implementations
 
                 foreach (var detail in transaction.TransactionDetails)
                 {
-                    var item = (await _itemService.GetByIdAsync(detail.ItemId)).Data;
+                    var item = await _itemRepository.GetByIdAsync(detail.ItemId);
                     item?.Stock -= detail.Quantity;
                 }
 

@@ -1,9 +1,8 @@
-﻿using eListam.Application.Common;
-using eListam.Application.Common.Interfaces;
-using eListam.Application.DTOs.Transactions;
-using eListam.Application.Services.Abstractions.Transactions;
+﻿using eListam.Application.DTOs.Transactions;
+using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Transactions;
 using eListam.Domain.Constants;
-using eListam.Domain.Models;
+using eListam.Domain.Models.Entities;
 using System.Data;
 using System.Text;
 
@@ -27,12 +26,13 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetTransactionResponse>>();
 
-            var transactions = (await _transactionRepo.GetAsync())?.OrderByDescending(o => o.Id);
+            var transactions = await _transactionRepo.GetAsync();
+            var orderedTransactions = transactions.OrderByDescending(o => o.Id);
             
             if (transactions == null)
                 return result.Success(message: "There are no existing transactions!");
             
-            return result.Success(transactions.Select(MapGetTransactionResponse));
+            return result.Success(orderedTransactions.Select(MapGetTransactionResponse));
         }
         #endregion
 
@@ -63,9 +63,10 @@ namespace eListam.Application.Services.Implementations
                 Date = req.Date,
                 IsCompleted = req.IsCompleted,
                 OrderNumber = req.OrderNumber,
+                PaymentMethod = req.PaymentMethod,
                 TotalPrice = req.TotalPrice,
                 TotalQuantity = req.TotalQuantity,
-                OrderId = req.OrderId,    
+                OrderId = req.OrderId,
                 TransactionDetails = req.TransactionDetails.Select(td => new TransactionDetail()
                 {
                     Description = td.Description,
@@ -90,7 +91,7 @@ namespace eListam.Application.Services.Implementations
             if (transaction == null)
                 return result.Success(message: "The transaction doesn't exist!");
 
-            await _transactionRepo.DeleteAsync(transaction);
+            _transactionRepo.Delete(transaction);
 
             return result.Success(MapGetTransactionResponse(transaction));
         }
@@ -138,6 +139,7 @@ namespace eListam.Application.Services.Implementations
                 Date = tran.Date,
                 TotalPrice = tran.TotalPrice,
                 TotalQuantity = tran.TotalQuantity,
+                PaymentMethod = tran.PaymentMethod,
                 TransactionDetails = tran.TransactionDetails?.Select(td =>
                 new GetTransactionDetailResponse()
                 {

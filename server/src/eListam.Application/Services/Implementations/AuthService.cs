@@ -1,6 +1,6 @@
 ﻿using eListam.Application.DTOs.Auth;
-using eListam.Application.Services.Abstractions.Auth;
-using eListam.Domain.Models;
+using eListam.Application.Services.Interfaces.Auth;
+using eListam.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -18,21 +18,20 @@ namespace eListam.Application.Services.Implementations
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IAuthRepository _authRepo;
+        private readonly IAuthRepository _authRepository;
         private readonly string _secretKey;
         #endregion
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IAuthRepository authRepo,
+            IAuthRepository authRepository,
             IConfiguration config,
             IHttpContextAccessor httpContextAccessor)
         {
-            _authRepo = authRepo;
+            _authRepository = authRepository;
             _signInManager = signInManager;
             _userManager = userManager;
-            _authRepo = authRepo;
             _httpContextAccessor = httpContextAccessor;
             _secretKey = config.GetValue<string>("Jwt:SecretKey") ?? string.Empty;
         }
@@ -42,12 +41,12 @@ namespace eListam.Application.Services.Implementations
         public string? GetUserName() => _httpContextAccessor.HttpContext?.User.Identity?.Name;
 
         #region GetApplicationUsersAsync
-        public async Task<List<ApplicationUser>> GetApplicationUsersAsync()
+        public async Task<IEnumerable<ApplicationUser>> GetAsync()
         {
-            return await _authRepo.GetApplicationUsersAsync();
+            return await _authRepository.GetAsync();
         }
         #endregion
-
+        
         #region LoginAsync
         public async Task<LoginResponse> LoginAsync(LoginRequest req)
         {

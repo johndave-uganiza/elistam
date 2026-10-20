@@ -6,12 +6,12 @@ import PageTitle from "../../components/common/PageTitle";
 
 function Transactions() {
   const { getTransactions, exportTransaction } = useContext(TransactionContext);
-  const [transactions, setTransactions] = useState(null);
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const result = await getTransactions();
-      setTransactions(result.data);
+      const { data } = await getTransactions();
+      setTransactions(data || []);
     };
 
     fetchTransactions();

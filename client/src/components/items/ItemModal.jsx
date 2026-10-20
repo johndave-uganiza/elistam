@@ -140,13 +140,12 @@ function ItemModal({
               }}
             >
               <form onSubmit={handleSubmit} id="addItemForm">
-                {/* Basic Information */}
+                {/* Item Information */}
                 <div className="bg-white border rounded-3 p-3 mb-2">
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <i className="bi bi-info-circle text-primary"></i>
                     <div>
-                      <h6 className="fw-semibold mb-0">Basic information</h6>
-                      <small className="text-muted">Item details</small>
+                      <h6 className="fw-semibold mb-0">Item information</h6>
                     </div>
                   </div>
 
@@ -219,9 +218,6 @@ function ItemModal({
                     <i className="bi bi-bar-chart text-primary"></i>
                     <div>
                       <h6 className="fw-semibold mb-0">Pricing & Stock</h6>
-                      <small className="text-muted">
-                        Item cost, selling price, and available stock
-                      </small>
                     </div>
                   </div>
 
@@ -311,9 +307,6 @@ function ItemModal({
                     <i className="bi bi-image text-primary"></i>
                     <div>
                       <h6 className="fw-semibold mb-0">Item image</h6>
-                      <small className="text-muted">
-                        Optional product image
-                      </small>
                     </div>
                   </div>
 

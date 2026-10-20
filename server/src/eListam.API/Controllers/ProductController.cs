@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using eListam.API.Common;
-using eListam.Application.Services.Abstractions.Products;
 using Microsoft.AspNetCore.Authorization;
+using eListam.Application.Services.Interfaces.Products;
 
 namespace eListamAPI.Controllers
 {

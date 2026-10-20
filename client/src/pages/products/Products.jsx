@@ -204,7 +204,7 @@ function Products() {
 
     setOrderDetail((prev) => ({
       ...prev,
-      quantity: value < 1 ? 1 : value,
+      quantity: value < 1 ? 0 : value,
     }));
   }
 

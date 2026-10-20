@@ -1,6 +1,6 @@
-﻿using eListam.Application.Common.Interfaces;
+﻿using eListam.Application.Services.Interfaces;
 using eListam.Domain.Constants;
-using eListam.Infrastructure.Persistence;
+using eListam.Infrastructure.Persistence.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;

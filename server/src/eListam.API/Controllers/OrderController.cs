@@ -1,8 +1,7 @@
 ﻿using eListam.API.Common;
 using eListam.Application.DTOs.Orders;
-using eListam.Application.Services.Abstractions.Auth;
-using eListam.Application.Services.Abstractions.Items;
-using eListam.Application.Services.Abstractions.Orders;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Application.Services.Interfaces.Orders;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

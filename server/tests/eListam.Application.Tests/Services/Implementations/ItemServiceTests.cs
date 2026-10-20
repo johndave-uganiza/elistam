@@ -1,8 +1,8 @@
-﻿using eListam.Application.Common.Interfaces;
-using eListam.Application.DTOs.Items;
-using eListam.Application.Services.Abstractions.Items;
+﻿using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Implementations;
-using eListam.Domain.Models;
+using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -145,7 +145,7 @@ namespace eListam.Application.Tests.Services.Implementations
 
             // Assert
             _itemRepository
-                .Verify(x => x.DeleteAsync(item),
+                .Verify(x => x.Delete(item),
                 Times.Once);
 
             _unitOfWork

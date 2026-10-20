@@ -1,4 +1,4 @@
-﻿using eListam.Infrastructure.Persistence.Seeders.SeedData;
+﻿using eListam.Infrastructure.Persistence.Data.Seeders.SeedData;
 using System;
 using System.Collections.Generic;
 using System.Text;

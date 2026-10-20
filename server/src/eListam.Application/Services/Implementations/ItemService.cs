@@ -1,8 +1,7 @@
-﻿using eListam.Application.Common;
-using eListam.Application.Common.Interfaces;
-using eListam.Application.DTOs.Items;
-using eListam.Application.Services.Abstractions.Items;
-using eListam.Domain.Models;
+﻿using eListam.Application.DTOs.Items;
+using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Domain.Models.Entities;
 
 namespace eListam.Application.Services.Implementations
 {
@@ -104,7 +103,7 @@ namespace eListam.Application.Services.Implementations
             if (item == null)
                 return result.Success(message: "Item does not exist!");
 
-            await _itemRepository.DeleteAsync(item);
+            _itemRepository.Delete(item);
             await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetItemResponse(item));

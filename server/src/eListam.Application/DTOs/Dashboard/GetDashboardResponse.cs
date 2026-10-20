@@ -6,10 +6,10 @@ namespace eListam.Application.DTOs.Dashboard
 {
     public class GetDashboardResponse
     {
-        public double Revenue { get; set;  }
-        public double COGS { get; set;  }
-        public double GrossProfit { get; set; }
-        public double NetProfit { get; set;  }
-        public double StockAmount { get; set; }
+        public decimal Revenue { get; set;  }
+        public decimal COGS { get; set;  }
+        public decimal GrossProfit { get; set; }
+        public decimal NetProfit { get; set;  }
+        public decimal StockAmount { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using eListam.API.Common;
-using eListam.Application.Services.Abstractions.Transactions;
+using eListam.Application.Services.Interfaces.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

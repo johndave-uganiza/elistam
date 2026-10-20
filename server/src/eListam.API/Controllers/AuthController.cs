@@ -1,6 +1,6 @@
 ﻿using eListam.API.Common;
 using eListam.Application.DTOs.Auth;
-using eListam.Application.Services.Abstractions.Auth;
+using eListam.Application.Services.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -26,7 +26,7 @@ namespace eListamAPI.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAsync()
         {
-            var result = await _authService.GetApplicationUsersAsync();
+            var result = await _authService.GetAsync();
 
             if (result == null)
             {

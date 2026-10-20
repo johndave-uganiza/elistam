@@ -1,75 +1,17 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
-using System.Text;
-using eListam.Application.Services.Abstractions.Items;
-using eListam.Application.Services.Abstractions.Products;
-using eListam.Application.Services.Implementations;
-using eListam.Infrastructure.Persistence;
-using eListam.Application.Services.Abstractions.Auth;
-using eListam.Application.Services.Abstractions.Orders;
-using eListam.Application.Services.Abstractions.Transactions;
-using eListam.Application.Services.Abstractions.Dashboard;
-using eListam.Infrastructure.Generators;
 using eListam.Infrastructure;
-using eListam.Infrastructure.Persistence.Seeders;
-using eListam.Application.Common.Interfaces;
+using eListam.Infrastructure.Persistence.Data.Seeders;
+using eListam.Infrastructure.Persistence.Data;
+using eListam.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
-
-#region Application Services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IItemService, ItemService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<IDocumentNumberGenerator, DocumentNumberGenerator>();
-#endregion
-
-#region Auth Services
-builder.Services.AddHttpContextAccessor();
-
-// Get JWT secret key from appsettings.json
-var key = builder.Configuration.GetValue<string>("Jwt:SecretKey");
-
-// Configure Jwt Authentication
-builder.Services.AddAuthentication(u =>
-{
-    u.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    u.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(u =>
-{
-    u.RequireHttpsMetadata = false;
-    u.SaveToken = true;
-    u.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-    };
-});
-
-// Configure global Authorization
-builder.Services.AddControllers(options =>
-{
-    var authorizationPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-
-    options.Filters.Add(new AuthorizeFilter(authorizationPolicy));
-});
-#endregion
+builder.Services.AddApplication(builder.Configuration);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

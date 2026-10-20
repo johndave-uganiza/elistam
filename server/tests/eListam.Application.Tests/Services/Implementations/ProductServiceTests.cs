@@ -1,6 +1,6 @@
-﻿using eListam.Application.Services.Abstractions.Items;
-using eListam.Application.Services.Implementations;
-using eListam.Domain.Models;
+﻿using eListam.Application.Services.Implementations;
+using eListam.Application.Services.Interfaces.Items;
+using eListam.Domain.Models.Entities;
 using Moq;
 
 

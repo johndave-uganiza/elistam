@@ -20,11 +20,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
 
     const parsedDate = new Date(date);
 
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "—";
-    }
-
-    return parsedDate.toLocaleString();
+    return parsedDate.toLocaleDateString();
   };
 
   const getImageUrl = (image) => {
@@ -119,7 +115,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
               <div className="bg-white border rounded-3 p-3 mb-2">
                 <div className="row g-3">
                   {/* Transaction Number */}
-                  <div className="col-12 col-sm-6 col-md-4">
+                  <div className="col-12 col-sm-6 col-md-2">
                     <small className="text-muted d-block">
                       Transaction No.
                     </small>
@@ -130,7 +126,7 @@ function TransactionModal({ selectedTransaction, onClose }) {
                   </div>
 
                   {/* Order Number */}
-                  <div className="col-12 col-sm-6 col-md-4">
+                  <div className="col-12 col-sm-6 col-md-2">
                     <small className="text-muted d-block">Order No.</small>
 
                     <span className="fw-semibold text-truncate d-block">
@@ -147,8 +143,19 @@ function TransactionModal({ selectedTransaction, onClose }) {
                     </span>
                   </div>
 
-                  {/* Status */}
+                  {/* Payment Method */}
                   <div className="col-12 col-sm-6 col-md-2">
+                    <small className="text-muted d-block mb-1">
+                      Payment Method
+                    </small>
+
+                    <span className="fw-medium d-block">
+                      {selectedTransaction?.paymentMethod}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-12 col-sm-6 col-md-2 ms-auto">
                     <small className="text-muted d-block mb-1">Status</small>
 
                     <span
@@ -319,16 +326,16 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                 />
 
                                 <div
-                                  className="flex-grow-1"
-                                  style={{
-                                    minWidth: 0,
-                                  }}
+                                // className="flex-grow-1"
+                                // style={{
+                                //   minWidth: 0,
+                                // }}
                                 >
                                   <div
                                     className="fw-semibold text-dark text-truncate"
                                     title={item.name}
                                   >
-                                    {item.name || "Unnamed Product"}
+                                    {item.name}
                                   </div>
 
                                   {item.description && (

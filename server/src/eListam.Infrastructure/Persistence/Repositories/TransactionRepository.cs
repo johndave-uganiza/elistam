@@ -1,50 +1,30 @@
-﻿using eListam.Application.Services.Abstractions.Transactions;
-using eListam.Domain.Models;
+﻿using eListam.Application.Services.Interfaces.Transactions;
+using eListam.Domain.Models.Entities;
+using eListam.Infrastructure.Persistence.Data;
+using eListam.Infrastructure.Persistence.Repositories.Generics;
 using Microsoft.EntityFrameworkCore;
 
 namespace eListam.Infrastructure.Persistence.Repositories
 {
-    public class TransactionRepository : ITransactionRepository
+    public class TransactionRepository : GenericRepository<Transaction>, ITransactionRepository
     {
         private readonly ApplicationDbContext _db;
 
         #region Constructor
-        public TransactionRepository(ApplicationDbContext db)
+        public TransactionRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
         #endregion
 
         #region GetAsync
-        public async Task<IEnumerable<Transaction>> GetAsync()
+        public override async Task<IEnumerable<Transaction>> GetAsync()
         {
             return await _db.Transactions
                 .Include(o => o.TransactionDetails)
                 .AsNoTracking()
                 .ToListAsync();
         }
-        #endregion
-
-        #region GetByIdAsync
-        public async Task<Transaction?> GetByIdAsync(int id)
-        {
-            return await _db.Transactions.FirstOrDefaultAsync(transaction => transaction.Id == id);
-        }
-        #endregion
-
-        #region CreateAsync
-        public async Task<Transaction> CreateAsync(Transaction transaction)
-        {
-            await _db.Transactions.AddAsync(transaction);
-            return transaction;
-        }
-        #endregion
-
-        #region DeleteAsync
-        public async Task DeleteAsync(Transaction transaction)
-        {
-            _db.Transactions.Remove(transaction);
-        }
-        #endregion       
+        #endregion   
     }
 }

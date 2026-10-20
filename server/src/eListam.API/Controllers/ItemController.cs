@@ -1,6 +1,6 @@
 ﻿using eListam.API.Common;
 using eListam.Application.DTOs.Items;
-using eListam.Application.Services.Abstractions.Items;
+using eListam.Application.Services.Interfaces.Items;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
