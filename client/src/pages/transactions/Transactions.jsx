@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import TransactionTable from "../../components/transactions/TransactionTable";
 import Toolbar from "../../components/common/Toolbar";
 import { TransactionContext } from "../../context/TransactionContext";
@@ -7,6 +7,7 @@ import PageTitle from "../../components/common/PageTitle";
 function Transactions() {
   const { getTransactions, exportTransaction } = useContext(TransactionContext);
   const [transactions, setTransactions] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -16,6 +17,26 @@ function Transactions() {
 
     fetchTransactions();
   }, []);
+
+  const filteredTransactions = useMemo(() => {
+    let result = [...(transactions ?? [])];
+
+    // Search
+    if (searchInput.trim()) {
+      const search = searchInput.toLowerCase().trim();
+
+      result = result.filter(
+        (transaction) =>
+          transaction.transactionNumber?.toLowerCase().includes(search) ||
+          transaction.orderNumber?.toLowerCase().includes(search),
+      );
+    }
+    return result;
+  }, [transactions, searchInput /* sortBy */]);
+
+  const handleSearchInput = (e) => {
+    setSearchInput(e.target.value);
+  };
 
   return (
     <div className="container px-3 px-md-4 py-2">
@@ -27,7 +48,7 @@ function Transactions() {
         total={transactions?.length || 0}
       />
       {/* Toolbar */}
-      <Toolbar />
+      <Toolbar onSearch={handleSearchInput} />
 
       {transactions?.length == 0 && (
         <div
@@ -40,7 +61,7 @@ function Transactions() {
       {transactions?.length > 0 && (
         <div className="card border-0 shadow-sm p-3">
           <TransactionTable
-            transactions={transactions}
+            transactions={filteredTransactions}
             exportTransaction={exportTransaction}
           />
         </div>

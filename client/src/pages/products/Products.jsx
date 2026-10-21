@@ -46,17 +46,6 @@ function Products() {
     fetchProducts();
   }, []);
 
-  /*
-   * Filter and sort products.
-   *
-   * This assumes the values from Toolbar are similar to:
-   * - name-asc
-   * - name-desc
-   * - price-asc
-   * - price-desc
-   *
-   * If your Toolbar uses different values, adjust these cases.
-   */
   const filteredProducts = useMemo(() => {
     let result = [...(products ?? [])];
 
@@ -72,29 +61,29 @@ function Products() {
     }
 
     // Sort
-    switch (sortBy) {
-      case "name-asc":
-        result.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-        break;
+    // switch (sortBy) {
+    //   case "name-asc":
+    //     result.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    //     break;
 
-      case "name-desc":
-        result.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
-        break;
+    //   case "name-desc":
+    //     result.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
+    //     break;
 
-      case "price-asc":
-        result.sort((a, b) => Number(a.price ?? 0) - Number(b.price ?? 0));
-        break;
+    //   case "price-asc":
+    //     result.sort((a, b) => Number(a.price ?? 0) - Number(b.price ?? 0));
+    //     break;
 
-      case "price-desc":
-        result.sort((a, b) => Number(b.price ?? 0) - Number(a.price ?? 0));
-        break;
+    //   case "price-desc":
+    //     result.sort((a, b) => Number(b.price ?? 0) - Number(a.price ?? 0));
+    //     break;
 
-      default:
-        break;
-    }
+    //   default:
+    //     break;
+    // }
 
     return result;
-  }, [products, searchInput, sortBy]);
+  }, [products, searchInput /* sortBy */]);
 
   function handleSearchInput(e) {
     setSearchInput(e.target.value);

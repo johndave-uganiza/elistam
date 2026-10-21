@@ -18,7 +18,8 @@ namespace eListam.Infrastructure.Persistence.Repositories
 
         public async Task<ApplicationUser?> GetByIdAsync(string id)
         {
-            return await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == id);
+            return await _db.ApplicationUsers
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
     }

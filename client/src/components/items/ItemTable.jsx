@@ -161,7 +161,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="name"
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                className="ps-3"
+                className="ps-3 text-nowrap"
               />
 
               <SortHeader
@@ -169,6 +169,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="id"
                 sortConfig={sortConfig}
                 onSort={handleSort}
+                className="text-nowrap"
               />
 
               <SortHeader
@@ -176,7 +177,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="cost"
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                className="text-center"
+                className="text-center text-nowrap"
               />
 
               <SortHeader
@@ -184,7 +185,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="price"
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                className="text-center"
+                className="text-center text-nowrap"
               />
 
               <SortHeader
@@ -192,7 +193,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="stock"
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                className="text-center"
+                className="text-center text-nowrap"
               />
 
               <SortHeader
@@ -200,7 +201,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                 sortKey="expirationDate"
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                className="text-center"
+                className="text-center text-nowrap"
               />
 
               <th

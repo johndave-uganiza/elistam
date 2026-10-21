@@ -1,5 +1,6 @@
 ﻿using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Auth;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Domain.Models.Entities;
 
@@ -11,14 +12,21 @@ namespace eListam.Application.Services.Implementations
         private readonly IItemRepository _itemRepository;
         private readonly IFileStorage _fileStorage;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuthService _authService;
         #endregion
 
         #region Constructor
-        public ItemService(IItemRepository itemRepository, IFileStorage fileStorage, IUnitOfWork unitOfWork)
+        public ItemService(
+            IItemRepository itemRepository,
+            IFileStorage fileStorage,
+            IUnitOfWork unitOfWork,
+            IAuthService authService)
         {
             _itemRepository = itemRepository;
             _fileStorage = fileStorage;
             _unitOfWork = unitOfWork;
+            _authService = authService;
+            _authService = authService;
         }
         #endregion
 
@@ -27,9 +35,10 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<IEnumerable<GetItemResponse>>();
 
-            var items = (await _itemRepository.GetAsync()).OrderByDescending(o => o.Id);
+            var items = await _itemRepository.GetAsync();
+            var data = items.OrderByDescending(o => o.Id);
 
-            return result.Success(items.Select(MapGetItemResponse));
+            return result.Success(data.Select(MapGetItemResponse));
         }
         #endregion
 
@@ -53,6 +62,10 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
 
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return result.Failure(message: "User does not exist!");
+
             if (req.ImageFile != null)
                 imagePath = await _fileStorage.SaveImageAsync(req.ImageFile);
             
@@ -69,6 +82,10 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
+
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return result.Failure(message: "User does not exist!");
 
             var item = await _itemRepository.GetByIdAsync(id);
 
@@ -97,6 +114,10 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetItemResponse>> DeleteAsync(int id)
         {
             var result = new Result<GetItemResponse>();
+
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return result.Failure(message: "User does not exist!");
 
             var item = await _itemRepository.GetByIdAsync(id);
 

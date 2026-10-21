@@ -19,7 +19,6 @@ namespace eListam.Application.Services.Implementations
         private readonly IAuthService _authService;
         private readonly IDocumentNumberGenerator _documentNumberGenerator;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly string _userId;
         #endregion
 
         #region Constructor
@@ -35,7 +34,6 @@ namespace eListam.Application.Services.Implementations
             _authService = authService;
             _documentNumberGenerator = documentNumberGenerator;
             _unitOfWork = unitOfWork;
-            _userId = _authService.GetUserId() ?? string.Empty;
         }
         #endregion
 
@@ -43,13 +41,14 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> GetAsync()
         {
             var result = new Result<GetOrderResponse>();
-           
-            var order = (await _orderRepository.GetAsync()).FirstOrDefault(o => !o.IsCompleted);
 
-            if (order == null)
+            var order = await _orderRepository.GetAsync();
+            var data = order.LastOrDefault(o => !o.IsCompleted);
+
+            if (data == null)
                 return result.Success(message: "There is no pending order.");
 
-            return result.Success(MapGetOrderResponse(order));
+            return result.Success(MapGetOrderResponse(data));
         }
         #endregion
 
@@ -61,7 +60,7 @@ namespace eListam.Application.Services.Implementations
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure(message: "Order does not exist!");
+                return result.Success(message: "Order does not exist!");
 
             return result.Success(MapGetOrderResponse(order));
         }
@@ -71,43 +70,45 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> CreateAsync(CreateOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
-            var _userId = _authService.GetUserId();
 
-            if (string.IsNullOrEmpty(_userId))
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
                 return result.Failure(message: "User does not exist!");
 
-            var item = await _itemRepository.GetByIdAsync(req.OrderDetails.First().ItemId);
+            var firstOrderDetail = req.OrderDetails.First();
+            var item = await _itemRepository.GetByIdAsync(firstOrderDetail.ItemId);
 
             if(item == null || item.Stock <= 0)
                 return result.Failure(message: "Order does not exist!");
 
-            var quantity = req.OrderDetails.First().Quantity;
-            var price = req.OrderDetails.First().Price;
-            var date = req.Date ?? DateTime.UtcNow;
-            var orderNumber = await _documentNumberGenerator.GenerateDocumentNumberAsync(DocumentType.Order);
+            var orderNumber = await _documentNumberGenerator
+                .GenerateDocumentNumberAsync(DocumentType.Order);
 
-            var order = await _orderRepository.CreateAsync(new Order()
+            var order = new Order()
             {
-                UserId = _userId,
-                TotalQuantity = quantity,
-                TotalPrice = quantity * price,
+                UserId = userId,
+                TotalQuantity = firstOrderDetail.Quantity,
+                TotalPrice = firstOrderDetail.Quantity * item.Price,
                 OrderNumber = orderNumber,
-                Date = date,
+                Date = req.Date ?? DateTime.UtcNow,
                 IsCompleted = false,
-                OrderDetails = [new OrderDetail()
+                OrderDetails = new List<OrderDetail>()
+                {
+                    new OrderDetail()
                     {
                         ItemId = item.Id,
                         Name = item.Name,
                         Description = item.Description,
                         Price = item.Price,
-                        Quantity = quantity,
+                        Quantity = firstOrderDetail.Quantity,
                         Image = item.Image ?? string.Empty,
-                    }]
-            });
+                    }
+                 }
+            };
 
-            await _unitOfWork.SaveChangesAsync();
-               
-            return result.Success(MapGetOrderResponse(order));
+            var createdOrder = await _orderRepository.CreateAsync(order);
+            await _unitOfWork.SaveChangesAsync(); 
+            return result.Success(MapGetOrderResponse(createdOrder));
         }
         #endregion
 
@@ -117,7 +118,6 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetOrderResponse>();
 
             var userId = _authService.GetUserId();
-
             if (string.IsNullOrEmpty(userId))
                 return result.Failure(message: "User does not exist!");
 
@@ -165,9 +165,9 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> UpdateAsync(int id, UpdateOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
-            var _userId = _authService.GetUserId();
 
-            if (string.IsNullOrEmpty(_userId))
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
                 return result.Failure(message: "User does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
@@ -194,6 +194,7 @@ namespace eListam.Application.Services.Implementations
             order.TotalPrice = req.OrderDetails.Sum(o => o.Price * o.Quantity);
             order.TotalQuantity = req.OrderDetails.Sum(o => o.Quantity);
 
+            _orderRepository.Update(order);
             await _unitOfWork.SaveChangesAsync();
             return result.Success(MapGetOrderResponse(order));
         }
@@ -203,9 +204,9 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> DeleteAsync(int id)
         {
             var result = new Result<GetOrderResponse>();
-            var _userId = _authService.GetUserId();
 
-            if (string.IsNullOrEmpty(_userId))
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
                 return result.Failure(message: "User does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
@@ -224,9 +225,9 @@ namespace eListam.Application.Services.Implementations
         public async Task<Result<GetOrderResponse>> ConfirmOrderAsync(int id, ConfirmOrderRequest req)
         {
             var result = new Result<GetOrderResponse>();
-            var _userId = _authService.GetUserId();
 
-            if (string.IsNullOrEmpty(_userId))
+            var userId = _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
                 return result.Failure(message: "Order does not exist!");
 
             var order = await _orderRepository.GetByIdAsync(id);
@@ -241,7 +242,7 @@ namespace eListam.Application.Services.Implementations
 
             try
             {
-                order.UserId = _userId;
+                order.UserId = userId;
                 order.IsCompleted = true;
                 order.PaymentMethod = req.PaymentMethod;
 

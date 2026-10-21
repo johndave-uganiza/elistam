@@ -1,6 +1,7 @@
 ﻿using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Implementations;
 using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Auth;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +15,7 @@ namespace eListam.Application.Tests.Services.Implementations
         private readonly Mock<IItemRepository> _itemRepository;
         private readonly Mock<IFileStorage> _fileStorage;
         private readonly Mock<IUnitOfWork> _unitOfWork;
+        private readonly Mock<IAuthService> _authService;
         private readonly ItemService _itemService;
         #endregion
 
@@ -23,8 +25,13 @@ namespace eListam.Application.Tests.Services.Implementations
             _itemRepository = new Mock<IItemRepository>();
             _fileStorage = new Mock<IFileStorage>();
             _unitOfWork = new Mock<IUnitOfWork>();
+            _authService = new Mock<IAuthService>();
 
-            _itemService = new ItemService(_itemRepository.Object, _fileStorage.Object, _unitOfWork.Object);
+            _itemService = new ItemService(
+                _itemRepository.Object,
+                _fileStorage.Object,
+                _unitOfWork.Object,
+                _authService.Object);
         }
         #endregion
 
@@ -100,6 +107,10 @@ namespace eListam.Application.Tests.Services.Implementations
                 ImageFile = null
             };
 
+            _authService
+                .Setup(x => x.GetUserId())
+                .Returns("user-123");
+
             _itemRepository
                 .Setup(x => x.GetByIdAsync(itemId))
                 .ReturnsAsync(item);
@@ -135,6 +146,10 @@ namespace eListam.Application.Tests.Services.Implementations
                 Id = itemId,
                 Name = "Item A"
             };
+
+            _authService
+                .Setup(x => x.GetUserId())
+                .Returns("user-123");
 
             _itemRepository
                 .Setup(x => x.GetByIdAsync(itemId))

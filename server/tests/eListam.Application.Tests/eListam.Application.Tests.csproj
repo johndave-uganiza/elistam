@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\eListam.Application\eListam.Application.csproj" />
+    <ProjectReference Include="..\..\src\eListam.Domain\eListam.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

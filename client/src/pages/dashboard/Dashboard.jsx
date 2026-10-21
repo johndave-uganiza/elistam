@@ -12,6 +12,7 @@ function Dashboard() {
     operatingExpenses: 0,
     stockAmount: 0,
   });
+
   const { getDashboardMetrics } = useContext(DashboardContext);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ function Dashboard() {
     };
 
     fetchDashboardMetrics();
-  }, []);
+  }, [getDashboardMetrics]);
 
   const cards = [
     {
@@ -48,7 +49,6 @@ function Dashboard() {
       color: "text-success",
       bg: "bg-success-subtle",
     },
-
     {
       icon: "bi bi-box-seam",
       label: "COGS",
@@ -58,7 +58,6 @@ function Dashboard() {
       color: "text-warning",
       bg: "bg-warning-subtle",
     },
-
     {
       icon: "bi bi-cash-stack",
       label: "Gross Profit",
@@ -68,7 +67,6 @@ function Dashboard() {
       color: "text-primary",
       bg: "bg-primary-subtle",
     },
-
     {
       icon: "bi bi-wallet2",
       label: "Net Profit",
@@ -80,26 +78,26 @@ function Dashboard() {
     },
   ];
 
-  const stockAlerts = [
-    {
-      item: "Item-1",
-      status: "Quantity is below 10 units",
-      type: "warning",
-      icon: "bi-exclamation-triangle-fill",
-    },
-    {
-      item: "Item-2",
-      status: "Expires in 6 months",
-      type: "info",
-      icon: "bi-calendar-event-fill",
-    },
-    {
-      item: "Item-3",
-      status: "Out of stock",
-      type: "danger",
-      icon: "bi-x-circle-fill",
-    },
-  ];
+  // const stockAlerts = [
+  //   {
+  //     item: "Item-1",
+  //     status: "Quantity is below 10 units",
+  //     type: "warning",
+  //     icon: "bi-exclamation-triangle-fill",
+  //   },
+  //   {
+  //     item: "Item-2",
+  //     status: "Expires in 6 months",
+  //     type: "info",
+  //     icon: "bi-calendar-event-fill",
+  //   },
+  //   {
+  //     item: "Item-3",
+  //     status: "Out of stock",
+  //     type: "danger",
+  //     icon: "bi-x-circle-fill",
+  //   },
+  // ];
 
   return (
     <div className="container px-3 px-md-4 py-2">
@@ -109,14 +107,13 @@ function Dashboard() {
           <h3 className="fw-bold mb-0">Dashboard</h3>
 
           <p className="text-muted small mb-0">
-            Financial and operational overview of your business.
+            Financial and operational overview.
           </p>
         </div>
 
         <div className="mt-2 mt-md-0">
           <div className="alert alert-success border-0 shadow-sm mb-0 py-1 px-3 d-flex align-items-center">
             <i className="bi bi-check-circle-fill me-2"></i>
-
             <span className="small fw-medium">Everything is looking good!</span>
           </div>
         </div>
@@ -160,9 +157,7 @@ function Dashboard() {
                   >
                     <i
                       className={`${card.icon} ${card.color}`}
-                      style={{
-                        fontSize: "1.1rem",
-                      }}
+                      style={{ fontSize: "1.1rem" }}
                     ></i>
                   </div>
                 </div>
@@ -199,6 +194,42 @@ function Dashboard() {
               </div>
             </div>
 
+            {/* Financial Overview */}
+            <div className="card-body px-3 px-md-4 pt-2 pb-3">
+              <div
+                className="d-flex flex-column align-items-center justify-content-center text-center bg-light rounded-3 border px-3"
+                style={{
+                  height: "38vh",
+                  minHeight: "250px",
+                }}
+              >
+                <div
+                  className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3"
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                  }}
+                >
+                  <i className="bi bi-bar-chart-line fs-3"></i>
+                </div>
+
+                <h6 className="fw-bold mb-2">Financial Overview</h6>
+
+                <p
+                  className="text-muted small mb-3"
+                  style={{ maxWidth: "360px" }}
+                >
+                  Visualize revenue, cost of goods sold, and operating expenses.
+                </p>
+
+                <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+                  <i className="bi bi-clock-history me-1"></i>
+                  Coming Soon
+                </span>
+              </div>
+            </div>
+
+            {/*
             <div className="card-body px-2 px-md-3 pt-2 pb-3">
               <div
                 className="w-100"
@@ -209,10 +240,11 @@ function Dashboard() {
                 <BarChart />
               </div>
             </div>
+            */}
           </div>
         </div>
 
-        {/* Stock Alerts — 1 KPI card width */}
+        {/* Stock Alerts */}
         <div className="col-12 col-xl-3">
           <div className="card border-0 shadow-sm h-100 overflow-hidden">
             <div className="card-header bg-white border-0 px-3 px-md-4 pt-3 pb-2">
@@ -224,17 +256,39 @@ function Dashboard() {
                     Items needing attention
                   </p>
                 </div>
+              </div>
+            </div>
 
-                <span
-                  className={`badge rounded-pill ${
-                    stockAlerts.length > 0 ? "bg-danger" : "bg-success"
-                  }`}
+            <div className="card-body p-3 px-md-4">
+              <div
+                className="p-3 d-flex flex-column align-items-center justify-content-center text-center bg-light rounded-3 border px-3"
+                style={{ minHeight: "200px" }}
+              >
+                <div
+                  className="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center mb-3"
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                  }}
                 >
-                  {stockAlerts.length}
+                  <i className="bi bi-bell fs-3"></i>
+                </div>
+
+                <h6 className="fw-bold mb-2">Stock Alerts</h6>
+
+                <p className="text-muted small mb-3">
+                  Get notified about low stock, expiring products, and
+                  out-of-stock items.
+                </p>
+
+                <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+                  <i className="bi bi-clock-history me-1"></i>
+                  Coming Soon
                 </span>
               </div>
             </div>
 
+            {/*
             <div className="card-body p-3 px-md-4">
               {stockAlerts.length > 0 ? (
                 <div className="d-flex flex-column gap-2">
@@ -279,8 +333,10 @@ function Dashboard() {
                 </div>
               )}
             </div>
+            */}
 
-            <div className="border-top px-3 px-md-4 py-3 mt-auto">
+            {/* Current Stock Value — remains active */}
+            {/* <div className="border-top px-3 px-md-4 py-3 mt-auto">
               <div className="d-flex justify-content-between align-items-center gap-3">
                 <span className="text-muted small">Current stock value</span>
 
@@ -288,7 +344,7 @@ function Dashboard() {
                   {eListam.utils.formatCurrencyToPHP(metrics.stockAmount)}
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

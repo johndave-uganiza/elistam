@@ -20,14 +20,19 @@ namespace eListam.Infrastructure.Persistence.Repositories
         #region GetAsync
         public async override Task<IEnumerable<Order>> GetAsync()
         {
-            return await _db.Orders.Include(o => o.OrderDetails).AsNoTracking().ToListAsync();
+            return await _db.Orders
+                .Include(o => o.OrderDetails)
+                .AsNoTracking()
+                .ToListAsync();
         }
         #endregion
 
         #region GetByIdAsync
         public async override Task<Order?> GetByIdAsync(int id)
         {
-            return await _db.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(item => item.Id == id);
+            return await _db.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(item => item.Id == id);
         }
         #endregion
     }

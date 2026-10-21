@@ -68,13 +68,13 @@ namespace eListam.Application.Services.Implementations
                 };
             }
 
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             byte[] key = Encoding.UTF8.GetBytes(_secretKey);
 
             var roles = await _userManager.GetRolesAsync(user);
 
             // Define JWT
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor()
+            var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(
                 [
@@ -87,7 +87,7 @@ namespace eListam.Application.Services.Implementations
             };
 
             // Create JWT
-            SecurityToken securityToken = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+            var securityToken = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
 
             // Serialize the security token to string
             var token = jwtSecurityTokenHandler.WriteToken(securityToken);

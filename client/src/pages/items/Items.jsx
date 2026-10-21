@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import Toolbar from "../../components/common/Toolbar";
 import { ItemContext } from "../../context/ItemContext";
 import ItemModal from "../../components/items/ItemModal";
@@ -11,7 +11,7 @@ function Items() {
     useContext(ItemContext);
 
   const [items, setItems] = useState([]);
-  const [sortBy, setSortBy] = useState("");
+  // const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -40,6 +40,22 @@ function Items() {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  const filteredItems = useMemo(() => {
+    let result = [...(items ?? [])];
+
+    // Search
+    if (searchInput.trim()) {
+      const search = searchInput.toLowerCase().trim();
+
+      result = result.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(search) ||
+          item.description?.toLowerCase().includes(search),
+      );
+    }
+    return result;
+  }, [items, searchInput /* sortBy */]);
 
   const resetFormData = () => {
     setFormData({
@@ -193,9 +209,9 @@ function Items() {
     }
   };
 
-  const handleSortBy = (e) => {
-    setSortBy(e.target.value);
-  };
+  // const handleSortBy = (e) => {
+  //   setSortBy(e.target.value);
+  // };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -217,10 +233,6 @@ function Items() {
       <Toolbar
         onShow={handleAddItem}
         onSearch={handleSearchInput}
-        onSort={handleSortBy}
-        items={items}
-        sortBy={sortBy}
-        searchInput={searchInput}
         label={
           <>
             <i className="bi bi-plus-circle me-1"></i>
@@ -228,14 +240,16 @@ function Items() {
           </>
         }
       />
+
       {/* Items Table */}
       <div className="card border-0 shadow-sm p-3">
         <ItemTable
-          items={items}
+          items={filteredItems}
           onEdit={handleEditItem}
           onDelete={handleDeleteItem}
         />
       </div>
+
       {/* Item Modal */}
       {showModal && (
         <ItemModal
