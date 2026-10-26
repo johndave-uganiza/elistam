@@ -1,22 +1,61 @@
 
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
-using Serilog;
-using eListam.Infrastructure;
-using eListam.Infrastructure.Persistence.Data.Seeders;
-using eListam.Infrastructure.Persistence.Data;
+using eListam.API.Middlewares;
 using eListam.Application;
+using eListam.Infrastructure;
+using eListam.Infrastructure.Persistence.Data;
+using eListam.Infrastructure.Persistence.Data.Seeders;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers(options =>
+{
+    // Configure global Authorization
+    var authorizationPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new AuthorizeFilter(authorizationPolicy));
+});
+
+// Get JWT secret key from appsettings.json
+var key = builder.Configuration.GetValue<string>("Jwt:SecretKey");
+
+// Configure Jwt Authentication
+builder.Services.AddAuthentication(u =>
+{
+    u.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    u.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(u =>
+{
+    u.RequireHttpsMetadata = false;
+    u.SaveToken = true;
+    u.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+    };
+});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseExceptionHandlingMiddleware();
 
 #region Seeders
 // "using" statement ensures that DI scope is properly disposed
@@ -48,39 +87,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseExceptionHandler(appBuilder =>
-{
-    appBuilder.Run(async context =>
-    {
-        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
-        var exception = exceptionHandlerFeature?.Error;
 
-        Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .WriteTo.Console()
-        .WriteTo.File(
-            path: "logs/app-.log",
-            rollingInterval: RollingInterval.Day,
-            retainedFileCountLimit: 7)
-        .CreateLogger();
-
-        Log.Information(exception, exception?.Message ?? string.Empty);
-
-        var (statusCode, message) = exception switch
-        {
-            ArgumentNullException => (StatusCodes.Status400BadRequest, "A required value was missing."),
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "You are not authorized to access this resource."),
-            KeyNotFoundException => (StatusCodes.Status404NotFound, "The requested resource was not found."),
-            InvalidOperationException => (StatusCodes.Status409Conflict, "The current state has a conflict."),
-            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
-        };
-
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = statusCode;
-
-        await context.Response.WriteAsJsonAsync(new { statusCode, message });
-    });
-});
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Items;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Implementations;
 using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
@@ -107,9 +108,14 @@ namespace eListam.Application.Tests.Services.Implementations
                 ImageFile = null
             };
 
+            var user = new Result<string>
+            {
+                Data = "user-123"
+            };
+
             _authService
                 .Setup(x => x.GetUserId())
-                .Returns("user-123");
+                .Returns(user);
 
             _itemRepository
                 .Setup(x => x.GetByIdAsync(itemId))
@@ -147,9 +153,14 @@ namespace eListam.Application.Tests.Services.Implementations
                 Name = "Item A"
             };
 
+            var user = new Result<string>
+            {
+                Data = "user-123"
+            };
+
             _authService
                 .Setup(x => x.GetUserId())
-                .Returns("user-123");
+                .Returns(user);
 
             _itemRepository
                 .Setup(x => x.GetByIdAsync(itemId))

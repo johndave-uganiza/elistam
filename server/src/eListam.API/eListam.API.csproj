@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\eListam.Application\eListam.Application.csproj" />
-    <ProjectReference Include="..\eListam.Domain\eListam.Domain.csproj" />
     <ProjectReference Include="..\eListam.Infrastructure\eListam.Infrastructure.csproj" />
   </ItemGroup>
 

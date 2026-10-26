@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Auth;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Auth;
 using eListam.Application.Services.Interfaces.Auth;
 using eListam.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -36,37 +37,71 @@ namespace eListam.Application.Services.Implementations
             _secretKey = config.GetValue<string>("Jwt:SecretKey") ?? string.Empty;
         }
 
-        public string? GetUserId() => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        public string? GetUserEmail() => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email);
-        public string? GetUserName() => _httpContextAccessor.HttpContext?.User.Identity?.Name;
+        public Result<string> GetUserId()
+        {
+            var result = new Result<string>();
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            return 
+                !string.IsNullOrEmpty(userId)
+                ? result.Success(data: userId)
+                : result.Failure(
+                    message: "User Id Not Found!",
+                    failureType: FailureType.NotFound);
+        }
+        public Result<string> GetUserEmail()
+        {
+            var result = new Result<string>();
+            var userEmail = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email);
+           
+            return
+                !string.IsNullOrEmpty(userEmail)
+                ? result.Success(data: userEmail)
+                : result.Failure(
+                    message: "User Email Not Found!",
+                    failureType: FailureType.NotFound);
+        }
+        public Result<string> GetUserName()
+        {
+            var result = new Result<string>();
+            var userName = _httpContextAccessor.HttpContext?.User.Identity?.Name;
+
+            return
+                !string.IsNullOrEmpty(userName)
+                ? result.Success(data: userName)
+                : result.Failure(
+                    message: "Username Not Found!",
+                    failureType: FailureType.NotFound);
+        }
 
         #region GetApplicationUsersAsync
-        public async Task<IEnumerable<ApplicationUser>> GetAsync()
+        public async Task<Result<IEnumerable<ApplicationUser>>> GetAsync()
         {
-            return await _authRepository.GetAsync();
+            var result = new Result<IEnumerable<ApplicationUser>>();
+            var users = await _authRepository.GetAsync();
+
+            return result.Success(data: users);
+
         }
         #endregion
         
         #region LoginAsync
-        public async Task<LoginResponse> LoginAsync(LoginRequest req)
+        public async Task<Result<LoginResponse>> LoginAsync(LoginRequest req)
         {
+            var result = new Result<LoginResponse>();
             // Find user by email
             var user = await _userManager.FindByEmailAsync(req.Email);
 
             if (user == null)
-            {
-                return new LoginResponse();
-            }
+                return result.Success(message: $"{req.Email} does not exist!");
+            
 
             // Check if password is valid
             bool isPasswordValid = await _userManager.CheckPasswordAsync(user, req.Password);
             if (!isPasswordValid)
-            {
-                return new LoginResponse()
-                {
-                    Token = string.Empty
-                };
-            }
+                return result.Failure(
+                    message: "Invalid Password!",
+                    failureType: FailureType.Validation);
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             byte[] key = Encoding.UTF8.GetBytes(_secretKey);
@@ -92,18 +127,16 @@ namespace eListam.Application.Services.Implementations
             // Serialize the security token to string
             var token = jwtSecurityTokenHandler.WriteToken(securityToken);
 
-            return new LoginResponse()
-            {
-                Token = token,
-            };
+            return result.Success(data: new LoginResponse { Token = token });
         }
         #endregion
 
         #region LogoutAsync
-        public async Task<LogoutResponse> LogoutAsync()
+        public async Task<Result<LogoutResponse>> LogoutAsync()
         {
+            var result = new Result<LogoutResponse>();
             await _signInManager.SignOutAsync();
-            return new LogoutResponse();
+            return result.Success(message: "Logged out successfully!");
         }
         #endregion
     }

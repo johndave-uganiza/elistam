@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Orders;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Orders;
 using eListam.Application.DTOs.Transactions;
 using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
@@ -71,15 +72,19 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var firstOrderDetail = req.OrderDetails.First();
             var item = await _itemRepository.GetByIdAsync(firstOrderDetail.ItemId);
 
             if(item == null || item.Stock <= 0)
-                return result.Failure(message: "Order does not exist!");
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
             var orderNumber = await _documentNumberGenerator
                 .GenerateDocumentNumberAsync(DocumentType.Order);
@@ -117,19 +122,25 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var order = await _orderRepository.GetByIdAsync(orderId);
 
             if (order == null)
-                return result.Failure(message: "Order does not exist!");
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
             var item = await _itemRepository.GetByIdAsync(req.ItemId);
 
             if (item == null)
-                return result.Failure(message: "Item does not exist!");
+                return result.Failure(
+                    message: "Item does not exist!",
+                    failureType: FailureType.NotFound);
 
             // Check whether this product is already in the order.
             var existingDetail = order.OrderDetails.FirstOrDefault(od => od.ItemId == item.Id);
@@ -166,14 +177,18 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure(message: "Order does not exist!");
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
             // Update existing Order Detail
             foreach (var detail in req.OrderDetails)
@@ -205,14 +220,18 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return result.Failure(message: "Order does not exist!");
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
             _orderRepository.Delete(order);
             await _unitOfWork.SaveChangesAsync();
@@ -226,17 +245,23 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetOrderResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "Order does not exist!");
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
             var order = await _orderRepository.GetByIdAsync(id);
 
-            if(order == null)
-                return result.Failure(message: "Order does not exist!");
+            if (order == null)
+                return result.Failure(
+                    message: "Order does not exist!",
+                    failureType: FailureType.NotFound);
 
-            if(order.IsCompleted)
-                return result.Failure(message: "Order was already completed!");
+            if (order.IsCompleted)
+                return result.Failure(
+                    message: "Order is not valid!",
+                    failureType: FailureType.Conflict);
 
             await _unitOfWork.BeginTransactionAsync();
 
@@ -248,7 +273,6 @@ namespace eListam.Application.Services.Implementations
 
                 var transaction = new CreateTransactionRequest()
                 {
-                    Date = DateTime.UtcNow,
                     IsCompleted = order.IsCompleted,
                     OrderId = order.Id,
                     OrderNumber = order.OrderNumber,

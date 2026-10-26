@@ -231,7 +231,7 @@ function Items() {
 
       {/* Toolbar */}
       <Toolbar
-        onShow={handleAddItem}
+        onAction={handleAddItem}
         onSearch={handleSearchInput}
         label={
           <>

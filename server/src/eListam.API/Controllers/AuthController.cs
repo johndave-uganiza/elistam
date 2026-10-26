@@ -1,4 +1,5 @@
 ﻿using eListam.API.Common;
+using eListam.Application;
 using eListam.Application.DTOs.Auth;
 using eListam.Application.Services.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -27,24 +28,7 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> GetAsync()
         {
             var result = await _authService.GetAsync();
-
-            if (result == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = true,
-                    Messages = []
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Data = result,
-                Messages = []
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
@@ -53,26 +37,8 @@ namespace eListamAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
-            // Find user by email
             var result = await _authService.LoginAsync(request);
-
-            if (result == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = true,
-                    Messages = []
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Data = result,
-                Messages = []
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
@@ -80,9 +46,8 @@ namespace eListamAPI.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> LogoutAsync()
         {
-            await _authService.LogoutAsync();
-
-            return Ok();
+            var result = await _authService.LogoutAsync();
+            return this.GetObjectResult(result);
         }
         #endregion
 

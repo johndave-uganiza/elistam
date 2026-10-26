@@ -1,6 +1,7 @@
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
+import EmptyItemTable from "./EmptyItemTable";
 
 function ItemTable({ items, onEdit, onDelete }) {
   const {
@@ -67,7 +68,7 @@ function ItemTable({ items, onEdit, onDelete }) {
   const getExpirationStatus = (expiration) => {
     if (!expiration) {
       return {
-        label: "No date",
+        label: "No Expr. Date",
         className: "text-bg-secondary",
       };
     }
@@ -77,7 +78,7 @@ function ItemTable({ items, onEdit, onDelete }) {
 
     if (Number.isNaN(expirationDate.getTime())) {
       return {
-        label: "No date",
+        label: "No Expr. Date",
         className: "text-bg-secondary",
       };
     }
@@ -108,29 +109,6 @@ function ItemTable({ items, onEdit, onDelete }) {
       className: "text-bg-success",
     };
   };
-
-  const EmptyState = () => (
-    <div className="d-flex flex-column align-items-center justify-content-center text-muted py-5">
-      <div
-        className="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3"
-        style={{
-          width: "72px",
-          height: "72px",
-        }}
-      >
-        <i
-          className="bi bi-box-seam"
-          style={{
-            fontSize: "2rem",
-          }}
-        />
-      </div>
-
-      <h6 className="fw-semibold text-dark mb-1">No items found</h6>
-
-      <small>Add an item to see it listed here.</small>
-    </div>
-  );
 
   return (
     <div className="bg-white rounded-3 border overflow-hidden">
@@ -359,7 +337,7 @@ function ItemTable({ items, onEdit, onDelete }) {
             ) : (
               <tr>
                 <td colSpan="6" className="border-0">
-                  <EmptyState />
+                  <EmptyItemTable />
                 </td>
               </tr>
             )}
@@ -368,11 +346,11 @@ function ItemTable({ items, onEdit, onDelete }) {
       </div>
 
       {/* =====================================================
-          MOBILE VIEW
+          MOBILE VIEW - COMPACT RECTANGULAR ITEMS
       ====================================================== */}
       <div className="d-md-none">
-        {/* Mobile Header / Sort */}
-        <div className="border-bottom bg-light px-3 py-2">
+        {/* Compact Header / Sort */}
+        <div className="border-bottom bg-light px-2 py-2">
           <div className="d-flex align-items-center justify-content-between">
             <small className="text-muted fw-medium">
               {sortedItems.length} {sortedItems.length === 1 ? "item" : "items"}
@@ -381,212 +359,170 @@ function ItemTable({ items, onEdit, onDelete }) {
             <div className="dropdown">
               <button
                 type="button"
-                className="btn btn-sm btn-white border dropdown-toggle"
+                className="btn btn-sm btn-white border py-1 px-2"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
+                aria-label="Sort items"
               >
-                <i className="bi bi-sort-down me-1"></i>
-                Sort
+                <i className="bi bi-sort-down" />
               </button>
 
               <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSort("name")}
-                  >
-                    Name
-                  </button>
-                </li>
-
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSort("id")}
-                  >
-                    Item No.
-                  </button>
-                </li>
-
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSort("price")}
-                  >
-                    Price
-                  </button>
-                </li>
-
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSort("stock")}
-                  >
-                    Stock
-                  </button>
-                </li>
-
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSort("expirationDate")}
-                  >
-                    Expiration
-                  </button>
-                </li>
+                {[
+                  ["name", "Name"],
+                  ["id", "Item No."],
+                  ["price", "Price"],
+                  ["stock", "Stock"],
+                  ["expirationDate", "Expiration"],
+                ].map(([key, label]) => (
+                  <li key={key}>
+                    <button
+                      type="button"
+                      className="dropdown-item"
+                      onClick={() => handleSort(key)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Mobile Items */}
+        {/* Compact Item List */}
         <div
           style={{
-            maxHeight: "calc(100vh - 300px)",
-            minHeight: "300px",
+            maxHeight: "calc(100vh - 260px)",
+            minHeight: "200px",
             overflowY: "auto",
           }}
         >
           {sortedItems.length > 0 ? (
-            <div className="list-group list-group-flush">
+            <div>
               {sortedItems.map((item) => {
                 const expirationStatus = getExpirationStatus(
                   item.expirationDate,
                 );
 
                 return (
-                  <div key={item.id} className="list-group-item px-3 py-3">
-                    {/* Item Header */}
-                    <div className="d-flex align-items-start gap-3">
-                      {/* Image */}
-                      <div
-                        className="rounded-3 bg-light border overflow-hidden flex-shrink-0"
-                        style={{
-                          width: "64px",
-                          height: "64px",
+                  <div
+                    key={item.id}
+                    className="d-flex align-items-center gap-2 px-2 py-2 border-bottom"
+                    style={{
+                      minHeight: "76px",
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      className="rounded-2 bg-light border overflow-hidden flex-shrink-0"
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                      }}
+                    >
+                      <img
+                        src={getImageUrl(item.image)}
+                        alt={item.name || "Item"}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = IMAGE_PLACEHOLDER_URL;
                         }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+
+                    {/* Essential Details */}
+                    <div
+                      className="flex-grow-1 overflow-hidden"
+                      style={{ minWidth: 0 }}
+                    >
+                      <div
+                        className="fw-semibold text-dark text-truncate"
+                        style={{
+                          fontSize: "0.84rem",
+                          lineHeight: 1.3,
+                        }}
+                        title={item.name}
                       >
-                        <img
-                          src={getImageUrl(item.image)}
-                          alt={item.name || "Item"}
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = IMAGE_PLACEHOLDER_URL;
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
+                        {item.name || "Unnamed item"}
                       </div>
 
-                      {/* Name / Item Number */}
                       <div
-                        className="flex-grow-1"
+                        className="d-flex align-items-center flex-wrap gap-1 mt-1"
                         style={{
-                          minWidth: 0,
+                          fontSize: "0.75rem",
+                          lineHeight: 1.3,
                         }}
                       >
-                        <div className="d-flex justify-content-between align-items-start gap-2">
-                          <div
-                            className="fw-semibold text-dark text-truncate"
-                            title={item.name}
-                          >
-                            {item.name || "Unnamed item"}
-                          </div>
+                        <span className="fw-bold text-black">
+                          {formatCurrency(item.price)}
+                        </span>
 
-                          <span className="font-monospace small text-muted text-nowrap">
-                            ITM-
-                            {String(item.id).padStart(3, "0")}
+                        <span className="text-muted fw-medium">·</span>
+
+                        <span className="text-muted fw-medium">
+                          Qty {item.stock ?? 0}
+                        </span>
+                      </div>
+
+                      <div className="d-flex align-items-center gap-1 mt-1">
+                        <span
+                          className={`badge rounded-pill ${expirationStatus.className}`}
+                          style={{
+                            fontSize: "0.62rem",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {expirationStatus.label}
+                        </span>
+
+                        {item.expirationDate && (
+                          <span
+                            className="text-muted text-truncate"
+                            style={{ fontSize: "0.68rem" }}
+                          >
+                            {formatDate(item.expirationDate)}
                           </span>
-                        </div>
-
-                        {item.description && (
-                          <div
-                            className="small text-muted mt-1"
-                            style={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
-                          >
-                            {item.description}
-                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Details */}
-                    <div className="row g-2 mt-2">
-                      {/* Price */}
-                      <div className="col-6">
-                        <div className="bg-light rounded-3 px-2 py-2 h-100">
-                          <small className="text-muted d-block">Price</small>
-
-                          <span className="fw-semibold">
-                            {formatCurrency(item.price)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Stock */}
-                      <div className="col-6">
-                        <div className="bg-light rounded-3 px-2 py-2 h-100">
-                          <small className="text-muted d-block">Stock</small>
-
-                          <span className="badge rounded-pill bg-white text-dark border mt-1">
-                            {item.stock ?? 0}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Expiration */}
-                      <div className="col-12">
-                        <div className="bg-light rounded-3 px-2 py-2 d-flex align-items-center justify-content-between gap-2">
-                          <div>
-                            <small className="text-muted d-block">
-                              Expiration
-                            </small>
-
-                            <span className="small fw-medium">
-                              {formatDate(item.expirationDate)}
-                            </span>
-                          </div>
-
-                          <span
-                            className={`badge rounded-pill ${expirationStatus.className}`}
-                          >
-                            {expirationStatus.label}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="d-flex gap-2 mt-3">
+                    {/* Icon-only Actions */}
+                    <div className="d-flex flex-column gap-1 flex-shrink-0">
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline-primary flex-fill"
+                        className="btn btn-sm btn-light border text-primary p-1"
                         onClick={() => onEdit(item)}
+                        title="Edit item"
+                        aria-label={`Edit ${item.name || "item"}`}
+                        style={{
+                          width: "30px",
+                          height: "28px",
+                          lineHeight: 1,
+                        }}
                       >
-                        <i className="bi bi-pencil-square me-1"></i>
-                        Edit
+                        <i className="bi bi-pencil" />
                       </button>
 
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline-danger flex-fill"
+                        className="btn btn-sm btn-light border text-danger p-1"
                         onClick={() => onDelete(item)}
+                        title="Delete item"
+                        aria-label={`Delete ${item.name || "item"}`}
+                        style={{
+                          width: "30px",
+                          height: "28px",
+                          lineHeight: 1,
+                        }}
                       >
-                        <i className="bi bi-trash3 me-1"></i>
-                        Delete
+                        <i className="bi bi-trash3" />
                       </button>
                     </div>
                   </div>
@@ -594,7 +530,7 @@ function ItemTable({ items, onEdit, onDelete }) {
               })}
             </div>
           ) : (
-            <EmptyState />
+            <EmptyItemTable />
           )}
         </div>
       </div>
@@ -604,16 +540,10 @@ function ItemTable({ items, onEdit, onDelete }) {
       ====================================================== */}
       {sortedItems.length > 0 && (
         <div className="border-top bg-light px-3 py-2">
-          <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">
-              <i className="bi bi-box-seam me-1"></i>
-              {sortedItems.length} {sortedItems.length !== 1 ? "items" : "item"}
-            </small>
-
-            <small className="text-muted d-none d-sm-inline">
-              Click a column to sort
-            </small>
-          </div>
+          <small className="text-muted">
+            <i className="bi bi-box-seam me-1"></i>
+            {sortedItems.length} {sortedItems.length !== 1 ? "items" : "item"}
+          </small>
         </div>
       )}
     </div>

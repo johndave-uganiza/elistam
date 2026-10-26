@@ -22,31 +22,14 @@ namespace eListamAPI.Controllers
         }
         #endregion
 
-        [AllowAnonymous]
         #region GetAsync
+        [AllowAnonymous]
         [HttpGet]
         [ActionName(nameof(GetAsync))]
         public async Task<IActionResult> GetAsync()
         {
             var result = await _service.GetAsync();
-
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
@@ -56,23 +39,7 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
     }

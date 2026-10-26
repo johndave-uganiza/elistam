@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import "../../assets/css/layouts/header.css";
+import { ROUTES } from "../../utilities/constants";
+import "@/assets/css/layouts/header.css";
 
 function Header() {
   const navigate = useNavigate();
@@ -48,29 +49,27 @@ function Header() {
         {/* Mobile Quick Navigation */}
         <div className="mobile-quick-nav d-md-none">
           {isAuthenticated && (
-            <NavLink to="/dashboard" className={navLinkClass}>
-              <i className="bi bi-grid-1x2-fill"></i>
-              <span>Dashboard</span>
-            </NavLink>
-          )}
+            <>
+              <NavLink to={ROUTES.DASHBOARD} className={navLinkClass}>
+                <i className="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+              </NavLink>
 
-          {isAuthenticated && (
-            <NavLink to="/items" className={navLinkClass}>
-              <i className="bi bi-box-seam"></i>
-              <span>Items</span>
-            </NavLink>
-          )}
+              <NavLink to={ROUTES.ITEMS} className={navLinkClass}>
+                <i className="bi bi-box-seam"></i>
+                <span>Items</span>
+              </NavLink>
 
-          <NavLink to="/products" className={navLinkClass}>
-            <i className="bi bi-ui-checks-grid"></i>
-            <span>Products</span>
-          </NavLink>
+              <NavLink to={ROUTES.PRODUCTS} className={navLinkClass}>
+                <i className="bi bi-ui-checks-grid"></i>
+                <span>Products</span>
+              </NavLink>
 
-          {isAuthenticated && (
-            <NavLink to="/transactions" className={navLinkClass}>
-              <i className="bi bi-receipt"></i>
-              <span>Transactions</span>
-            </NavLink>
+              <NavLink to={ROUTES.TRANSACTIONS} className={navLinkClass}>
+                <i className="bi bi-receipt"></i>
+                <span>Transactions</span>
+              </NavLink>
+            </>
           )}
         </div>
 
@@ -80,36 +79,26 @@ function Header() {
           <ul className="navbar-nav me-auto gap-md-1 mt-3 mt-md-0">
             {isAuthenticated && (
               <>
-                <li className="nav-item">
-                  <NavLink className={navLinkClass} to="/dashboard">
-                    <i className="bi bi-grid-1x2-fill"></i>
-                    <span>Dashboard</span>
-                  </NavLink>
-                </li>
+                <NavLink to={ROUTES.DASHBOARD} className={navLinkClass}>
+                  <i className="bi bi-grid-1x2-fill"></i>
+                  <span>Dashboard</span>
+                </NavLink>
 
-                <li className="nav-item">
-                  <NavLink className={navLinkClass} to="/items">
-                    <i className="bi bi-box-seam"></i>
-                    <span>Items</span>
-                  </NavLink>
-                </li>
-              </>
-            )}
+                <NavLink to="/items" className={navLinkClass}>
+                  <i className="bi bi-box-seam"></i>
+                  <span>Items</span>
+                </NavLink>
 
-            <li className="nav-item">
-              <NavLink className={navLinkClass} to="/products">
-                <i className="bi bi-ui-checks-grid"></i>
-                <span>Products</span>
-              </NavLink>
-            </li>
+                <NavLink to={ROUTES.PRODUCTS} className={navLinkClass}>
+                  <i className="bi bi-ui-checks-grid"></i>
+                  <span>Products</span>
+                </NavLink>
 
-            {isAuthenticated && (
-              <li className="nav-item">
-                <NavLink className={navLinkClass} to="/transactions">
+                <NavLink to={ROUTES.TRANSACTIONS} className={navLinkClass}>
                   <i className="bi bi-receipt"></i>
                   <span>Transactions</span>
                 </NavLink>
-              </li>
+              </>
             )}
 
             {/* Mobile Secondary Links */}
@@ -118,21 +107,21 @@ function Header() {
 
               {isAuthenticated && (
                 <>
-                  <li className="nav-item">
-                    <NavLink className={navLinkClass} to="/orders">
+                  {/* <li className="nav-item">
+                    <NavLink className={navLinkClass}>
                       <i className="bi bi-bag-check"></i>
                       <span>My Orders</span>
                     </NavLink>
                   </li>
 
                   <li className="nav-item">
-                    <NavLink className={navLinkClass} to="/settings">
+                    <NavLink className={navLinkClass}>
                       <i className="bi bi-gear"></i>
                       <span>Settings</span>
                     </NavLink>
                   </li>
 
-                  <hr className="my-2" />
+                  <hr className="my-2" /> */}
 
                   <li className="nav-item">
                     <button
@@ -152,7 +141,7 @@ function Header() {
                   <button
                     type="button"
                     className="btn btn-success w-100 rounded-3"
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate(`${ROUTES.LOGIN}`)}
                   >
                     <i className="bi bi-box-arrow-in-right me-2"></i>
                     Login
@@ -190,20 +179,14 @@ function Header() {
 
                 <ul className="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2 p-2">
                   <li>
-                    <NavLink
-                      className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2"
-                      to="/orders"
-                    >
+                    <NavLink className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2 disabled">
                       <i className="bi bi-bag-check"></i>
                       <span>My Orders</span>
                     </NavLink>
                   </li>
 
                   <li>
-                    <NavLink
-                      className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2"
-                      to="/settings"
-                    >
+                    <NavLink className="dropdown-item rounded-3 py-2 d-flex align-items-center gap-2 disabled">
                       <i className="bi bi-gear"></i>
                       <span>Settings</span>
                     </NavLink>
@@ -229,7 +212,7 @@ function Header() {
               <button
                 type="button"
                 className="btn bg-success-subtle rounded-pill px-4 fw-semibold"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate(`${ROUTES.LOGIN}`)}
               >
                 Sign In
               </button>

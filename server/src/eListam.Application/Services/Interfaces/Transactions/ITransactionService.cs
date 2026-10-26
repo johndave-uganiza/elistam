@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Transactions;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Transactions;
 
 
 namespace eListam.Application.Services.Interfaces.Transactions
@@ -9,6 +10,6 @@ namespace eListam.Application.Services.Interfaces.Transactions
         public Task<Result<GetTransactionResponse>> GetByIdAsync(int id);
         public Task<Result<GetTransactionResponse>> CreateAsync(CreateTransactionRequest req);
         public Task<Result<GetTransactionResponse>> DeleteAsync(int id);
-        public Task<Result<ExportTransactionResponse>> ExportCsvAsync(int id);
+        public Task<Result<ExportTransactionResponse>> ExportCsvAsync();
     }
 }

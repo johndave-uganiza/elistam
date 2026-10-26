@@ -27,25 +27,37 @@ function TransactionProvider({ children }) {
     }
   };
 
-  const exportTransaction = async (id) => {
+  const deleteTransaction = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/transaction/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("DELETE error:", error);
+    }
+  };
+
+  const exportTransaction = async () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/transaction/${id}/export`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API_BASE_URL}/api/transaction/export`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `transaction-${id}.csv`;
+      link.download = `transactions-as-of-${new Date().toLocaleString()}.csv`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -59,7 +71,12 @@ function TransactionProvider({ children }) {
 
   return (
     <TransactionContext.Provider
-      value={{ getTransactions, exportTransaction, isLoading }}
+      value={{
+        getTransactions,
+        exportTransaction,
+        deleteTransaction,
+        isLoading,
+      }}
     >
       {children}
     </TransactionContext.Provider>

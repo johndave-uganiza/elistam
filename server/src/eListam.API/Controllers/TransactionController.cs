@@ -1,7 +1,5 @@
-﻿using eListam.API.Common;
-using eListam.Application.Services.Interfaces.Transactions;
+﻿using eListam.Application.Services.Interfaces.Transactions;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace eListamAPI.Controllers
 {
@@ -26,34 +24,7 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> GetAsync()
         {
             var result = await _service.GetAsync();
-
-            if(!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if (result.Data == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
@@ -64,34 +35,7 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var result = await _service.GetByIdAsync(id);
-
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if (result.Data == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
@@ -101,67 +45,21 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var result = await _service.DeleteAsync(id);
-
-            if(!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if(result.Data == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            });
+            return this.GetObjectResult(result);
         }
         #endregion
 
         #region ExportCsvAsync
-        [HttpGet("{id:int}/export")]
+        [HttpGet("export")]
         [ActionName(nameof(ExportCsvAsync))]
         public async Task<IActionResult> ExportCsvAsync(int id)
         {
-            var result = await _service.ExportCsvAsync(id);
+            var result = await _service.ExportCsvAsync();
 
-            if (result == null) return NotFound( new ApiResponse() { StatusCode = HttpStatusCode.NotFound });
-
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if (result.Data == null || result.Data.CsvData == null)
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            return File(result.Data.CsvData, "text/csv", "transaction.csv");
+            if (result.IsSuccess && result?.Data?.CsvData != null)
+                return File(result.Data.CsvData, "text/csv", "transaction.csv");
+            
+            return this.GetObjectResult(result!);
         }
         #endregion
 

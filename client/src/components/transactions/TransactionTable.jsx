@@ -3,8 +3,9 @@ import TransactionModal from "./TransactionModal";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
 import eListam from "@/utilities//eListam";
+import EmptyTransactionTable from "./EmptyTransactionTable";
 
-function TransactionTable({ transactions, exportTransaction }) {
+function TransactionTable({ transactions, deleteTransaction }) {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -64,29 +65,6 @@ function TransactionTable({ transactions, exportTransaction }) {
         return "text-bg-secondary";
     }
   };
-
-  const EmptyState = () => (
-    <div className="d-flex flex-column align-items-center justify-content-center text-muted py-5">
-      <div
-        className="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3"
-        style={{
-          width: "72px",
-          height: "72px",
-        }}
-      >
-        <i
-          className="bi bi-receipt"
-          style={{
-            fontSize: "2rem",
-          }}
-        />
-      </div>
-
-      <h6 className="fw-semibold text-dark mb-1">No transactions found</h6>
-
-      <small>Completed transactions will appear here.</small>
-    </div>
-  );
 
   return (
     <>
@@ -278,13 +256,13 @@ function TransactionTable({ transactions, exportTransaction }) {
 
                           <button
                             type="button"
-                            className="btn btn-sm btn-light border text-dark px-3"
-                            onClick={() => exportTransaction(tran.id)}
-                            title="Export transaction to CSV"
+                            className="btn btn-sm btn-light border text-danger px-3"
+                            onClick={() => deleteTransaction(tran)}
+                            title="Delete Transaction"
                           >
-                            <i className="bi bi-filetype-csv me-1"></i>
+                            <i className="bi bi-trash3 me-1"></i>
 
-                            <span className="d-none d-lg-inline">Export</span>
+                            <span className="d-none d-lg-inline">Delete</span>
                           </button>
                         </div>
                       </td>
@@ -294,7 +272,7 @@ function TransactionTable({ transactions, exportTransaction }) {
               ) : (
                 <tr>
                   <td colSpan="7" className="border-0">
-                    <EmptyState />
+                    <EmptyTransactionTable />
                   </td>
                 </tr>
               )}
@@ -307,7 +285,7 @@ function TransactionTable({ transactions, exportTransaction }) {
         ====================================================== */}
         <div className="d-md-none">
           {/* Mobile Header / Sort */}
-          <div className="border-bottom bg-light px-3 py-2">
+          <div className="border-bottom bg-light px-2 py-2">
             <div className="d-flex align-items-center justify-content-between">
               <small className="text-muted fw-medium">
                 {sortedTransactions.length}{" "}
@@ -319,207 +297,183 @@ function TransactionTable({ transactions, exportTransaction }) {
               <div className="dropdown">
                 <button
                   type="button"
-                  className="btn btn-sm btn-white border dropdown-toggle"
+                  className="btn btn-sm btn-white border py-1 px-2"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
+                  aria-label="Sort transactions"
                 >
-                  <i className="bi bi-sort-down me-1"></i>
-                  Sort
+                  <i className="bi bi-sort-down" />
                 </button>
 
                 <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("transactionNumber")}
-                    >
-                      Transaction
-                    </button>
-                  </li>
-
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("orderNumber")}
-                    >
-                      Order
-                    </button>
-                  </li>
-
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("date")}
-                    >
-                      Date
-                    </button>
-                  </li>
-
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("status")}
-                    >
-                      Status
-                    </button>
-                  </li>
-
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("totalQuantity")}
-                    >
-                      Quantity
-                    </button>
-                  </li>
-
-                  <li>
-                    <button
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => handleSort("totalPrice")}
-                    >
-                      Total
-                    </button>
-                  </li>
+                  {[
+                    ["transactionNumber", "Transaction"],
+                    ["orderNumber", "Order"],
+                    ["date", "Date"],
+                    ["status", "Status"],
+                    ["totalQuantity", "Quantity"],
+                    ["totalPrice", "Total"],
+                  ].map(([key, label]) => (
+                    <li key={key}>
+                      <button
+                        type="button"
+                        className="dropdown-item"
+                        onClick={() => handleSort(key)}
+                      >
+                        {label}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
           </div>
 
-          {/* Mobile Transactions */}
+          {/* Compact Transaction List */}
           <div
             style={{
-              maxHeight: "calc(100vh - 300px)",
-              minHeight: "300px",
+              maxHeight: "calc(100vh - 260px)",
+              minHeight: "200px",
               overflowY: "auto",
             }}
           >
             {sortedTransactions.length > 0 ? (
-              <div className="list-group list-group-flush">
+              <div>
                 {sortedTransactions.map((tran) => {
                   const status = tran.status || "Paid";
 
                   return (
                     <div
                       key={tran.id || tran.transactionNumber}
-                      className="list-group-item px-3 py-3"
+                      className="d-flex align-items-center gap-2 px-2 py-2 border-bottom"
+                      style={{
+                        minHeight: "68px",
+                      }}
                     >
-                      {/* Transaction Header */}
-                      <div className="d-flex align-items-start gap-3">
-                        {/* Icon */}
-                        <div
-                          className="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0"
-                          style={{
-                            width: "48px",
-                            height: "48px",
-                          }}
-                        >
-                          <i
-                            className="bi bi-receipt"
+                      {/* Receipt Icon */}
+                      <div
+                        className="rounded-2 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{
+                          width: "38px",
+                          height: "38px",
+                        }}
+                      >
+                        <i className="bi bi-receipt" />
+                      </div>
+
+                      {/* Essential Transaction Details */}
+                      <div
+                        className="flex-grow-1 overflow-hidden"
+                        style={{
+                          minWidth: 0,
+                        }}
+                      >
+                        {/* Transaction Number + Status */}
+                        <div className="d-flex align-items-center gap-1">
+                          <div
+                            className="fw-semibold text-dark text-truncate flex-grow-1"
                             style={{
-                              fontSize: "1.2rem",
+                              fontSize: "0.82rem",
+                              lineHeight: 1.3,
+                              minWidth: 0,
                             }}
-                          ></i>
+                            title={tran.transactionNumber}
+                          >
+                            {tran.transactionNumber || "TRAN-###"}
+                          </div>
+
+                          <span
+                            className={`badge rounded-pill flex-shrink-0 ${getStatusClass(
+                              status,
+                            )}`}
+                            style={{
+                              fontSize: "0.6rem",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {status}
+                          </span>
                         </div>
 
-                        {/* Transaction Details */}
+                        {/* Order Number + Date */}
                         <div
-                          className="flex-grow-1"
+                          className="d-flex align-items-center gap-1 mt-1 text-muted"
                           style={{
-                            minWidth: 0,
+                            fontSize: "0.7rem",
+                            lineHeight: 1.3,
                           }}
                         >
-                          <div className="d-flex justify-content-between align-items-start gap-2">
-                            <div
-                              className="fw-semibold text-dark text-truncate"
-                              title={tran.transactionNumber}
-                            >
-                              {tran.transactionNumber || "TRAN-###"}
-                            </div>
+                          <span
+                            className="font-monospace text-truncate"
+                            style={{
+                              maxWidth: "55%",
+                            }}
+                            title={tran.orderNumber}
+                          >
+                            {tran.orderNumber || "No order"}
+                          </span>
 
-                            <span
-                              className={`badge rounded-pill flex-shrink-0 ${getStatusClass(
-                                status,
-                              )}`}
-                            >
-                              {status}
-                            </span>
-                          </div>
+                          <span>·</span>
 
-                          <div className="small text-muted mt-1">
-                            <span className="font-monospace">
-                              {tran.orderNumber}
-                            </span>
-                          </div>
+                          <span className="text-truncate">
+                            {eListam.utils.formatDate(tran.date)}
+                          </span>
+                        </div>
+
+                        {/* Total + Quantity */}
+                        <div
+                          className="d-flex align-items-center flex-wrap gap-1 mt-1"
+                          style={{
+                            fontSize: "0.75rem",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          <span className="fw-bold text-dark">
+                            {eListam.utils.formatCurrency(tran.totalPrice)}
+                          </span>
+
+                          <span className="text-muted fw-medium">·</span>
+
+                          <span className="text-muted fw-medium">
+                            Qty {tran.totalQuantity ?? 0}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Transaction Details */}
-                      <div className="row g-2 mt-2">
-                        {/* Date */}
-                        <div className="col-12">
-                          <div className="bg-light rounded-3 px-2 py-2">
-                            <small className="text-muted d-block">Date</small>
-
-                            <div className="d-flex align-items-center gap-2">
-                              <i className="bi bi-calendar3 text-muted"></i>
-
-                              <span className="small fw-medium">
-                                {eListam.utils.formatDate(tran.date)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Quantity */}
-                        <div className="col-6">
-                          <div className="bg-light rounded-3 px-2 py-2 h-100">
-                            <small className="text-muted d-block">
-                              Quantity
-                            </small>
-
-                            <span className="badge rounded-pill bg-white text-dark border mt-1">
-                              {tran.totalQuantity}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Total */}
-                        <div className="col-6">
-                          <div className="bg-light rounded-3 px-2 py-2 h-100">
-                            <small className="text-muted d-block">Total</small>
-
-                            <span className="fw-semibold">
-                              {eListam.utils.formatCurrency(tran.totalPrice)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="d-flex gap-2 mt-3">
+                      {/* Compact Icon-Only Actions */}
+                      <div className="d-flex flex-column gap-1 flex-shrink-0">
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-primary flex-fill"
+                          className="btn btn-sm btn-light border text-primary p-1"
                           onClick={() => handleViewTransaction(tran)}
+                          title="View transaction"
+                          aria-label={`View transaction ${
+                            tran.transactionNumber || ""
+                          }`}
+                          style={{
+                            width: "30px",
+                            height: "27px",
+                            lineHeight: 1,
+                          }}
                         >
-                          <i className="bi bi-eye me-1"></i>
-                          View
+                          <i className="bi bi-eye" />
                         </button>
 
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-dark flex-fill"
-                          onClick={() => exportTransaction(tran.id)}
+                          className="btn btn-sm btn-light border text-danger p-1"
+                          onClick={() => deleteTransaction(tran)}
+                          title="Delete transaction"
+                          aria-label={`Delete transaction ${
+                            tran.transactionNumber || ""
+                          }`}
+                          style={{
+                            width: "30px",
+                            height: "27px",
+                            lineHeight: 1,
+                          }}
                         >
-                          <i className="bi bi-filetype-csv me-1"></i>
-                          Export
+                          <i className="bi bi-trash3" />
                         </button>
                       </div>
                     </div>
@@ -527,7 +481,7 @@ function TransactionTable({ transactions, exportTransaction }) {
                 })}
               </div>
             ) : (
-              <EmptyState />
+              <EmptyTransactionTable />
             )}
           </div>
         </div>
@@ -537,17 +491,11 @@ function TransactionTable({ transactions, exportTransaction }) {
         ====================================================== */}
         {sortedTransactions.length > 0 && (
           <div className="border-top bg-light px-3 py-2">
-            <div className="d-flex justify-content-between align-items-center">
-              <small className="text-muted">
-                <i className="bi bi-receipt me-1"></i>
-                {sortedTransactions.length} transaction
-                {sortedTransactions.length !== 1 ? "s" : ""}
-              </small>
-
-              <small className="text-muted d-none d-sm-inline">
-                Click a column to sort
-              </small>
-            </div>
+            <small className="text-muted">
+              <i className="bi bi-receipt me-1"></i>
+              {sortedTransactions.length} transaction
+              {sortedTransactions.length !== 1 ? "s" : ""}
+            </small>
           </div>
         )}
       </div>

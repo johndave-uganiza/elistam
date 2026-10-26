@@ -1,6 +1,15 @@
 export const API_BASE_URL = "https://localhost:7020";
 export const IMAGE_PLACEHOLDER_URL = "https://placehold.co/600x400";
 
+export const ROUTES = {
+    HOME: "/",
+    DASHBOARD: "/dashboard",
+    ITEMS: "/items",
+    PRODUCTS: "/products",
+    TRANSACTIONS: "/transactions",
+    LOGIN: "/login",
+};
+
 export const PAYMENT_METHODS = [
     {
         value: "Cash",

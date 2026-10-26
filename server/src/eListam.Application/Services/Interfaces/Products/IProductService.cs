@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Products;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Products;
 
 namespace eListam.Application.Services.Interfaces.Products
 {

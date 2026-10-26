@@ -214,7 +214,7 @@ function Products() {
       {/* Toolbar */}
 
       <Toolbar
-        onShow={handleViewOrder}
+        onAction={handleViewOrder}
         onSearch={handleSearchInput}
         onSort={handleSortBy}
         items={products}

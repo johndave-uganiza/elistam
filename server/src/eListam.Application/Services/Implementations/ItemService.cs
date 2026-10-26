@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Items;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
 using eListam.Application.Services.Interfaces.Items;
@@ -62,9 +63,11 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             if (req.ImageFile != null)
                 imagePath = await _fileStorage.SaveImageAsync(req.ImageFile);
@@ -83,14 +86,18 @@ namespace eListam.Application.Services.Implementations
             var result = new Result<GetItemResponse>();
             string? imagePath = null;
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var item = await _itemRepository.GetByIdAsync(id);
 
             if (item == null)
-                return result.Success(message: "Item does not exist!");
+                return result.Failure(
+                    message: "Item does not exist!",
+                    failureType: FailureType.NotFound);
             
             item.Name = req.Name;
             item.Description = req.Description;
@@ -115,9 +122,11 @@ namespace eListam.Application.Services.Implementations
         {
             var result = new Result<GetItemResponse>();
 
-            var userId = _authService.GetUserId();
+            var userId = _authService.GetUserId().Data;
             if (string.IsNullOrEmpty(userId))
-                return result.Failure(message: "User does not exist!");
+                return result.Failure(
+                    message: "User does not exist!",
+                    failureType: FailureType.NotFound);
 
             var item = await _itemRepository.GetByIdAsync(id);
 

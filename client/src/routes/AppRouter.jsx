@@ -44,11 +44,13 @@ function AppRouter() {
       <Route
         path="/products"
         element={
-          <ProductProvider>
-            <OrderProvider>
-              <Products />
-            </OrderProvider>
-          </ProductProvider>
+          <ProtectedRoute>
+            <ProductProvider>
+              <OrderProvider>
+                <Products />
+              </OrderProvider>
+            </ProductProvider>
+          </ProtectedRoute>
         }
       />
 

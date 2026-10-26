@@ -1,181 +1,95 @@
+import { useEffect } from "react";
 import Background from "../../components/common/Background";
+import "@/assets/css/pages/Home.css";
 
 function Home() {
+  useEffect(() => {
+    const elements = document.querySelectorAll(".reveal-on-scroll");
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion) {
+      elements.forEach((element) => {
+        element.classList.add("is-visible");
+      });
+      return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      elements.forEach((element) => {
+        element.classList.add("is-visible");
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -40px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Background>
-        <div className="container py-5">
-          {/* Hero */}
-          <div className="row justify-content-center">
+        <div
+          className="container py-5 home-container"
+          style={{ opacity: "92%" }}
+        >
+          {/* Hero Section */}
+          <div className="row justify-content-center align-items-center mb-5">
             <div className="col-12">
-              <div
-                className="card border-0 shadow-lg text-white overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(6,78,59,.85), rgba(4,120,87,.80), rgba(3,105,161,.78))",
-                  borderRadius: "24px",
-                }}
-              >
-                <div className="card-body text-center p-4 p-md-5">
-                  <span
-                    className="badge rounded-pill px-3 py-2 mb-3"
-                    style={{
-                      backgroundColor: "#D1FAE5",
-                      color: "#000",
-                      border: "1px solid rgba(0, 0, 0, 0.08)",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    ELISTAM - SMART POINT OF SALE SYSTEM
+              <div className="card border-0 shadow-lg text-white overflow-hidden hero-card">
+                <div className="card-body text-center p-4 p-md-5 hero-content">
+                  <span className="rounded-pill px-3 py-2 hero-badge d-inline-block mb-3">
+                    eListam - SMART POINT OF SALE SYSTEM
                   </span>
 
-                  <h1
-                    className="display-5 fw-bold mb-3 d-flex justify-content-center align-items-center flex-wrap gap-2"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    <span>Manage Products.</span>
-                    <span style={{ color: "#7CFFB2" }}>Track Profits.</span>
+                  <h1 className="display-5 fw-bold mb-3 hero-title">
+                    <span>Manage Products.</span>{" "}
+                    <span className="hero-green">Track Profits.</span>{" "}
                     <span className="text-warning">Grow Smarter.</span>
                   </h1>
 
-                  <p
-                    className="text-white-50 fs-5 mb-0 mx-auto"
-                    style={{ maxWidth: "650px" }}
-                  >
+                  <p className="text-white-50 fs-5 mb-0 mx-auto hero-description">
                     Inventory management, product listing, and sales tracking —
                     all in one simple place.
                   </p>
+
+                  <div className="hero-divider mx-auto mt-4" />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Features */}
-          <div className="row justify-content-center g-4 mt-3">
-            {/* Products */}
-            <div className="col-12 col-md-6">
-              <div
-                className="card h-100 border-0 shadow-sm"
-                style={{
-                  borderRadius: "20px",
-                  backgroundColor: "rgba(255,255,255,.94)",
-                }}
-              >
-                <div className="card-body p-4 p-lg-5">
-                  <div className="d-flex align-items-center gap-3 mb-4">
-                    <div
-                      className="d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        borderRadius: "16px",
-                        backgroundColor: "rgba(25,135,84,.12)",
-                      }}
-                    >
-                      <i
-                        className="bi bi-box-seam text-success"
-                        style={{ fontSize: "28px" }}
-                      ></i>
-                    </div>
-
-                    <h3 className="fw-bold mb-0">Manage Products</h3>
-                  </div>
-
-                  <p className="text-secondary mb-0">
-                    Easily add, update, organize, and keep track of your
-                    products and stock levels from one convenient place.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Profit */}
-            <div className="col-12 col-md-6">
-              <div
-                className="card h-100 border-0 shadow-sm"
-                style={{
-                  borderRadius: "20px",
-                  backgroundColor: "rgba(255,255,255,.94)",
-                }}
-              >
-                <div className="card-body p-4 p-lg-5">
-                  <div className="d-flex align-items-center gap-3 mb-4">
-                    <div
-                      className="d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        borderRadius: "16px",
-                        backgroundColor: "rgba(255,193,7,.15)",
-                      }}
-                    >
-                      <i
-                        className="bi bi-graph-up-arrow text-warning"
-                        style={{ fontSize: "28px" }}
-                      ></i>
-                    </div>
-
-                    <h3 className="fw-bold mb-0">Track Your Profit</h3>
-                  </div>
-
-                  <p className="text-secondary mb-0">
-                    Monitor your earnings, understand your performance, and make
-                    smarter decisions based on your business data.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Background>
-
-      {/* NEW SECTION: Outside and below Background */}
-      <section
-        id="how-it-works"
-        className="py-5"
-        style={{
-          backgroundColor: "#F8FAFC",
-          color: "#1E293B",
-        }}
-      >
-        <div className="container py-4">
-          <div className="text-center mb-5">
-            <span
-              className="badge rounded-pill px-3 py-2 mb-3"
-              style={{
-                backgroundColor: "#D1FAE5",
-                color: "#065F46",
-                letterSpacing: "0.08em",
-              }}
-            >
-              SIMPLE. SMART. EFFICIENT.
-            </span>
-
-            <h2 className="display-6 fw-bold mb-3">How ELISTAM Works</h2>
-
-            <p className="text-secondary mx-auto" style={{ maxWidth: "600px" }}>
-              Everything you need to manage your inventory, monitor sales, and
-              make smarter business decisions.
-            </p>
-          </div>
-          <div className="row g-4">
+          {/* Features Section */}
+          <div className="row g-4 features-section">
             {/* Step 1 */}
             <div className="col-12 col-md-4">
-              <div
-                className="card h-100 border-0 shadow-sm p-4"
-                style={{ borderRadius: "20px" }}
-              >
-                <div className="mb-3">
-                  <i
-                    className="bi bi-box-seam"
-                    style={{ fontSize: "36px", color: "#059669" }}
-                  ></i>
+              <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-1">
+                <div className="feature-icon icon-green mb-3">
+                  <i className="bi bi-box-seam" aria-hidden="true" />
                 </div>
 
                 <span className="text-success fw-bold mb-2">STEP 01</span>
+
                 <h4 className="fw-bold">Manage Inventory</h4>
+
                 <p className="text-secondary mb-0">
                   Organize products, update stock levels, and keep your
                   inventory information accurate.
@@ -185,19 +99,15 @@ function Home() {
 
             {/* Step 2 */}
             <div className="col-12 col-md-4">
-              <div
-                className="card h-100 border-0 shadow-sm p-4"
-                style={{ borderRadius: "20px" }}
-              >
-                <div className="mb-3">
-                  <i
-                    className="bi bi-receipt"
-                    style={{ fontSize: "36px", color: "#2563EB" }}
-                  ></i>
+              <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-2">
+                <div className="feature-icon icon-blue mb-3">
+                  <i className="bi bi-receipt" aria-hidden="true" />
                 </div>
 
                 <span className="text-primary fw-bold mb-2">STEP 02</span>
+
                 <h4 className="fw-bold">Track Sales</h4>
+
                 <p className="text-secondary mb-0">
                   Review sales activity and transaction records to understand
                   your business performance.
@@ -207,21 +117,15 @@ function Home() {
 
             {/* Step 3 */}
             <div className="col-12 col-md-4">
-              <div
-                className="card h-100 border-0 shadow-sm p-4"
-                style={{ borderRadius: "20px" }}
-              >
-                <div className="mb-3">
-                  <i
-                    className="bi bi-graph-up-arrow"
-                    style={{ fontSize: "36px", color: "#D97706" }}
-                  ></i>
+              <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-3">
+                <div className="feature-icon icon-amber mb-3">
+                  <i className="bi bi-graph-up-arrow" aria-hidden="true" />
                 </div>
 
-                <span className="fw-bold mb-2" style={{ color: "#D97706" }}>
-                  STEP 03
-                </span>
+                <span className="fw-bold mb-2 text-amber">STEP 03</span>
+
                 <h4 className="fw-bold">Grow Your Business</h4>
+
                 <p className="text-secondary mb-0">
                   Use your sales and profit information to make informed
                   decisions and plan for growth.
@@ -229,182 +133,100 @@ function Home() {
               </div>
             </div>
           </div>
-          {/* Tech Stack Used */}
-          <div
-            className="text-center text-white mt-5 p-4 p-md-5 shadow"
-            style={{
-              borderRadius: "24px",
-              background: "linear-gradient(135deg, #064E3B, #047857, #075985)",
-            }}
-          >
-            <h2 className="fw-bold mb-3">Tech Stack Used</h2>
+        </div>
+      </Background>
 
-            <p
-              className="text-white-50 mb-4 mx-auto"
-              style={{ maxWidth: "550px" }}
-            >
-              Built with reliable technologies to deliver a smooth, efficient,
-              and data-driven point-of-sale experience.
+      {/* Technology Section */}
+      <section className="tech-section py-5">
+        <div className="container py-4">
+          <div className="text-center mb-5 reveal-on-scroll">
+            <span className="section-eyebrow">
+              BUILT FOR SCALABILITY AND RELIABILITY
+            </span>
+
+            <h2 className="display-6 fw-bold mb-3 section-title">
+              How eListam Works
+            </h2>
+
+            <p className="text-secondary mx-auto section-description">
+              Modern technologies working together to power a reliable,
+              efficient, and data-driven point-of-sale experience.
+            </p>
+          </div>
+
+          {/* Tech Stack */}
+          <div className="tech-stack-wrapper bg-black text-center text-white mt-5 p-4 p-md-5 shadow-lg reveal-on-scroll">
+            <h2 className="fw-bold mb-3">Enterprise-Inspired Solution.</h2>
+
+            <p className="text-white-50 mb-5 mx-auto tech-intro">
+              Modern technologies working together to power a reliable,
+              efficient, and data-driven point-of-sale experience.
             </p>
 
-            <div className="row justify-content-center g-3">
-              {/* React.js */}
+            <div className="row justify-content-center g-4">
+              {/* React */}
               <div className="col-12 col-sm-6 col-md-4">
-                <div
-                  className="h-100 p-4"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,.12)",
-                    border: "1px solid rgba(255,255,255,.2)",
-                    borderRadius: "16px",
-                  }}
-                >
-                  <i
-                    className="bi bi-code-slash mb-3 d-block"
-                    style={{ fontSize: "36px", color: "#61DAFB" }}
-                  ></i>
+                <div className="h-100 p-4 tech-card reveal-on-scroll stagger-1">
+                  <div className="tech-logo-wrapper mb-3">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/3/30/React_Logo_SVG.svg"
+                      alt="React logo"
+                      className="tech-logo"
+                      loading="lazy"
+                    />
+                  </div>
 
                   <h4 className="fw-bold mb-2">React.js</h4>
+
                   <p className="text-white-50 mb-0">
-                    Frontend development and interactive user interfaces.
+                    Component-based frontend library for building fast,
+                    interactive, and reusable user interfaces.
                   </p>
                 </div>
               </div>
 
               {/* .NET Core */}
               <div className="col-12 col-sm-6 col-md-4">
-                <div
-                  className="h-100 p-4"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,.12)",
-                    border: "1px solid rgba(255,255,255,.2)",
-                    borderRadius: "16px",
-                  }}
-                >
-                  <i
-                    className="bi bi-gear-wide-connected mb-3 d-block"
-                    style={{ fontSize: "36px", color: "#C4B5FD" }}
-                  ></i>
+                <div className="h-100 p-4 tech-card reveal-on-scroll stagger-2">
+                  <div className="tech-logo-wrapper mb-3">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/e/ee/.NET_Core_Logo.svg"
+                      alt=".NET Core logo"
+                      className="tech-logo"
+                      loading="lazy"
+                    />
+                  </div>
 
                   <h4 className="fw-bold mb-2">.NET Core</h4>
+
                   <p className="text-white-50 mb-0">
-                    Backend services, business logic, and API development.
+                    High-performance, secure, and scalable backend framework for
+                    building RESTful APIs.
                   </p>
                 </div>
               </div>
 
               {/* SQL Server */}
               <div className="col-12 col-sm-6 col-md-4">
-                <div
-                  className="h-100 p-4"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,.12)",
-                    border: "1px solid rgba(255,255,255,.2)",
-                    borderRadius: "16px",
-                  }}
-                >
-                  <i
-                    className="bi bi-database-fill mb-3 d-block"
-                    style={{ fontSize: "36px", color: "#FCA5A5" }}
-                  ></i>
+                <div className="h-100 p-4 tech-card reveal-on-scroll stagger-3">
+                  <div className="tech-logo-wrapper sql-logo-wrapper mb-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/microsoft-sql-server.svg"
+                      alt="Microsoft SQL Server logo"
+                      className="tech-logo"
+                      loading="lazy"
+                    />
+                  </div>
 
-                  <h4 className="fw-bold mb-2">SQL Server</h4>
+                  <h4 className="fw-bold mb-2">Microsoft SQL Server</h4>
+
                   <p className="text-white-50 mb-0">
-                    Database management and reliable data storage.
+                    Reliable relational database with strong data integrity,
+                    advanced querying, and enterprise-grade security.
                   </p>
                 </div>
               </div>
             </div>
-          </div>
-          {/* Developer Contact */}{" "}
-          <div
-            className="text-center mt-4 p-4 p-md-5 shadow"
-            style={{
-              borderRadius: "24px",
-              backgroundColor: "rgba(255,255,255,.96)",
-              border: "1px solid rgba(5,150,105,.15)",
-            }}
-          >
-            {" "}
-            <span
-              className="badge rounded-pill px-3 py-2 mb-3"
-              style={{
-                backgroundColor: "#D1FAE5",
-                color: "#065F46",
-                letterSpacing: "0.08em",
-              }}
-            >
-              {" "}
-              GET IN TOUCH{" "}
-            </span>
-            <h2 className="fw-bold mb-3">Developer Contact</h2>
-            <p
-              className="text-secondary mx-auto mb-4"
-              style={{ maxWidth: "550px" }}
-            >
-              {" "}
-              Have questions, suggestions, or feedback about ELISTAM? Feel free
-              to reach out.{" "}
-            </p>
-            <div className="row justify-content-center g-3">
-              {" "}
-              {/* Developer Name */}{" "}
-              <div className="col-12 col-md-4">
-                {" "}
-                <div className="p-3 h-100 rounded-4 bg-light">
-                  {" "}
-                  <i
-                    className="bi bi-person-circle text-success mb-2"
-                    style={{ fontSize: "30px" }}
-                  ></i>{" "}
-                  <h5 className="fw-bold">Developer</h5>{" "}
-                  <p className="text-secondary mb-0"> Your Name </p>{" "}
-                </div>{" "}
-              </div>
-              {/* Email */}{" "}
-              <div className="col-12 col-md-4">
-                {" "}
-                <div className="p-3 h-100 rounded-4 bg-light">
-                  {" "}
-                  <i
-                    className="bi bi-envelope-fill text-success mb-2"
-                    style={{ fontSize: "30px" }}
-                  ></i>{" "}
-                  <h5 className="fw-bold">Email</h5>{" "}
-                  <a
-                    href="mailto:your.email@example.com"
-                    className="text-success text-decoration-none"
-                  >
-                    {" "}
-                    your.email@example.com{" "}
-                  </a>{" "}
-                </div>{" "}
-              </div>
-              {/* GitHub */}{" "}
-              <div className="col-12 col-md-4">
-                {" "}
-                <div className="p-3 h-100 rounded-4 bg-light">
-                  {" "}
-                  <i
-                    className="bi bi-github text-success mb-2"
-                    style={{ fontSize: "30px" }}
-                  ></i>{" "}
-                  <h5 className="fw-bold">GitHub</h5>{" "}
-                  <a
-                    href="https://github.com/yourusername"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-success text-decoration-none"
-                  >
-                    {" "}
-                    View GitHub Profile{" "}
-                  </a>{" "}
-                </div>{" "}
-              </div>{" "}
-            </div>
-            <p className="text-secondary small mt-4 mb-0">
-              {" "}
-              © {new Date().getFullYear()} ELISTAM. Developed with care.{" "}
-            </p>{" "}
           </div>
         </div>
       </section>

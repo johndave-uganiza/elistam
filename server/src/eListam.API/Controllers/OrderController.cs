@@ -2,6 +2,7 @@
 using eListam.Application.DTOs.Orders;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Application.Services.Interfaces.Orders;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -36,7 +37,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -45,7 +46,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -64,7 +65,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -74,7 +75,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -83,7 +84,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -100,7 +101,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -110,7 +111,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = false,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -119,7 +120,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.Created,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -136,7 +137,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -146,7 +147,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = false,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -155,7 +156,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.Created,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -173,7 +174,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -183,7 +184,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = false,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -192,7 +193,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -210,7 +211,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -220,7 +221,7 @@ namespace eListamAPI.Controllers
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = false,
-                    Messages = [result.Message]
+                    Message = result.Message
                 });
             }
 
@@ -229,7 +230,7 @@ namespace eListamAPI.Controllers
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = result.IsSuccess,
                 Data = result.Data,
-                Messages = [result.Message]
+                Message = result.Message
             });
         }
         #endregion
@@ -239,34 +240,7 @@ namespace eListamAPI.Controllers
         public async Task<IActionResult> ConfirmOderAsync(int id, [FromBody] ConfirmOrderRequest req)
         {
             var result = await _orderService.ConfirmOrderAsync(id, req);
-
-            if (result.Data == null)
-            {
-                return BadRequest(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = result.IsSuccess,
-                    Messages = [result.Message]
-                });
-            }
-
-            if (string.IsNullOrEmpty(result.Data.UserId))
-            {
-                return NotFound(new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = false,
-                    Messages = [result.Message]
-                });
-            }
-
-            return Ok(new ApiResponse()
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = result.IsSuccess,
-                Data = result.Data,
-                Messages = [result.Message]
-            }); 
+            return this.GetObjectResult(result);
         }
         #endregion
     }

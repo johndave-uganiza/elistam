@@ -1,4 +1,5 @@
-﻿using eListam.Application.DTOs.Transactions;
+﻿using eListam.Application.Common;
+using eListam.Application.DTOs.Transactions;
 using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Transactions;
 using eListam.Domain.Constants;
@@ -12,12 +13,17 @@ namespace eListam.Application.Services.Implementations
     {
         private readonly ITransactionRepository _transactionRepo;
         private readonly IDocumentNumberGenerator _documentNumberGenerator;
+        private readonly IUnitOfWork _unitOfWork;
 
         #region Constructor
-        public TransactionService(ITransactionRepository transactionRepo, IDocumentNumberGenerator documentNumberGenerator)
+        public TransactionService(
+            ITransactionRepository transactionRepo,
+            IDocumentNumberGenerator documentNumberGenerator,
+            IUnitOfWork unitOfWork)
         {
             _transactionRepo = transactionRepo;
             _documentNumberGenerator = documentNumberGenerator;
+            _unitOfWork = unitOfWork;
         }
         #endregion
 
@@ -60,7 +66,7 @@ namespace eListam.Application.Services.Implementations
             var transaction = await _transactionRepo.CreateAsync(new Transaction()
             {
                 TransactionNumber = transactionNumber,
-                Date = req.Date,
+                Date = DateTime.Now,
                 IsCompleted = req.IsCompleted,
                 OrderNumber = req.OrderNumber,
                 PaymentMethod = req.PaymentMethod,
@@ -78,6 +84,8 @@ namespace eListam.Application.Services.Implementations
                 }).ToList()
             });
 
+            // ConfirmOrderAsync commits the transaction
+
             return result.Success(MapGetTransactionResponse(transaction));
         }
         #endregion
@@ -89,39 +97,50 @@ namespace eListam.Application.Services.Implementations
 
             var transaction = await _transactionRepo.GetByIdAsync(id);
             if (transaction == null)
-                return result.Success(message: "The transaction doesn't exist!");
+                return result.Failure(message: "The transaction doesn't exist!", failureType: FailureType.NotFound);
 
             _transactionRepo.Delete(transaction);
+            await _unitOfWork.SaveChangesAsync();
 
             return result.Success(MapGetTransactionResponse(transaction));
         }
         #endregion
 
         #region ExportAsync
-        public async Task<Result<ExportTransactionResponse>> ExportCsvAsync(int id)
+        public async Task<Result<ExportTransactionResponse>> ExportCsvAsync()
         {
             var result = new Result<ExportTransactionResponse>();
+            var csv = new StringBuilder();
 
-            var transaction = await _transactionRepo.GetByIdAsync(id);
-            if (transaction != null)
+            var transactions = await _transactionRepo.GetAsync();
+
+            if (transactions.Any())
             {
-                var csv = new StringBuilder();
-                csv.AppendLine("Transaction_Id,Transaction_Number,Order_Number,Date,Total_Quantity,Total_Price");
                 csv.AppendLine(
-                    $"{transaction.Id}," +
-                    $"{transaction.TransactionNumber}," +
-                    $"{transaction.OrderNumber}," +
-                    $"{transaction.Date}," +
-                    $"{transaction.TotalQuantity}," +
-                    $"{transaction.TotalPrice}");
+                    "Transaction_Id," +
+                    "Transaction_Number," +
+                    "Order_Number," +
+                    "Date," +
+                    "Total_Quantity," +
+                    "Total_Price");
+                
+                foreach (var transaction in transactions)
+                {
+                    csv.AppendLine(
+                        $"{transaction.Id}," +
+                        $"{transaction.TransactionNumber}," +
+                        $"{transaction.OrderNumber}," +
+                        $"{transaction.Date.ToString("MM/dd/yyy")}," +
+                        $"{transaction.TotalQuantity}," +
+                        $"{transaction.TotalPrice}");
+                }
 
                 var exportCsvData = new ExportTransactionResponse
                 {
                     CsvData = Encoding.UTF8.GetBytes(csv.ToString())
                 };
-                
+
                 return result.Success(exportCsvData);
-               
             }
 
             return result.Failure();
