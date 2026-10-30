@@ -36,7 +36,7 @@ namespace eListam.Infrastructure.Persistence.Data.Seeders
                 _config["SeedUsers:DemoUserName"]!,
                  _config["SeedUsers:DemoEmail"]!,
                  _config["SeedUsers:DemoPassword"]!,
-                 Role.Demo
+                 Role.User
                 );
 
             await CreateUserAsync(adminUser);
@@ -68,9 +68,9 @@ namespace eListam.Infrastructure.Persistence.Data.Seeders
                 await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
             }
 
-            if (!await _roleManager.RoleExistsAsync(Role.Demo))
+            if (!await _roleManager.RoleExistsAsync(Role.User))
             {
-                await _roleManager.CreateAsync(new IdentityRole(Role.Demo));
+                await _roleManager.CreateAsync(new IdentityRole(Role.User));
             }
 
             if (userData.Role!.Equals(Role.Admin, StringComparison.CurrentCultureIgnoreCase))
@@ -78,9 +78,9 @@ namespace eListam.Infrastructure.Persistence.Data.Seeders
                 await _userManager.AddToRoleAsync(user, Role.Admin);
             }
 
-            if (userData.Role!.Equals(Role.Demo, StringComparison.CurrentCultureIgnoreCase))
+            if (userData.Role!.Equals(Role.User, StringComparison.CurrentCultureIgnoreCase))
             {
-                await _userManager.AddToRoleAsync(user, Role.Demo);
+                await _userManager.AddToRoleAsync(user, Role.User);
             }
         }
         #endregion

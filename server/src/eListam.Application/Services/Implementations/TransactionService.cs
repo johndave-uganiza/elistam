@@ -1,6 +1,6 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Transactions;
-using eListam.Application.Services.Interfaces;
+using eListam.Application.Services.Interfaces.Common;
 using eListam.Application.Services.Interfaces.Transactions;
 using eListam.Domain.Constants;
 using eListam.Domain.Models.Entities;

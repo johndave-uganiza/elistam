@@ -10,11 +10,10 @@ html {
     position: relative;
 }
 
-.hero-card,
-.feature-card,
-.tech-card,
-.tech-stack-wrapper {
-    transform: translateZ(0);
+/* Keep the hero's existing transform.
+   Do not apply translateZ(0) to reveal elements. */
+.hero-card {
+    isolation: isolate;
 }
 
 /* ========================================
@@ -23,17 +22,20 @@ html {
 
 .hero-card {
     position: relative;
-    isolation: isolate;
     overflow: hidden;
     border-radius: 24px;
+
     background: linear-gradient(135deg,
             rgba(6, 78, 59, 0.96),
             rgba(4, 120, 87, 0.93),
             rgba(3, 105, 161, 0.92));
+
     background-size: 180% 180%;
+
     animation:
         hero-entrance 0.9s cubic-bezier(0.22, 1, 0.36, 1) both,
         gradient-shift 12s ease infinite;
+
     transition:
         box-shadow 0.4s ease,
         transform 0.4s ease;
@@ -48,10 +50,12 @@ html {
     height: 260%;
     z-index: -1;
     pointer-events: none;
+
     background: linear-gradient(90deg,
             transparent,
             rgba(255, 255, 255, 0.08),
             transparent);
+
     transform: rotate(25deg);
     animation: hero-shine 8s ease-in-out 1s infinite;
 }
@@ -63,6 +67,8 @@ html {
 .hero-content {
     position: relative;
     z-index: 1;
+    height: 76vh;
+
     animation: content-entrance 0.85s ease-out 0.12s both;
 }
 
@@ -73,6 +79,7 @@ html {
     font-weight: 700;
     letter-spacing: 0.08em;
     font-size: 0.75rem;
+
     transition:
         transform 0.3s ease,
         background-color 0.3s ease;
@@ -102,25 +109,183 @@ html {
     width: 70px;
     height: 4px;
     border-radius: 50px;
-    background: linear-gradient(90deg, #7cffb2, #60a5fa);
+
+    background: linear-gradient(90deg,
+            #7cffb2,
+            #60a5fa);
+
     animation: divider-expand 0.8s ease-out 0.6s both;
 }
 
 /* ========================================
-   FEATURE CARDS
+   HERO ACTION BUTTONS
 ======================================== */
+
+.hero-actions {
+    display: flex;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.hero-actions a.btn.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+
+    min-height: 50px;
+    padding: 0.8rem 1.35rem;
+
+    border: 1px solid transparent;
+    border-radius: 12px;
+
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+    box-shadow: none;
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.hero-actions a.btn.hero-btn:hover {
+    transform: translateY(-3px);
+    text-decoration: none;
+}
+
+.hero-actions a.btn.hero-btn:focus {
+    box-shadow: none;
+}
+
+.hero-actions a.btn.hero-btn:focus-visible {
+    outline: 3px solid #fbbf24;
+    outline-offset: 4px;
+}
+
+/* Primary button */
+
+.hero-actions a.btn.hero-btn-primary,
+.hero-actions a.btn.hero-btn-primary:visited {
+    color: #064e3b;
+    background-color: #a7f3d0;
+    border-color: #a7f3d0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.hero-actions a.btn.hero-btn-primary:hover,
+.hero-actions a.btn.hero-btn-primary:focus,
+.hero-actions a.btn.hero-btn-primary:active {
+    color: #064e3b;
+    background-color: #d1fae5;
+    border-color: #d1fae5;
+}
+
+.hero-actions a.btn.hero-btn-primary:hover {
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
+}
+
+/* Login button */
+
+.hero-actions a.btn.hero-btn-secondary,
+.hero-actions a.btn.hero-btn-secondary:visited {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hero-actions a.btn.hero-btn-secondary:hover,
+.hero-actions a.btn.hero-btn-secondary:focus,
+.hero-actions a.btn.hero-btn-secondary:active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Register button */
+
+.hero-actions a.btn.hero-btn-outline,
+.hero-actions a.btn.hero-btn-outline:visited {
+    color: #fff;
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-actions a.btn.hero-btn-outline:hover,
+.hero-actions a.btn.hero-btn-outline:focus,
+.hero-actions a.btn.hero-btn-outline:active {
+    color: #064e3b;
+    background-color: #fff;
+    border-color: #fff;
+}
+
+/* Arrow animation */
+
+.hero-actions .hero-btn-arrow {
+    transition: transform 0.3s ease;
+}
+
+.hero-actions a.btn.hero-btn-primary:hover .hero-btn-arrow {
+    transform: translateX(4px);
+}
+
+/* ========================================
+   HOW ELISTAM WORKS
+======================================== */
+
+.tech-section {
+    background-color: #f8fafc;
+    color: #1e293b;
+    overflow: hidden;
+}
 
 .features-section {
     padding-bottom: 1rem;
 }
 
+.section-eyebrow,
+.tech-stack-label {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.section-eyebrow {
+    color: #059669;
+}
+
+.section-title {
+    letter-spacing: -0.03em;
+}
+
+.section-description {
+    max-width: 600px;
+    line-height: 1.8;
+}
+
+/* ========================================
+   FEATURE / STEP CARDS
+======================================== */
+
 .feature-card {
     position: relative;
     isolation: isolate;
     overflow: hidden;
+
     border-radius: 20px;
     background-color: #fff;
-    animation: card-entrance 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    /*
+     * IMPORTANT:
+     * No card-entrance animation here.
+     * Scroll reveal controls opacity and transform.
+     */
+
     transition:
         transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 0.35s ease,
@@ -132,9 +297,17 @@ html {
     position: absolute;
     inset: 0 0 auto;
     height: 4px;
-    background: linear-gradient(90deg, #059669, #2563eb, #d97706);
+    z-index: 1;
+    pointer-events: none;
+
+    background: linear-gradient(90deg,
+            #059669,
+            #2563eb,
+            #d97706);
+
     transform: scaleX(0);
     transform-origin: left;
+
     transition: transform 0.4s ease;
 }
 
@@ -147,13 +320,18 @@ html {
     transform: scaleX(1);
 }
 
+/* Feature icons */
+
 .feature-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 64px;
     height: 64px;
+
     border-radius: 18px;
+
     transition:
         transform 0.35s ease,
         border-radius 0.35s ease;
@@ -162,6 +340,7 @@ html {
 .feature-icon i {
     font-size: 32px;
     line-height: 1;
+
     transition: transform 0.35s ease;
 }
 
@@ -202,47 +381,25 @@ html {
 }
 
 /* ========================================
-   TECHNOLOGY SECTION
+   TECHNOLOGY STACK WRAPPER
 ======================================== */
-
-.tech-section {
-    background-color: #f8fafc;
-    color: #1e293b;
-    overflow: hidden;
-}
-
-.section-eyebrow,
-.tech-stack-label {
-    display: inline-block;
-    margin-bottom: 12px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-}
-
-.section-eyebrow {
-    color: #059669;
-}
-
-.section-title {
-    letter-spacing: -0.03em;
-}
-
-.section-description {
-    max-width: 600px;
-    line-height: 1.8;
-}
 
 .tech-stack-wrapper {
     position: relative;
     overflow: hidden;
+
     border-radius: 24px;
+
     background:
         radial-gradient(ellipse at top left,
             rgba(5, 150, 105, 0.19),
             transparent 50%),
         #080c12 !important;
-    animation: card-entrance 0.8s ease-out both;
+
+    /*
+     * No card-entrance animation.
+     * IntersectionObserver controls the reveal.
+     */
 }
 
 .tech-stack-label {
@@ -254,14 +411,24 @@ html {
     line-height: 1.8;
 }
 
+/* ========================================
+   TECHNOLOGY CARDS
+======================================== */
+
 .tech-card {
     height: 100%;
     position: relative;
     overflow: hidden;
+
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 18px;
     background-color: rgba(255, 255, 255, 0.07);
-    animation: card-entrance 0.7s ease-out both;
+
+    /*
+     * Do not add card-entrance animation.
+     * Scroll reveal owns the initial transform.
+     */
+
     transition:
         transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
         border-color 0.35s ease,
@@ -274,9 +441,15 @@ html {
     position: absolute;
     inset: auto 0 0;
     height: 3px;
-    background: linear-gradient(90deg, #059669, #60a5fa);
+    pointer-events: none;
+
+    background: linear-gradient(90deg,
+            #059669,
+            #60a5fa);
+
     transform: scaleX(0);
     transform-origin: left;
+
     transition: transform 0.4s ease;
 }
 
@@ -284,6 +457,7 @@ html {
     transform: translateY(-7px);
     border-color: rgba(110, 231, 183, 0.65);
     background-color: rgba(255, 255, 255, 0.12);
+
     box-shadow: 0 18px 35px rgba(0, 0, 0, 0.2);
 }
 
@@ -291,14 +465,19 @@ html {
     transform: scaleX(1);
 }
 
+/* Technology logos */
+
 .tech-logo-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 76px;
     height: 76px;
+
     margin-inline: auto;
     border-radius: 20px;
+
     transition:
         transform 0.35s ease,
         background-color 0.35s ease;
@@ -306,9 +485,12 @@ html {
 
 .tech-logo {
     display: block;
+
     width: 60px;
     height: 60px;
+
     object-fit: contain;
+
     transition:
         transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
         filter 0.4s ease;
@@ -346,29 +528,63 @@ html {
    SCROLL REVEAL
 ======================================== */
 
+/*
+ * Initial state:
+ * Elements start invisible and slightly below
+ * their final position.
+ *
+ * IntersectionObserver adds .is-visible when
+ * the element enters the viewport.
+ */
+
 .reveal-on-scroll {
     opacity: 0;
     transform: translateY(26px);
+
     transition:
         opacity 0.7s ease,
         transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+
     transition-delay: 0s;
+
+    /*
+     * Do not add animation or transform overrides
+     * to reveal elements outside this rule.
+     */
 }
+
+/* Visible state */
 
 .reveal-on-scroll.is-visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-.stagger-1 {
+/* Staggered feature-card reveal */
+
+.feature-card.stagger-1 {
     transition-delay: 0.08s;
 }
 
-.stagger-2 {
+.feature-card.stagger-2 {
     transition-delay: 0.18s;
 }
 
-.stagger-3 {
+.feature-card.stagger-3 {
+    transition-delay: 0.28s;
+}
+
+/* Staggered technology-card reveal */
+
+.tech-card.stagger-1 {
+    transition-delay: 0.08s;
+}
+
+.tech-card.stagger-2 {
+    transition-delay: 0.18s;
+}
+
+.tech-card.stagger-3 {
     transition-delay: 0.28s;
 }
 
@@ -392,18 +608,6 @@ html {
     from {
         opacity: 0;
         transform: translateY(14px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes card-entrance {
-    from {
-        opacity: 0;
-        transform: translateY(22px);
     }
 
     to {
@@ -463,6 +667,14 @@ html {
         font-size: 1rem !important;
     }
 
+    .hero-actions {
+        gap: 0.75rem;
+    }
+
+    .hero-actions a.btn.hero-btn {
+        width: 100%;
+    }
+
     .feature-card {
         padding: 1.5rem !important;
     }
@@ -475,11 +687,10 @@ html {
         transform: translateY(-3px);
     }
 
-    .stagger-1,
-    .stagger-2,
-    .stagger-3 {
-        transition-delay: 0s;
-    }
+    /*
+     * Keep staggered delays on mobile so the cards
+     * still reveal sequentially.
+     */
 }
 
 /* ========================================
@@ -504,6 +715,7 @@ html {
     .reveal-on-scroll {
         opacity: 1;
         transform: none;
+        transition: none;
     }
 
     .feature-card:hover,

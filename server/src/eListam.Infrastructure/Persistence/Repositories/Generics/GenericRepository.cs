@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eListam.Infrastructure.Persistence.Repositories.Generics
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> where T : class
     {
         private readonly DbSet<T> _dbSet;
 

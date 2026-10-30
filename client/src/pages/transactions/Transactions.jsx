@@ -106,12 +106,8 @@ function Transactions() {
       <Toolbar
         onSearch={handleSearchInput}
         onAction={handleExportTransactions}
-        label={
-          <>
-            <i className="bi bi-filetype-csv me-1"></i>
-            <span>Export Transactions</span>
-          </>
-        }
+        label={<span>Export Transactions</span>}
+        icon={<i className="bi bi-filetype-csv me-1"></i>}
       />
 
       {transactions?.length == 0 && (

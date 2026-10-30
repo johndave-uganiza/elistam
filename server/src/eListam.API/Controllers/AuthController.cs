@@ -10,6 +10,7 @@ namespace eListamAPI.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class AuthController : Controller
     {
         #region Fields

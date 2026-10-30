@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { API_BASE_URL } from "../utilities/constants";
+import { API_BASE_URL } from "../config/api";
 
 const DashboardContext = createContext(null);
 
@@ -10,7 +10,7 @@ function DashboardProvider({ children }) {
   const getDashboardMetrics = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

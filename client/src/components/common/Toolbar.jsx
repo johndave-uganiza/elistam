@@ -1,4 +1,4 @@
-function Toolbar({ onAction, onSearch, label }) {
+function Toolbar({ onAction, onSearch, label, icon }) {
   return (
     <div className="card border-0 shadow-sm mb-2">
       <div className="card-body d-flex p-2 p-md-3">
@@ -12,8 +12,11 @@ function Toolbar({ onAction, onSearch, label }) {
         </div>
         {label && (
           <div className="col-6 text-end p-0">
-            <button onClick={onAction} className="btn btn-dark">
-              <span>{label}</span>
+            <button onClick={onAction} className="btn btn-primary">
+              <span>
+                {icon}
+                <span className="d-none d-md-inline">{label}</span>
+              </span>
             </button>
           </div>
         )}

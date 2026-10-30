@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { API_BASE_URL } from "../utilities/constants";
+import { API_BASE_URL } from "../config/api";
 
 const ItemContext = createContext(null);
 
@@ -11,7 +11,7 @@ function ItemProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/item`, {
+      const response = await fetch(`${API_BASE_URL}/item`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ function ItemProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Item`, {
+      const response = await fetch(`${API_BASE_URL}/Item`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ function ItemProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/item/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/item/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ function ItemProvider({ children }) {
 
   const deleteItem = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/item/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/item/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

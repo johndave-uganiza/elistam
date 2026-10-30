@@ -8,6 +8,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import helperFunctions from "../../utilities/helperFunctions";
 
 ChartJS.register(
   CategoryScale,
@@ -48,13 +49,6 @@ function BarChart() {
     10000, 11000, 10500, 12000, 13000, 12500, 14000, 13500, 15000, 15500, 16000,
     17000,
   ];
-
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(value);
 
   const data = {
     labels: months,
@@ -161,10 +155,10 @@ function BarChart() {
 
           callback: (value) => {
             if (value >= 1000) {
-              return `$${value / 1000}k`;
+              return `${helperFunctions.formatCurrencyToPHP(value / 1000)}k`;
             }
 
-            return `$${value}`;
+            return `${helperFunctions.formatCurrencyToPHP(value)}`;
           },
         },
       },
@@ -207,7 +201,7 @@ function BarChart() {
 
         callbacks: {
           label: (context) =>
-            `${context.dataset.label}: ${formatCurrency(context.raw)}`,
+            `${context.dataset.label}: ${helperFunctions.formatCurrencyToPHP(context.raw)}`,
 
           afterBody: (items) => {
             if (!items.length) return "";
@@ -224,8 +218,8 @@ function BarChart() {
 
             return [
               "",
-              `Gross Profit: ${formatCurrency(grossProfit)}`,
-              `Net Profit: ${formatCurrency(netProfit)}`,
+              `Gross Profit: ${helperFunctions.formatCurrencyToPHP(grossProfit)}`,
+              `Net Profit: ${helperFunctions.formatCurrencyToPHP(netProfit)}`,
             ];
           },
         },

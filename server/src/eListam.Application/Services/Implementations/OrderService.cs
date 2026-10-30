@@ -1,8 +1,8 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Orders;
 using eListam.Application.DTOs.Transactions;
-using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
+using eListam.Application.Services.Interfaces.Common;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Application.Services.Interfaces.Orders;
 using eListam.Application.Services.Interfaces.Transactions;
@@ -129,14 +129,12 @@ namespace eListam.Application.Services.Implementations
                     failureType: FailureType.NotFound);
 
             var order = await _orderRepository.GetByIdAsync(orderId);
-
             if (order == null)
                 return result.Failure(
                     message: "Order does not exist!",
                     failureType: FailureType.NotFound);
 
             var item = await _itemRepository.GetByIdAsync(req.ItemId);
-
             if (item == null)
                 return result.Failure(
                     message: "Item does not exist!",

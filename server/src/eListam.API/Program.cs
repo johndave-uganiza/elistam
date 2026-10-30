@@ -16,7 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers(options =>
 {
@@ -26,6 +25,15 @@ builder.Services.AddControllers(options =>
         .Build();
 
     options.Filters.Add(new AuthorizeFilter(authorizationPolicy));
+});
+
+// Configure CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173" /* Add frontend domain here) */).AllowAnyHeader().AllowAnyMethod();
+    });
 });
 
 // Get JWT secret key from appsettings.json
@@ -48,6 +56,13 @@ builder.Services.AddAuthentication(u =>
         ValidateAudience = false,
         ValidateLifetime = true,
     };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -83,17 +98,15 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
-
-
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 
-app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

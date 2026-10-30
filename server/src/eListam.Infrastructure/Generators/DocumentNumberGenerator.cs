@@ -1,4 +1,4 @@
-﻿using eListam.Application.Services.Interfaces;
+﻿using eListam.Application.Services.Interfaces.Common;
 using eListam.Domain.Constants;
 using eListam.Infrastructure.Persistence.Data;
 using Microsoft.Data.SqlClient;

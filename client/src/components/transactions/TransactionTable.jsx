@@ -2,7 +2,7 @@ import { useState } from "react";
 import TransactionModal from "./TransactionModal";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
-import eListam from "@/utilities//eListam";
+import helperFunctions from "@/utilities/helperFunctions";
 import EmptyTransactionTable from "./EmptyTransactionTable";
 
 function TransactionTable({ transactions, deleteTransaction }) {
@@ -203,7 +203,7 @@ function TransactionTable({ transactions, deleteTransaction }) {
                           <i className="bi bi-calendar3 text-muted"></i>
 
                           <span className="small">
-                            {eListam.utils.formatDate(tran.date)}
+                            {helperFunctions.formatDate(tran.date)}
                           </span>
                         </div>
                       </td>
@@ -236,7 +236,7 @@ function TransactionTable({ transactions, deleteTransaction }) {
                       {/* Total */}
                       <td className="text-center text-nowrap">
                         <span className="fw-semibold">
-                          {eListam.utils.formatCurrency(tran.totalPrice)}
+                          {helperFunctions.formatCurrencyToPHP(tran.totalPrice)}
                         </span>
                       </td>
 
@@ -416,7 +416,7 @@ function TransactionTable({ transactions, deleteTransaction }) {
                           <span>·</span>
 
                           <span className="text-truncate">
-                            {eListam.utils.formatDate(tran.date)}
+                            {helperFunctions.formatDate(tran.date)}
                           </span>
                         </div>
 
@@ -429,7 +429,9 @@ function TransactionTable({ transactions, deleteTransaction }) {
                           }}
                         >
                           <span className="fw-bold text-dark">
-                            {eListam.utils.formatCurrency(tran.totalPrice)}
+                            {helperFunctions.formatCurrencyToPHP(
+                              tran.totalPrice,
+                            )}
                           </span>
 
                           <span className="text-muted fw-medium">·</span>

@@ -2,6 +2,7 @@ import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
 import EmptyItemTable from "./EmptyItemTable";
+import helperFunctions from "../../utilities/helperFunctions";
 
 function ItemTable({ items, onEdit, onDelete }) {
   const {
@@ -27,31 +28,6 @@ function ItemTable({ items, onEdit, onDelete }) {
       return Number.isNaN(timestamp) ? null : timestamp;
     },
   });
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Number(value) || 0);
-  };
-
-  const formatDate = (value) => {
-    if (!value) {
-      return "—";
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
 
   const getImageUrl = (image) => {
     if (!image) {
@@ -270,14 +246,14 @@ function ItemTable({ items, onEdit, onDelete }) {
                     {/* Cost */}
                     <td className="text-center text-nowrap">
                       <span className="fw-normal">
-                        {formatCurrency(item.cost)}
+                        {helperFunctions.formatCurrencyToPHP(item.cost)}
                       </span>
                     </td>
 
                     {/* Price */}
                     <td className="text-center text-nowrap">
                       <span className="fw-semibold">
-                        {formatCurrency(item.price)}
+                        {helperFunctions.formatCurrencyToPHP(item.price)}
                       </span>
                     </td>
 
@@ -292,7 +268,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                     <td className="text-center">
                       <div className="d-flex flex-column align-items-center gap-1">
                         <span className="small">
-                          {formatDate(item.expirationDate)}
+                          {helperFunctions.formatDate(item.expirationDate)}
                         </span>
 
                         <span
@@ -461,7 +437,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                         }}
                       >
                         <span className="fw-bold text-black">
-                          {formatCurrency(item.price)}
+                          {helperFunctions.formatCurrencyToPHP(item.price)}
                         </span>
 
                         <span className="text-muted fw-medium">·</span>
@@ -487,7 +463,7 @@ function ItemTable({ items, onEdit, onDelete }) {
                             className="text-muted text-truncate"
                             style={{ fontSize: "0.68rem" }}
                           >
-                            {formatDate(item.expirationDate)}
+                            {helperFunctions.formatDate(item.expirationDate)}
                           </span>
                         )}
                       </div>

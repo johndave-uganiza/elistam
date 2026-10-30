@@ -1,4 +1,5 @@
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import helperFunctions from "../../utilities/helperFunctions";
 
 function TransactionModal({ selectedTransaction, onClose }) {
   const transactionNumber = selectedTransaction.transactionNumber;
@@ -277,11 +278,13 @@ function TransactionModal({ selectedTransaction, onClose }) {
                                 </td>
 
                                 <td className="text-end text-nowrap">
-                                  ${price.toFixed(2)}
+                                  {helperFunctions.formatCurrencyToPHP(price)}
                                 </td>
 
                                 <td className="text-end text-nowrap fw-semibold">
-                                  ${subtotal.toFixed(2)}
+                                  {helperFunctions.formatCurrencyToPHP(
+                                    subtotal,
+                                  )}
                                 </td>
                               </tr>
                             );

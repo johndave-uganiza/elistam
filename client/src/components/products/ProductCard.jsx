@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import helperFunctions from "../../utilities/helperFunctions";
 
 function ProductCard({ product, onOrderProduct }) {
   const navigate = useNavigate();
@@ -94,10 +95,8 @@ function ProductCard({ product, onOrderProduct }) {
               >
                 <span className="text-muted d-none d-sm-inline">Price: </span>
 
-                <span className="text-muted d-inline d-sm-none">$</span>
-
                 <strong className="text-dark">
-                  {Number(product.price ?? 0).toFixed(2)}
+                  {helperFunctions.formatCurrencyToPHP(product.price ?? 0)}
                 </strong>
               </div>
 

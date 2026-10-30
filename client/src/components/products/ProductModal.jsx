@@ -1,5 +1,6 @@
 import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 import { API_BASE_URL } from "../../utilities/constants";
+import helperFunctions from "../../utilities/helperFunctions";
 
 function ProductModal({
   onClose,
@@ -160,7 +161,7 @@ function ProductModal({
                           <small className="text-muted d-block">Price</small>
 
                           <span className="fs-5 fw-bold text-primary">
-                            ${price.toFixed(2)}
+                            {helperFunctions.formatCurrencyToPHP(price)}
                           </span>
                         </div>
 
@@ -201,7 +202,9 @@ function ProductModal({
                       <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
                         <span className="text-muted">Unit price</span>
 
-                        <span className="fw-semibold">${price.toFixed(2)}</span>
+                        <span className="fw-semibold">
+                          {helperFunctions.formatCurrencyToPHP(price)}
+                        </span>
                       </div>
 
                       {/* Quantity */}
@@ -280,7 +283,7 @@ function ProductModal({
                               fontSize: "clamp(1.5rem, 6vw, 2rem)",
                             }}
                           >
-                            ${total.toFixed(2)}
+                            {helperFunctions.formatCurrencyToPHP(total)}
                           </span>
                         </div>
                       </div>

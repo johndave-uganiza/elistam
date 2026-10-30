@@ -19,7 +19,7 @@ function OrderDetailModal({ onClose, onChange, onUpdate, orderDetail }) {
         <div className="modal-dialog modal-dialog-centered modal-sm">
           <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             {/* Header */}
-            <div className="modal-header bg-dark text-white border-0 px-4 py-3">
+            <div className="d-flex justify-content-between modal-header bg-dark text-white border-0 px-4 py-3">
               <div className="d-flex align-items-center gap-3">
                 <div
                   className="d-flex align-items-center justify-content-center rounded-3 bg-primary"

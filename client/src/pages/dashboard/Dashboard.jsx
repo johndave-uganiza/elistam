@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import BarChart from "../../components/dashboard/BarChart";
 import { DashboardContext } from "../../context/DashboardContext";
-import eListam from "@/utilities/elistam";
+import helperFunctions from "@/utilities/helperFunctions";
 
 function Dashboard() {
   const [metrics, setMetrics] = useState({
@@ -43,7 +43,7 @@ function Dashboard() {
     {
       icon: "bi bi-graph-up-arrow",
       label: "Revenue",
-      value: eListam.utils.formatCurrencyToPHP(metrics.revenue),
+      value: helperFunctions.formatCurrencyToPHP(metrics.revenue),
       description: "Total sales",
       border: "border-success",
       color: "text-success",
@@ -52,7 +52,7 @@ function Dashboard() {
     {
       icon: "bi bi-box-seam",
       label: "COGS",
-      value: eListam.utils.formatCurrencyToPHP(metrics.cogs),
+      value: helperFunctions.formatCurrencyToPHP(metrics.cogs),
       description: "Cost of goods sold",
       border: "border-warning",
       color: "text-warning",
@@ -61,7 +61,7 @@ function Dashboard() {
     {
       icon: "bi bi-cash-stack",
       label: "Gross Profit",
-      value: eListam.utils.formatCurrencyToPHP(metrics.grossProfit),
+      value: helperFunctions.formatCurrencyToPHP(metrics.grossProfit),
       description: "Revenue − COGS",
       border: "border-primary",
       color: "text-primary",
@@ -70,7 +70,7 @@ function Dashboard() {
     {
       icon: "bi bi-wallet2",
       label: "Net Profit",
-      value: eListam.utils.formatCurrencyToPHP(metrics.netProfit),
+      value: helperFunctions.formatCurrencyToPHP(metrics.netProfit),
       description: "After operating expenses",
       border: metrics.netProfit >= 0 ? "border-success" : "border-danger",
       color: metrics.netProfit >= 0 ? "text-success" : "text-danger",
@@ -341,7 +341,7 @@ function Dashboard() {
                 <span className="text-muted small">Current stock value</span>
 
                 <span className="fw-bold text-dark text-nowrap">
-                  {eListam.utils.formatCurrencyToPHP(metrics.stockAmount)}
+                  {helperFunctions.formatCurrencyToPHP(metrics.stockAmount)}
                 </span>
               </div>
             </div> */}

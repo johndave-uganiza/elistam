@@ -1,5 +1,5 @@
-﻿using eListam.Application.Services.Interfaces;
-using eListam.Application.Services.Interfaces.Auth;
+﻿using eListam.Application.Services.Interfaces.Auth;
+using eListam.Application.Services.Interfaces.Common;
 using eListam.Application.Services.Interfaces.Dashboards;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Application.Services.Interfaces.Orders;
@@ -39,7 +39,7 @@ namespace eListam.Infrastructure
             services.AddScoped<IdentitySeeder>();
             services.AddScoped<DummyProductSeeder>();
             services.AddScoped<IDummyProductExternalService, DummyProductExternalService>();
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(GenericRepository<>));
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();

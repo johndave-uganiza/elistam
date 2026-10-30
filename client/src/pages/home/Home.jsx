@@ -10,52 +10,54 @@ function Home() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (prefersReducedMotion) {
+    // Display everything immediately when reduced motion is preferred.
+    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
       elements.forEach((element) => {
         element.classList.add("is-visible");
       });
-      return;
-    }
 
-    if (!("IntersectionObserver" in window)) {
-      elements.forEach((element) => {
-        element.classList.add("is-visible");
-      });
       return;
     }
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      (entries, observerInstance) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+
+            // Animate each element only once.
+            observerInstance.unobserve(entry.target);
           }
         });
       },
       {
-        threshold: 0.12,
-        rootMargin: "0px 0px -40px 0px",
+        root: null,
+        threshold: 0.05,
+        rootMargin: "0px 0px -20px 0px",
       },
     );
 
-    elements.forEach((element) => observer.observe(element));
+    elements.forEach((element) => {
+      observer.observe(element);
+    });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   return (
     <>
+      {/* Hero Section */}
       <Background>
         <div
           className="container py-5 home-container"
-          style={{ opacity: "92%" }}
+          style={{ opacity: "92%", minHeight: "90vh" }}
         >
-          {/* Hero Section */}
           <div className="row justify-content-center align-items-center mb-5">
             <div className="col-12">
               <div className="card border-0 shadow-lg text-white overflow-hidden hero-card">
-                <div className="card-body text-center p-4 p-md-5 hero-content">
+                <div className="card-body text-center p-4 p-md-5 hero-content d-flex flex-column align-items-center justify-content-center">
                   <span className="rounded-pill px-3 py-2 hero-badge d-inline-block mb-3">
                     eListam - SMART POINT OF SALE SYSTEM
                   </span>
@@ -72,14 +74,69 @@ function Home() {
                   </p>
 
                   <div className="hero-divider mx-auto mt-4" />
+
+                  {/* Hero Action Buttons */}
+                  <div className="hero-actions d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center mt-4">
+                    <a
+                      href="#how-elistam-works"
+                      className="btn hero-btn hero-btn-primary"
+                    >
+                      <i className="bi bi-rocket-takeoff" aria-hidden="true" />
+                      <span>Get Started</span>
+                      <i
+                        className="bi bi-arrow-right hero-btn-arrow"
+                        aria-hidden="true"
+                      />
+                    </a>
+
+                    <a
+                      href="/login"
+                      className="btn hero-btn hero-btn-secondary"
+                    >
+                      <i
+                        className="bi bi-box-arrow-in-right"
+                        aria-hidden="true"
+                      />
+                      <span>Login</span>
+                    </a>
+
+                    {/* <a
+                      href="/register"
+                      className="btn hero-btn hero-btn-outline"
+                    >
+                      <i className="bi bi-person-plus" aria-hidden="true" />
+                      <span>Register</span>
+                    </a> */}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </Background>
 
-          {/* Features Section */}
-          <div className="row g-4 features-section">
-            {/* Step 1 */}
+      {/* How eListam Works Section */}
+      <section className="tech-section py-5" id="how-elistam-works">
+        <div className="container py-4">
+          {/* Section Heading */}
+          <div className="text-center mb-5 reveal-on-scroll">
+            <span className="section-eyebrow">
+              BUILT FOR SCALABILITY AND RELIABILITY
+            </span>
+
+            <h2 className="display-6 fw-bold mb-3 section-title">
+              How eListam Works
+            </h2>
+
+            <p className="text-secondary mx-auto section-description">
+              From managing inventory to tracking sales, eListam gives you the
+              tools to understand your business and make smarter decisions.
+            </p>
+          </div>
+
+          {/* Feature Cards */}
+          <div className="row g-4 features-section mb-5">
+            {/* Step 01 */}
             <div className="col-12 col-md-4">
               <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-1">
                 <div className="feature-icon icon-green mb-3">
@@ -97,7 +154,7 @@ function Home() {
               </div>
             </div>
 
-            {/* Step 2 */}
+            {/* Step 02 */}
             <div className="col-12 col-md-4">
               <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-2">
                 <div className="feature-icon icon-blue mb-3">
@@ -115,7 +172,7 @@ function Home() {
               </div>
             </div>
 
-            {/* Step 3 */}
+            {/* Step 03 */}
             <div className="col-12 col-md-4">
               <div className="card h-100 border-0 shadow-sm p-4 feature-card reveal-on-scroll stagger-3">
                 <div className="feature-icon icon-amber mb-3">
@@ -133,29 +190,13 @@ function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </Background>
 
-      {/* Technology Section */}
-      <section className="tech-section py-5">
-        <div className="container py-4">
-          <div className="text-center mb-5 reveal-on-scroll">
-            <span className="section-eyebrow">
-              BUILT FOR SCALABILITY AND RELIABILITY
+          {/* Technology Stack */}
+          <div className="tech-stack-wrapper bg-black text-center text-white mt-5 p-4 p-md-5 shadow-lg reveal-on-scroll">
+            <span className="tech-stack-label">
+              POWERED BY MODERN TECHNOLOGY
             </span>
 
-            <h2 className="display-6 fw-bold mb-3 section-title">
-              How eListam Works
-            </h2>
-
-            <p className="text-secondary mx-auto section-description">
-              Modern technologies working together to power a reliable,
-              efficient, and data-driven point-of-sale experience.
-            </p>
-          </div>
-
-          {/* Tech Stack */}
-          <div className="tech-stack-wrapper bg-black text-center text-white mt-5 p-4 p-md-5 shadow-lg reveal-on-scroll">
             <h2 className="fw-bold mb-3">Enterprise-Inspired Solution.</h2>
 
             <p className="text-white-50 mb-5 mx-auto tech-intro">

@@ -3,6 +3,7 @@ import { OrderContext } from "../../context/OrderContext";
 import OrderTable from "./OrderTable";
 import Swal from "sweetalert2";
 import { PAYMENT_METHODS } from "../../utilities/constants";
+import helperFunctions from "../../utilities/helperFunctions";
 
 function OrderModal({ onClose, onSubmit }) {
   const { getOrder, confirmOrder, isLoading } = useContext(OrderContext);
@@ -197,7 +198,9 @@ function OrderModal({ onClose, onSubmit }) {
                           <h6 className="mb-0 fw-semibold">Total</h6>
 
                           <span className="fs-5 fw-bold">
-                            ${Number(order.totalPrice || 0).toFixed(2)}
+                            {helperFunctions.formatCurrencyToPHP(
+                              order.totalPrice || 0,
+                            )}
                           </span>
                         </div>
                       </div>
@@ -246,7 +249,7 @@ function OrderModal({ onClose, onSubmit }) {
                       <div
                         className="p-1"
                         style={{
-                          maxHeight: "300px",
+                          maxHeight: "48vh",
                           overflowY: "auto",
                           overflowX: "hidden",
                         }}

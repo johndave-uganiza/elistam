@@ -1,5 +1,5 @@
 import { useState, createContext } from "react";
-import { API_BASE_URL } from "../utilities/constants";
+import { API_BASE_URL } from "../config/api";
 
 const AuthContext = createContext(null);
 
@@ -20,7 +20,7 @@ function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

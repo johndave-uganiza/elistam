@@ -1,4 +1,4 @@
-﻿using eListam.Application.Services.Interfaces;
+﻿using eListam.Application.Services.Interfaces.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 

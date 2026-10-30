@@ -216,15 +216,8 @@ function Products() {
       <Toolbar
         onAction={handleViewOrder}
         onSearch={handleSearchInput}
-        onSort={handleSortBy}
-        items={products}
-        sortBy={sortBy}
-        label={
-          <>
-            <i className="bi bi-basket me-1"></i>
-            <span> Open Orders</span>
-          </>
-        }
+        label={<span> Open Orders</span>}
+        icon={<i className="bi bi-basket me-1"></i>}
       />
 
       {/* Product Catalog */}

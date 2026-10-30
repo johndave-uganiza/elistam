@@ -1,7 +1,6 @@
-﻿using eListam.API.Common;
-using eListam.Application.Services.Interfaces.Dashboards;
+﻿using eListam.Application.Services.Interfaces.Dashboards;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace eListamAPI.Controllers
 {

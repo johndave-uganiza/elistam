@@ -1,8 +1,8 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Orders;
 using eListam.Application.Services.Implementations;
-using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
+using eListam.Application.Services.Interfaces.Common;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Application.Services.Interfaces.Orders;
 using eListam.Application.Services.Interfaces.Transactions;
@@ -215,6 +215,116 @@ namespace eListam.Application.Tests.Services.Implementations
             Assert.Equal(
                 1,
                 data?.OrderDetails.Count());
+        }
+        #endregion
+
+        #region AddOrderDetailAsync_WhenAddingExistingItemInOpenOrder_ReturnsOrderWithIncreasedQuantity
+        [Fact]
+        public async Task AddOrderDetailAsync_WhenAddingExistingItemInOpenOrder_ReturnsOrderWithIncreasedQuantity()
+        {
+            // Arrange
+            int itemId1 = 1;
+            int itemId2 = 2;
+            int orderId = 1;
+            int orderQuantity1 = 1;
+            int orderQuantity2 = 2;
+            int orderDetailRequestQuantity1 = 3;
+
+            // Item
+            var item1 = new Item()
+            {
+                Id = itemId1,
+                Name = "Item A",
+                Description = "Item A Description",
+                Price = 100,
+                Stock = 1,
+                Image = "item_a.png",
+            };
+
+            var item2 = new Item()
+            {
+                Id = itemId2,
+                Name = "Item B",
+                Description = "Item B Description",
+                Price = 200,
+                Stock = 2,
+                Image = "item_b.png",
+            };
+
+            // Order Detail Request
+            var orderDetailRequest = new CreateOrderDetailRequest()
+            {
+                ItemId = itemId1,
+                Name = item1.Name,
+                Description = item1.Description,
+                Price = item1.Price,
+                Quantity = orderDetailRequestQuantity1,
+                Image = item1.Image,
+            };
+            
+            // Order
+            var order = new Order()
+            {
+                Id = orderId,
+                IsCompleted = false,
+                OrderNumber = "ORD-1",
+                PaymentMethod = "Cash",
+                TotalQuantity = orderQuantity1 + orderQuantity2,
+                TotalPrice = orderQuantity1 * item1.Price + orderQuantity2 * item2.Price,
+                Date = DateTime.UtcNow,
+                OrderDetails = new List<OrderDetail>()
+                {
+                    new OrderDetail()
+                    {
+                        ItemId = itemId1,
+                        Name = item1.Name,
+                        Description = item1.Description,
+                        Price = item1.Price,
+                        Quantity = orderQuantity1,
+                        Image = item1.Image,
+                    },
+                    new OrderDetail()
+                    {
+                        ItemId = itemId2,
+                        Name = item2.Name,
+                        Description = item1.Description,
+                        Price = item2.Price,
+                        Quantity = orderQuantity2,
+                        Image = item2.Image,
+                    }
+                 }
+            };
+
+            // User
+            var user = new Result<string>
+            {
+                Data = "user-123"
+            };
+
+            _authService
+                .Setup(x => x.GetUserId())
+                .Returns(user);
+
+            _orderRepository
+               .Setup(x => x.GetByIdAsync(orderId))
+               .ReturnsAsync(order);
+
+            _itemRepository
+                .Setup(x => x.GetByIdAsync(itemId1))
+                .ReturnsAsync(item1);
+
+            // Act
+            var result = await _orderService.AddOrderDetailAsync(orderId, orderDetailRequest);
+            var data = result.Data;
+
+            // Assert
+            Assert.Equal(
+                orderQuantity1 + orderDetailRequestQuantity1,
+                data?.OrderDetails.FirstOrDefault(x => x.ItemId == itemId1)?.Quantity);
+
+            Assert.Equal(
+                orderQuantity1 + orderQuantity2 + orderDetailRequestQuantity1,
+                data?.TotalQuantity);
         }
         #endregion
     }

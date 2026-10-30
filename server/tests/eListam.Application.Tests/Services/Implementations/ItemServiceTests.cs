@@ -1,8 +1,8 @@
 ﻿using eListam.Application.Common;
 using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Implementations;
-using eListam.Application.Services.Interfaces;
 using eListam.Application.Services.Interfaces.Auth;
+using eListam.Application.Services.Interfaces.Common;
 using eListam.Application.Services.Interfaces.Items;
 using eListam.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;

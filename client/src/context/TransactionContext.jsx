@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { API_BASE_URL } from "../utilities/constants";
+import { API_BASE_URL } from "../config/api";
 
 const TransactionContext = createContext(null);
 
@@ -11,7 +11,7 @@ function TransactionProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/transaction`, {
+      const response = await fetch(`${API_BASE_URL}/transaction`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -29,7 +29,7 @@ function TransactionProvider({ children }) {
 
   const deleteTransaction = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/transaction/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/transaction/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,7 +46,7 @@ function TransactionProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/transaction/export`, {
+      const response = await fetch(`${API_BASE_URL}/transaction/export`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -149,7 +149,7 @@ function Items() {
       name: item.name || "",
       description: item.description || "",
       price: item.price ?? 0,
-      quantity: item.quantity ?? 0,
+      stock: item.stock ?? 0,
       cost: item.cost ?? 0,
       expirationDate: item.expirationDate
         ? String(item.expirationDate).split("T")[0]
@@ -233,12 +233,8 @@ function Items() {
       <Toolbar
         onAction={handleAddItem}
         onSearch={handleSearchInput}
-        label={
-          <>
-            <i className="bi bi-plus-circle me-1"></i>
-            Add Item
-          </>
-        }
+        label={<span>Add Item</span>}
+        icon={<i className="bi bi-plus-circle me-1"></i>}
       />
 
       {/* Items Table */}

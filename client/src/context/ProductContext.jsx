@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { API_BASE_URL } from "../utilities/constants";
+import { API_BASE_URL } from "../config/api";
 
 const ProductContext = createContext(null);
 
@@ -10,7 +10,7 @@ function ProductProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/product`, {
+      const response = await fetch(`${API_BASE_URL}/product`, {
         method: "GET",
       });
 
