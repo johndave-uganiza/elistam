@@ -10,7 +10,7 @@ function ProductProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/product`, {
+      const response = await fetch(`${API_BASE_URL}/api/product`, {
         method: "GET",
       });
 

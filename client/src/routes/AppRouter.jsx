@@ -10,7 +10,6 @@ import Transactions from "../pages/transactions/Transactions";
 import { ItemProvider } from "../context/ItemContext";
 import { TransactionProvider } from "../context/TransactionContext";
 import ProtectedRoute from "./ProtectedRoute";
-import { AuthProvider } from "../context/AuthContext";
 import { DashboardProvider } from "../context/DashboardContext";
 
 function AppRouter() {

@@ -10,7 +10,7 @@ function DashboardProvider({ children }) {
   const getDashboardMetrics = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/dashboard`, {
+      const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

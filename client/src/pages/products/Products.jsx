@@ -13,7 +13,6 @@ function Products() {
   const { getProducts, isLoading } = useContext(ProductContext);
 
   const [products, setProducts] = useState([]);
-  const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -60,37 +59,11 @@ function Products() {
       );
     }
 
-    // Sort
-    // switch (sortBy) {
-    //   case "name-asc":
-    //     result.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-    //     break;
-
-    //   case "name-desc":
-    //     result.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
-    //     break;
-
-    //   case "price-asc":
-    //     result.sort((a, b) => Number(a.price ?? 0) - Number(b.price ?? 0));
-    //     break;
-
-    //   case "price-desc":
-    //     result.sort((a, b) => Number(b.price ?? 0) - Number(a.price ?? 0));
-    //     break;
-
-    //   default:
-    //     break;
-    // }
-
     return result;
-  }, [products, searchInput /* sortBy */]);
+  }, [products, searchInput]);
 
   function handleSearchInput(e) {
     setSearchInput(e.target.value);
-  }
-
-  function handleSortBy(e) {
-    setSortBy(e.target.value);
   }
 
   function handleOrderProduct(product) {
@@ -212,7 +185,6 @@ function Products() {
       />
 
       {/* Toolbar */}
-
       <Toolbar
         onAction={handleViewOrder}
         onSearch={handleSearchInput}

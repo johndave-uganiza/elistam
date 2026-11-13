@@ -1,7 +1,9 @@
 import { useContext, useState } from "react";
 import { OrderContext } from "../../context/OrderContext";
-import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../config/api";
 import OrderDetailModal from "./OrderDetailModal";
+import helperFunctions from "../../utilities/helperFunctions";
 import { toast } from "react-toastify";
 
 function OrderTable({ order, setOrder }) {
@@ -20,13 +22,6 @@ function OrderTable({ order, setOrder }) {
     quantity: 0,
     image: "",
   });
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Number(value) || 0);
-  };
 
   const getImageUrl = (image) => {
     if (!image) {
@@ -277,13 +272,13 @@ function OrderTable({ order, setOrder }) {
 
                         <td className="text-end text-nowrap">
                           <span className="text-muted small">
-                            {formatCurrency(detail.price)}
+                            {helperFunctions.formatCurrencyToPHP(detail.price)}
                           </span>
                         </td>
 
                         <td className="text-end text-nowrap">
                           <span className="fw-semibold">
-                            {formatCurrency(itemTotal)}
+                            {helperFunctions.formatCurrencyToPHP(itemTotal)}
                           </span>
                         </td>
 
@@ -392,7 +387,8 @@ function OrderTable({ order, setOrder }) {
                           }}
                         >
                           <span className="text-muted">
-                            {formatCurrency(detail.price)} each
+                            {helperFunctions.formatCurrencyToPHP(detail.price)}{" "}
+                            each
                           </span>
                           <span className="text-muted">·</span>
                           <span className="text-muted">
@@ -404,7 +400,8 @@ function OrderTable({ order, setOrder }) {
                           className="fw-bold text-dark mt-1"
                           style={{ fontSize: "0.82rem" }}
                         >
-                          Total: {formatCurrency(itemTotal)}
+                          Total:{" "}
+                          {helperFunctions.formatCurrencyToPHP(itemTotal)}
                         </div>
                       </div>
 

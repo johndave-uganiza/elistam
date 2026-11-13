@@ -26,7 +26,7 @@ function OrderProvider({ children }) {
         ],
       };
 
-      const response = await fetch(`${API_BASE_URL}/order`, {
+      const response = await fetch(`${API_BASE_URL}/api/order`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -58,15 +58,18 @@ function OrderProvider({ children }) {
         image: image,
       };
 
-      const response = await fetch(`${API_BASE_URL}/order/${orderId}/details`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          // Accept: "application/json",
+      const response = await fetch(
+        `${API_BASE_URL}/api/order/${orderId}/details`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            // Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       return await response.json();
     } catch (error) {
@@ -81,7 +84,7 @@ function OrderProvider({ children }) {
 
     try {
       const payload = JSON.stringify(order);
-      const response = await fetch(`${API_BASE_URL}/order/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/order/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -104,7 +107,7 @@ function OrderProvider({ children }) {
 
     try {
       const payload = JSON.stringify(paymentMethod);
-      const response = await fetch(`${API_BASE_URL}/order/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/order/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -126,7 +129,7 @@ function OrderProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/order`, {
+      const response = await fetch(`${API_BASE_URL}/api/order`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

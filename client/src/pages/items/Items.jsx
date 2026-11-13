@@ -11,7 +11,6 @@ function Items() {
     useContext(ItemContext);
 
   const [items, setItems] = useState([]);
-  // const [sortBy, setSortBy] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -55,7 +54,7 @@ function Items() {
       );
     }
     return result;
-  }, [items, searchInput /* sortBy */]);
+  }, [items, searchInput]);
 
   const resetFormData = () => {
     setFormData({
@@ -208,10 +207,6 @@ function Items() {
       });
     }
   };
-
-  // const handleSortBy = (e) => {
-  //   setSortBy(e.target.value);
-  // };
 
   const handleCloseModal = () => {
     setShowModal(false);

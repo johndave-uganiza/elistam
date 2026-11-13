@@ -1,10 +1,8 @@
-﻿using eListam.API.Common;
-using eListam.Application;
-using eListam.Application.DTOs.Auth;
+﻿using eListam.Application.DTOs.Auth;
 using eListam.Application.Services.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
+
 
 namespace eListamAPI.Controllers
 {

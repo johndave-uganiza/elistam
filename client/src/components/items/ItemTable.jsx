@@ -1,4 +1,5 @@
-import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../config/api";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
 import EmptyItemTable from "./EmptyItemTable";

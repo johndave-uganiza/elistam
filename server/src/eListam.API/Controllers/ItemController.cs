@@ -1,6 +1,5 @@
 ﻿using eListam.Application.DTOs.Items;
 using eListam.Application.Services.Interfaces.Items;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eListamAPI.Controllers

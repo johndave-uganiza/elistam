@@ -1,4 +1,5 @@
-import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../config/api";
 import helperFunctions from "../../utilities/helperFunctions";
 
 function TransactionModal({ selectedTransaction, onClose }) {

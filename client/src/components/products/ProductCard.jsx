@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { API_BASE_URL, IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../config/api";
 import helperFunctions from "../../utilities/helperFunctions";
 
 function ProductCard({ product, onOrderProduct }) {

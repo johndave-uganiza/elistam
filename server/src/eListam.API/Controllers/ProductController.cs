@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using eListam.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using eListam.Application.Services.Interfaces.Products;
 
