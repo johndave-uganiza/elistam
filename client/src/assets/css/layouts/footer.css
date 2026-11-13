@@ -1,0 +1,28 @@
+.footer-meta {
+  min-height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  color: #868e96;
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  letter-spacing: 0.1px;
+}
+
+.footer-dot {
+  color: #ced4da;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .footer-meta {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+}

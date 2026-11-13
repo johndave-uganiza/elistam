@@ -1,0 +1,482 @@
+import { useContext, useState } from "react";
+import { OrderContext } from "../../context/OrderContext";
+import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
+import { API_BASE_URL } from "../../config/api";
+import OrderDetailModal from "./OrderDetailModal";
+import helperFunctions from "../../utilities/helperFunctions";
+import { toast } from "react-toastify";
+
+function OrderTable({ order, setOrder }) {
+  const { getOrder, updateOrder } = useContext(OrderContext);
+
+  const [showModal, setShowModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [orderDetail, setOrderDetail] = useState({
+    id: null,
+    orderId: null,
+    itemId: null,
+    name: "",
+    description: "",
+    price: 0,
+    quantity: 0,
+    image: "",
+  });
+
+  const getImageUrl = (image) => {
+    if (!image) {
+      return IMAGE_PLACEHOLDER_URL;
+    }
+
+    if (image.startsWith("images")) {
+      return `${API_BASE_URL}/${image}`;
+    }
+
+    return image;
+  };
+
+  const handleRemove = async (orderId, detailToRemove) => {
+    if (!order || isUpdating) return;
+
+    const previousOrder = order;
+
+    const updatedOrderDetails = order.orderDetails.filter(
+      (detail) => detail.id !== detailToRemove.id,
+    );
+
+    const updatedOrder = {
+      ...order,
+      totalPrice: updatedOrderDetails.reduce(
+        (sum, detail) => sum + Number(detail.price) * Number(detail.quantity),
+        0,
+      ),
+      orderDetails: updatedOrderDetails,
+    };
+
+    try {
+      setIsUpdating(true);
+
+      // Optimistic update
+      setOrder(updatedOrder);
+
+      const result = await updateOrder(orderId, updatedOrder);
+
+      if (result?.isSuccess) {
+        const refreshedOrder = await getOrder();
+
+        if (refreshedOrder?.data) {
+          setOrder(refreshedOrder.data);
+        }
+
+        toast.success(`${detailToRemove.name} removed successfully!`, {
+          autoClose: 1000,
+        });
+      } else {
+        // Rollback if update failed
+        setOrder(previousOrder);
+      }
+    } catch (error) {
+      console.error("Failed to remove order item:", error);
+
+      // Rollback
+      setOrder(previousOrder);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleUpdate = async (orderId, updatedDetail) => {
+    if (!order || isUpdating) return;
+
+    const previousOrder = order;
+
+    const updatedOrderDetails = order.orderDetails.map((detail) =>
+      detail.id === updatedDetail.id && updatedDetail.orderId === orderId
+        ? updatedDetail
+        : detail,
+    );
+
+    const updatedOrder = {
+      ...order,
+      totalPrice: updatedOrderDetails.reduce(
+        (sum, detail) => sum + Number(detail.price) * Number(detail.quantity),
+        0,
+      ),
+      orderDetails: updatedOrderDetails,
+    };
+
+    try {
+      setIsUpdating(true);
+
+      // Optimistic update
+      setOrder(updatedOrder);
+
+      const result = await updateOrder(orderId, updatedOrder);
+
+      if (result?.isSuccess) {
+        setShowModal(false);
+
+        const refreshedOrder = await getOrder();
+
+        if (refreshedOrder?.data) {
+          setOrder(refreshedOrder.data);
+        }
+      } else {
+        setOrder(previousOrder);
+      }
+    } catch (error) {
+      console.error("Failed to update order item:", error);
+      setOrder(previousOrder);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleEdit = (detail) => {
+    setOrderDetail({
+      id: detail.id,
+      orderId: order.id,
+      itemId: detail.itemId,
+      name: detail.name,
+      description: detail.description,
+      price: detail.price,
+      quantity: detail.quantity,
+      image: detail.image,
+    });
+
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    if (!isUpdating) {
+      setShowModal(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const quantity = Math.max(1, Number(e.target.value) || 1);
+
+    setOrderDetail((prev) => ({
+      ...prev,
+      quantity,
+    }));
+  };
+
+  const orderItems = order?.orderDetails || [];
+
+  return (
+    <>
+      <div className="bg-white rounded-3 border overflow-hidden">
+        {orderItems.length === 0 ? (
+          <div className="text-center text-muted py-4">
+            <i
+              className="bi bi-bag-x d-block mb-2"
+              style={{ fontSize: "2rem" }}
+            />
+            <small>No items in this order.</small>
+          </div>
+        ) : (
+          <>
+            {/* DESKTOP / TABLET VIEW */}
+            <div
+              className="d-none d-md-block table-responsive"
+              style={{
+                maxHeight: "calc(100vh - 300px)",
+                minHeight: "300px",
+                overflowY: "auto",
+              }}
+            >
+              <table className="table table-sm align-middle mb-0">
+                <thead
+                  className="table-light"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 2,
+                  }}
+                >
+                  <tr className="text-muted small text-uppercase">
+                    <th className="border-0 ps-3 py-2">Product Name</th>
+                    <th className="border-0 text-center py-2">Qty</th>
+                    <th className="border-0 text-end py-2">Price</th>
+                    <th className="border-0 text-end py-2">Total</th>
+                    <th className="border-0 text-center pe-3 py-2">
+                      <span className="visually-hidden">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {orderItems.map((detail) => {
+                    const itemTotal =
+                      Number(detail.price) * Number(detail.quantity);
+
+                    return (
+                      <tr key={detail.id} className="border-bottom">
+                        <td className="ps-3 py-2">
+                          <div className="d-flex align-items-center gap-2">
+                            <div
+                              className="rounded-3 bg-light border flex-shrink-0 overflow-hidden"
+                              style={{ width: 48, height: 48 }}
+                            >
+                              <img
+                                src={getImageUrl(detail.image)}
+                                alt={detail.name || "Product"}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = IMAGE_PLACEHOLDER_URL;
+                                }}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            </div>
+
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                className="fw-semibold text-dark text-truncate"
+                                title={detail.name}
+                              >
+                                {detail.name}
+                              </div>
+
+                              {detail.description && (
+                                <small
+                                  className="text-muted d-block text-truncate"
+                                  style={{ maxWidth: 240 }}
+                                  title={detail.description}
+                                >
+                                  {detail.description}
+                                </small>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="text-center">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-light border rounded-pill px-2 py-1"
+                            onClick={() => handleEdit(detail)}
+                            disabled={isUpdating}
+                            title="Edit quantity"
+                          >
+                            <span className="fw-semibold">
+                              {detail.quantity}
+                            </span>
+                            <i className="bi bi-pencil ms-1 text-muted small" />
+                          </button>
+                        </td>
+
+                        <td className="text-end text-nowrap">
+                          <span className="text-muted small">
+                            {helperFunctions.formatCurrencyToPHP(detail.price)}
+                          </span>
+                        </td>
+
+                        <td className="text-end text-nowrap">
+                          <span className="fw-semibold">
+                            {helperFunctions.formatCurrencyToPHP(itemTotal)}
+                          </span>
+                        </td>
+
+                        <td className="text-center pe-3">
+                          <button
+                            type="button"
+                            onClick={() => handleRemove(order.id, detail)}
+                            className="btn btn-sm btn-light text-danger rounded-circle"
+                            style={{
+                              width: 32,
+                              height: 32,
+                              padding: 0,
+                            }}
+                            disabled={isUpdating}
+                            title={`Remove ${detail.name}`}
+                            aria-label={`Remove ${detail.name}`}
+                          >
+                            {isUpdating ? (
+                              <span
+                                className="spinner-border spinner-border-sm"
+                                style={{
+                                  width: "0.8rem",
+                                  height: "0.8rem",
+                                }}
+                              />
+                            ) : (
+                              <i className="bi bi-trash3" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE VIEW */}
+            <div className="d-md-none">
+              <div className="border-bottom bg-light px-2 py-2">
+                <small className="text-muted fw-medium">
+                  {orderItems.length}{" "}
+                  {orderItems.length === 1 ? "item" : "items"}
+                </small>
+              </div>
+
+              <div
+                style={{
+                  maxHeight: "calc(100vh - 260px)",
+                  minHeight: "200px",
+                  overflowY: "auto",
+                }}
+              >
+                {orderItems.map((detail) => {
+                  const itemTotal =
+                    Number(detail.price) * Number(detail.quantity);
+
+                  return (
+                    <div
+                      key={detail.id}
+                      className="d-flex align-items-center gap-2 px-2 py-2 border-bottom"
+                      style={{ minHeight: 76 }}
+                    >
+                      {/* Thumbnail */}
+                      <div
+                        className="rounded-2 bg-light border overflow-hidden flex-shrink-0"
+                        style={{ width: 44, height: 44 }}
+                      >
+                        <img
+                          src={getImageUrl(detail.image)}
+                          alt={detail.name || "Product"}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = IMAGE_PLACEHOLDER_URL;
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+
+                      {/* Product details */}
+                      <div
+                        className="flex-grow-1 overflow-hidden"
+                        style={{ minWidth: 0 }}
+                      >
+                        <div
+                          className="fw-semibold text-dark text-truncate"
+                          style={{
+                            fontSize: "0.84rem",
+                            lineHeight: 1.3,
+                          }}
+                          title={detail.name}
+                        >
+                          {detail.name || "Unnamed item"}
+                        </div>
+
+                        <div
+                          className="d-flex align-items-center flex-wrap gap-1 mt-1"
+                          style={{
+                            fontSize: "0.75rem",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          <span className="text-muted">
+                            {helperFunctions.formatCurrencyToPHP(detail.price)}{" "}
+                            each
+                          </span>
+                          <span className="text-muted">·</span>
+                          <span className="text-muted">
+                            Qty {detail.quantity}
+                          </span>
+                        </div>
+
+                        <div
+                          className="fw-bold text-dark mt-1"
+                          style={{ fontSize: "0.82rem" }}
+                        >
+                          Total:{" "}
+                          {helperFunctions.formatCurrencyToPHP(itemTotal)}
+                        </div>
+                      </div>
+
+                      {/* Compact actions */}
+                      <div className="d-flex flex-column gap-1 flex-shrink-0">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-light border text-primary p-1"
+                          onClick={() => handleEdit(detail)}
+                          disabled={isUpdating}
+                          title="Edit quantity"
+                          aria-label={`Edit quantity for ${detail.name}`}
+                          style={{
+                            width: 30,
+                            height: 28,
+                            lineHeight: 1,
+                          }}
+                        >
+                          <i className="bi bi-pencil" />
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-light border text-danger p-1"
+                          onClick={() => handleRemove(order.id, detail)}
+                          disabled={isUpdating}
+                          title={`Remove ${detail.name}`}
+                          aria-label={`Remove ${detail.name}`}
+                          style={{
+                            width: 30,
+                            height: 28,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {isUpdating ? (
+                            <span
+                              className="spinner-border spinner-border-sm"
+                              style={{
+                                width: "0.8rem",
+                                height: "0.8rem",
+                              }}
+                            />
+                          ) : (
+                            <i className="bi bi-trash3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Mobile footer */}
+              <div className="border-top bg-light px-2 py-2">
+                <small className="text-muted">
+                  <i className="bi bi-bag me-1" />
+                  {orderItems.length}{" "}
+                  {orderItems.length === 1 ? "item" : "items"}
+                </small>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {showModal && (
+        <OrderDetailModal
+          onClose={handleClose}
+          onChange={handleInputChange}
+          orderDetail={orderDetail}
+          onUpdate={handleUpdate}
+        />
+      )}
+    </>
+  );
+}
+
+export default OrderTable;

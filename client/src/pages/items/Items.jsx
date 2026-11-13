@@ -1,198 +1,257 @@
-import { useContext, useState } from "react";
-import { ProductContext } from "../../context/ProductContext";
-import ProductCard from "../../components/products/ProductCard";
-import { OrderContext } from "../../context/OrderContext";
-import SearchBar from "../../components/common/SearchBar";
-import SortDropdown from "../../components/common/SortDropdown";
-import ToastAlert from "../../components/common/ToastAlert";
-import ItemsToolbar from "../../components/items/ItemsToolbar";
-import AddToOrderForm from "../../components/products/AddToOrderForm";
-import { Modal } from "bootstrap";
-import AddItemForm from "../../components/items/AddItemForm";
-import EditItemForm from "../../components/items/EditItemForm";
-import DeleteItemForm from "../../components/items/DeleteItemForm";
-import ItemCard from "../../components/items/ItemCard";
+import { useContext, useEffect, useState, useMemo } from "react";
+import Toolbar from "../../components/common/Toolbar";
 import { ItemContext } from "../../context/ItemContext";
+import ItemModal from "../../components/items/ItemModal";
+import ItemTable from "../../components/items/ItemTable";
+import Swal from "sweetalert2";
+import PageTitle from "../../components/common/PageTitle";
 
 function Items() {
-  // const navigate = useNavigate();
-  const { items, setItems } = useContext(ItemContext);
+  const { createItem, getItems, updateItem, deleteItem, isLoading } =
+    useContext(ItemContext);
 
-  // const [showToast, setShowToast] = useState(false);
-  const [showAddItemForm, setShowAddItemForm] = useState(false);
-  const [showEditItemForm, setShowEditItemForm] = useState(false);
-  const [showDeleteItemForm, setShowDeleteItemForm] = useState(false);
-  const [sortBy, setSortBy] = useState("");
+  const [items, setItems] = useState([]);
   const [searchInput, setSearchInput] = useState("");
-  const [currentItem, setCurrentItem] = useState(null);
-  const [itemDetailForm, setItemDetailForm] = useState({
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const [formData, setFormData] = useState({
     name: "",
-    price: "",
+    description: "",
+    price: 0,
+    cost: 0,
     quantity: 0,
     expirationDate: "",
+    image: null,
   });
 
-  // Filter items
-  const filteredItems = items.filter((item) => item.name.includes(searchInput));
+  // Fetch items
+  const fetchItems = async () => {
+    try {
+      const result = await getItems();
+      setItems(result || []);
+    } catch (error) {
+      console.error("Failed to fetch items:", error);
+      setItems([]);
+    }
+  };
 
-  // Sort items
-  const { name, price } = sortBy;
-  switch (sortBy) {
-    case price?.asc.value:
-      filteredItems.sort((current, next) => current.price - next.price);
-      break;
-    case price?.desc.value:
-      filteredItems.sort((current, next) => next.price - current.price);
-      break;
-    case name?.asc.value:
-      filteredItems.sort((current, next) =>
-        current.name.localeCompare(next.name),
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    let result = [...(items ?? [])];
+
+    // Search
+    if (searchInput.trim()) {
+      const search = searchInput.toLowerCase().trim();
+
+      result = result.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(search) ||
+          item.description?.toLowerCase().includes(search),
       );
-      break;
-    case name?.desc.value:
-      filteredItems.sort((current, next) =>
-        next.name.localeCompare(current.name),
-      );
-      break;
-    default:
-      break;
-  }
+    }
+    return result;
+  }, [items, searchInput]);
 
-  function handleSearchInput(e) {
-    e.preventDefault();
-    setSearchInput(e.target.value);
-  }
-
-  function handleAddItem() {
-    setShowAddItemForm(true);
-  }
-
-  function handleEditItem(item) {
-    setCurrentItem(item);
-
-    setItemDetailForm({
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      expirationDate: item.expirationDate || "",
+  const resetFormData = () => {
+    setFormData({
+      name: "",
+      description: "",
+      price: 0,
+      cost: 0,
+      quantity: 0,
+      expirationDate: "",
+      image: null,
     });
+  };
 
-    setShowEditItemForm(true);
-  }
+  const handleSearchInput = (e) => {
+    setSearchInput(e.target.value);
+  };
 
-  function handleUpdateItem(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get("name");
-    const price = formData.get("price");
-    const quantity = formData.get("quantity");
-    const expirationDate = new Date(
-      formData.get("expirationDate"),
-    ).toLocaleDateString("en-US");
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
 
-    const updatedItems = items.map((item) => {
-      if (item.id === currentItem.id) {
-        return {
-          ...item,
-          name: name,
-          price: price,
-          quantity: quantity,
-          expirationDate: expirationDate,
-        };
+    if (name === "image") {
+      setFormData((prev) => ({
+        ...prev,
+        image: files?.[0] || null,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleAddItem = () => {
+    setSelectedItem(null);
+    resetFormData();
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (formData) => {
+    try {
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("Name", formData.name);
+      formDataToSend.append("Description", formData.description);
+      formDataToSend.append("Price", formData.price);
+      formDataToSend.append("Cost", formData.cost);
+      formDataToSend.append("Stock", formData.stock);
+      formDataToSend.append("ExpirationDate", formData.expirationDate);
+
+      if (formData.image) {
+        formDataToSend.append("ImageFile", formData.image);
       }
 
-      return item;
+      let result;
+
+      if (selectedItem) {
+        result = await updateItem(selectedItem.id, formDataToSend);
+      } else {
+        result = await createItem(formDataToSend);
+      }
+
+      if (result?.isSuccess) {
+        await fetchItems();
+        setShowModal(false);
+        setSelectedItem(null);
+        resetFormData();
+
+        await Swal.fire({
+          title: `Item ${selectedItem ? "updated" : "created"} successfully!`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: true,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save item:", error);
+
+      Swal.fire({
+        title: "Something went wrong",
+        text: "Unable to save the item.",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleEditItem = (item) => {
+    setSelectedItem(item);
+
+    setFormData({
+      name: item.name || "",
+      description: item.description || "",
+      price: item.price ?? 0,
+      stock: item.stock ?? 0,
+      cost: item.cost ?? 0,
+      expirationDate: item.expirationDate
+        ? String(item.expirationDate).split("T")[0]
+        : "",
+      image: null,
     });
 
-    setItems(updatedItems);
-    setShowEditItemForm(false);
-    localStorage.setItem("items", JSON.stringify(updatedItems));
-  }
+    setShowModal(true);
+  };
 
-  function handleDeleteItem(item) {
-    setCurrentItem(item);
+  const handleDeleteItem = async (item) => {
+    try {
+      const result = await Swal.fire({
+        title: `Delete ${item.name}`,
+        html: `
+        <p style="margin-bottom: 8px; color: #555;">
+            Are you sure you want to delete
+            <strong style="color: #d33;">${item.name}</strong>?
+        </p>
+        <p style="font-size: 13px; color: #888; margin-bottom: 0;">
+            This action cannot be undone.
+        </p>
+    `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        focusCancel: true,
+      });
 
-    // setItemDetailForm({
-    //   name: item.name,
-    //   price: item.price,
-    //   quantity: item.stock,
-    //   expirationDate: item.expirationDate || "",
-    // });
+      if (result.isConfirmed) {
+        const deleteResult = await deleteItem(item.id);
 
-    setShowDeleteItemForm(true);
-  }
+        if (deleteResult?.isSuccess) {
+          await fetchItems();
 
-  function handleConfirmDeleteItem(item) {
-    const newItems = items.filter((singleItem) => singleItem.id !== item.id);
-    setItems(newItems);
-    localStorage.setItem("items", JSON.stringify(newItems));
-    setShowDeleteItemForm(false);
-  }
+          await Swal.fire({
+            title: "Deleted!",
+            text: `${item.name} has been deleted.`,
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: true,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to delete item:", error);
 
-  function handleSortBy(e) {
-    setSortBy(e.target.value);
-  }
+      Swal.fire({
+        title: "Something went wrong",
+        text: "Unable to delete the item.",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedItem(null);
+    resetFormData();
+  };
 
   return (
-    <div className="p-0">
-      <div className="container-fluid">
-        <div className="row p-3">
-          <div className="p-0 d-flex justify-content-between align-items-center">
-            <h3 className="">List of Items</h3>
-            <h6 className="">Total Items:{items?.length}</h6>
-          </div>
-        </div>
-        <div className="row py-2 mb-2 p-3">
-          <ItemsToolbar
-            handleAddItem={handleAddItem}
-            handleSearchInput={handleSearchInput}
-            handleSortBy={handleSortBy}
-            items={items}
-            sortBy={sortBy}
-          />
-        </div>
-        <div className="row justify-content-between p-3 gap-5">
-          {filteredItems?.length > 0
-            ? filteredItems.map((item, index) => {
-                return (
-                  <ItemCard
-                    item={item}
-                    key={index}
-                    items={items}
-                    setItems={setItems}
-                    // setShowToast={setShowToast}
-                    // handleAddToBasket={handleAddToBasket}
-                    handleEditItem={handleEditItem}
-                    handleDeleteItem={handleDeleteItem}
-                  />
-                );
-              })
-            : null}
-        </div>
+    <div className="container px-2 px-sm-3 px-md-4 py-2">
+      {/* Page Title */}
+      <PageTitle
+        title={"Item List"}
+        description={"Manage your products, inventory, and item details."}
+        label={"Item"}
+        total={items?.length ?? 0}
+      />
+
+      {/* Toolbar */}
+      <Toolbar
+        onAction={handleAddItem}
+        onSearch={handleSearchInput}
+        label={<span>Add Item</span>}
+        icon={<i className="bi bi-plus-circle me-1"></i>}
+      />
+
+      {/* Items Table */}
+      <div className="card border-0 shadow-sm p-3">
+        <ItemTable
+          items={filteredItems}
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
+        />
       </div>
 
-      <AddItemForm
-        showAddItemForm={showAddItemForm}
-        setShowAddItemForm={setShowAddItemForm}
-      />
-
-      <EditItemForm
-        showEditItemForm={showEditItemForm}
-        setShowEditItemForm={setShowEditItemForm}
-        currentItem={currentItem}
-        handleUpdateItem={handleUpdateItem}
-        itemDetailForm={itemDetailForm}
-        setItemDetailForm={setItemDetailForm}
-        setCurrentItem={setCurrentItem}
-      />
-
-      <DeleteItemForm
-        showDeleteItemForm={showDeleteItemForm}
-        setShowDeleteItemForm={setShowDeleteItemForm}
-        currentItem={currentItem}
-        setCurrentItem={setCurrentItem}
-        handleConfirmDeleteItem={handleConfirmDeleteItem}
-      />
+      {/* Item Modal */}
+      {showModal && (
+        <ItemModal
+          onClose={handleCloseModal}
+          isEditing={!!selectedItem}
+          onSubmit={handleSubmit}
+          onChange={handleInputChange}
+          formData={formData}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,25 @@
+export const IMAGE_PLACEHOLDER_URL = "https://placehold.co/600x400";
+
+export const ROUTES = {
+    HOME: "/",
+    DASHBOARD: "/dashboard",
+    ITEMS: "/items",
+    PRODUCTS: "/products",
+    TRANSACTIONS: "/transactions",
+    LOGIN: "/login",
+};
+
+export const PAYMENT_METHODS = [
+    {
+        value: "Cash",
+        icon: "bi-cash-stack",
+    },
+    {
+        value: "Stripe",
+        icon: "bi-credit-card",
+    },
+    {
+        value: "Pay Later",
+        icon: "bi-wallet2",
+    },
+];

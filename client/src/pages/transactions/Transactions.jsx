@@ -1,191 +1,131 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
+import TransactionTable from "../../components/transactions/TransactionTable";
+import Toolbar from "../../components/common/Toolbar";
 import { TransactionContext } from "../../context/TransactionContext";
-import EditOrderDetailForm from "../../components/orders/EditOrderDetailForm";
-import DeleteOrderDetailForm from "../../components/orders/DeleteOrderDetailForm";
-import { eListam } from "../../utilities/elistam";
-import DeleteTransactionForm from "../../components/transactions/DeleteTransactionForm";
+import PageTitle from "../../components/common/PageTitle";
+import Swal from "sweetalert2";
 
 function Transactions() {
-  const { transactionCtx, setTransactionCtx } = useContext(TransactionContext);
-  const [showDeleteTransactionForm, setShowDeleteTransactionForm] =
-    useState(false);
-  const [currentTransaction, setCurrentTransaction] = useState(null);
+  const { getTransactions, exportTransaction, deleteTransaction } =
+    useContext(TransactionContext);
+  const [transactions, setTransactions] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
 
-  function getTotalTransactionPrice() {
-    return Number(
-      transactionCtx.reduce(
-        (prev, current) => Number(prev) + Number(current.totalPrice),
-        0,
-      ),
-    );
-  }
+  const fetchTransactions = async () => {
+    const { data } = await getTransactions();
+    setTransactions(data || []);
+  };
 
-  function handleDeleteTransactionDetail(current) {
-    setCurrentTransaction(current);
-    setShowDeleteTransactionForm(true);
-  }
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
-  function handleConfirmDeleteTransaction(e, current) {
-    e.preventDefault();
-    const updatedTransactions = transactionCtx.filter(
-      (transaction) => transaction.id !== current.id,
-    );
+  const filteredTransactions = useMemo(() => {
+    let result = [...(transactions ?? [])];
 
-    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
-    setTransactionCtx(updatedTransactions);
-    setShowDeleteTransactionForm(false);
-  }
+    // Search
+    if (searchInput.trim()) {
+      const search = searchInput.toLowerCase().trim();
+
+      result = result.filter(
+        (transaction) =>
+          transaction.transactionNumber?.toLowerCase().includes(search) ||
+          transaction.orderNumber?.toLowerCase().includes(search),
+      );
+    }
+    return result;
+  }, [transactions, searchInput /* sortBy */]);
+
+  const handleSearchInput = (e) => {
+    setSearchInput(e.target.value);
+  };
+
+  const handleExportTransactions = async () => {
+    await exportTransaction();
+  };
+
+  const handleDeleteTransaction = async (transaction) => {
+    try {
+      const result = await Swal.fire({
+        title: `Delete ${transaction.transactionNumber}`,
+        html: `
+          <p style="margin-bottom: 8px; color: #555;">
+              Are you sure you want to delete
+              <strong style="color: #d33;">${transaction.transactionNumber}</strong>?
+          </p>
+          <p style="font-size: 13px; color: #888; margin-bottom: 0;">
+              This action cannot be undone.
+          </p>
+      `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        focusCancel: true,
+      });
+
+      if (result.isConfirmed) {
+        const deleteResult = await deleteTransaction(transaction.id);
+
+        if (deleteResult?.isSuccess) {
+          await fetchTransactions();
+
+          await Swal.fire({
+            title: "Deleted!",
+            text: `${transaction.transactionNumber} has been deleted.`,
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: true,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
+
+      Swal.fire({
+        title: "Something went wrong",
+        text: "Unable to delete the transaction.",
+        icon: "error",
+      });
+    }
+  };
 
   return (
-    <div className="container-fluid flex-fill d-flex flex-column py-3">
-      <div className="row flex-fill">
-        <div className="col-12 d-flex flex-column">
-          <div className="card bg-primary-subtle flex-fill">
-            <div className="card-header bg-black">
-              <h4 className="card-title d-flex justify-content-between align-items-center mb-0">
-                <span>Transaction Overview</span>
-                <span className="fs-6">{`Date: ${new Date().toLocaleDateString()}`}</span>
-              </h4>
-            </div>
-            <div className="card-body bg-secondary d-flex flex-column flex-fill">
-              <form className="flex-fill d-flex flex-column">
-                <div className="row">
-                  {/* <div className="col-auto">
-                    <label
-                      htmlFor="inputPassword4"
-                      className="form-label form-label-sm m-0"
-                    >
-                      From:
-                    </label>
-
-                    <input
-                      className="form-control fw-bold"
-                      disabled
-                      value={`${new Date().toLocaleDateString()}`}
-                    />
-                  </div>
-                  <div className="col-auto">
-                    <label
-                      htmlFor="inputPassword4"
-                      className="form-label form-label-sm m-0"
-                    >
-                      To:
-                    </label>
-
-                    <input
-                      className="form-control fw-bold"
-                      disabled
-                      value={`${new Date().toLocaleDateString()}`}
-                    />
-                  </div> */}
-                  <div className="col-auto ms-md-auto">
-                    <label className="form-label form-label-sm m-0">
-                      Total Gross Amount:
-                    </label>
-
-                    <input
-                      className="form-control fw-bold"
-                      disabled
-                      value={eListam.utils.formatCurrencyToPHP(
-                        getTotalTransactionPrice(),
-                      )}
-                    />
-                  </div>
-                  <div className="col-auto">
-                    <label htmlFor="inputEmail4" className="form-label m-0">
-                      Total Net Amount:
-                    </label>
-
-                    <input
-                      className="form-control fw-bold"
-                      disabled
-                      value={eListam.utils.formatCurrencyToPHP(
-                        getTotalTransactionPrice() * 0.15,
-                      )}
-                    />
-                  </div>
-                </div>
-                <hr />
-                <div className="row flex-fill">
-                  <div className="overflow-auto" style={{ maxHeight: "340px" }}>
-                    <table className="table table-bordered table-hover table-striped small">
-                      <thead>
-                        <tr>
-                          <th scope="col">Transact Number</th>
-                          <th scope="col">Order Number</th>
-                          <th scope="col">Date</th>
-                          <th scope="col">Total</th>
-                          <th scope="col">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transactionCtx.map((item, index) => (
-                          <tr
-                            key={index}
-                            className={index % 2 === 0 ? "table-secondary" : ""}
-                          >
-                            {/* <th scope="row">{item.id}</th> */}
-                            <td className="text-wrap">{`T - ${item.id}`}</td>
-                            <td className="text-wrap">{`O - ${item.id}`}</td>
-                            <td className="text-wrap">{item.date}</td>
-                            <td>
-                              {eListam.utils.formatCurrencyToPHP(
-                                item.totalPrice,
-                              )}
-                            </td>
-                            <td>
-                              <a
-                                className="btn btn-outline-danger me-1 btn-sm mb-1 mb-lg-0"
-                                onClick={() =>
-                                  handleDeleteTransactionDetail(item)
-                                }
-                              >
-                                <i className="bi bi-trash3-fill me-1"></i>
-                                <span className=" d-none d-md-inline">
-                                  Delete
-                                </span>
-                              </a>
-                              <a className="btn btn-outline-success me-1 btn-sm mb-1 mb-lg-0 disabled">
-                                <i className="bi bi-list me-1"></i>
-                                <span className="d-none d-md-inline">
-                                  View Details
-                                </span>
-                              </a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <hr />
-                <div className="row">
-                  <div className="col-12 d-flex flex-sm-row flex-column justify-content-end align-items-center gap-md-0 gap-3">
-                    <button
-                      type="submit"
-                      className="btn btn-info btn-sm disabled"
-                    >
-                      <span
-                        className="fw-bold"
-                        // style={{ fontSize: "0.75rem" }}
-                      >
-                        Generate Report
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <DeleteTransactionForm
-        showDeleteTransactionForm={showDeleteTransactionForm}
-        setShowDeleteTransactionForm={setShowDeleteTransactionForm}
-        currentTransaction={currentTransaction}
-        handleConfirmDeleteTransaction={handleConfirmDeleteTransaction}
+    <div className="container px-3 px-md-4 py-2">
+      {/* Page Title */}
+      <PageTitle
+        title={"Sales Transactions"}
+        description={"Review past transactions and track sales trends."}
+        label={"Transaction"}
+        total={transactions?.length || 0}
       />
+      {/* Toolbar */}
+      <Toolbar
+        onSearch={handleSearchInput}
+        onAction={handleExportTransactions}
+        label={<span>Export Transactions</span>}
+        icon={<i className="bi bi-filetype-csv me-1"></i>}
+      />
+
+      {transactions?.length == 0 && (
+        <div
+          className="container bg-white align-items-center d-flex justify-content-center rounded"
+          style={{ height: "60vh" }}
+        >
+          <h2 className="row text-black-50">There are 0 transactions.</h2>
+        </div>
+      )}
+      {transactions?.length > 0 && (
+        <div className="card border-0 shadow-sm p-3">
+          <TransactionTable
+            transactions={filteredTransactions}
+            deleteTransaction={handleDeleteTransaction}
+          />
+        </div>
+      )}
     </div>
   );
 }

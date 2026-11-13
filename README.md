@@ -48,4 +48,4 @@ Work-in-Progress (WIP): eListam will be a Point Of Sale (POS) web application to
 ---
 
 ## Thank You
-Thanks for checking out the project! 🙂
+Thanks for checking out this project! 🙂
