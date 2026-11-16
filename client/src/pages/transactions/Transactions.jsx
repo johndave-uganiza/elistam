@@ -110,22 +110,12 @@ function Transactions() {
         icon={<i className="bi bi-filetype-csv me-1"></i>}
       />
 
-      {transactions?.length == 0 && (
-        <div
-          className="container bg-white align-items-center d-flex justify-content-center rounded"
-          style={{ height: "60vh" }}
-        >
-          <h2 className="row text-black-50">There are 0 transactions.</h2>
-        </div>
-      )}
-      {transactions?.length > 0 && (
-        <div className="card border-0 shadow-sm p-3">
-          <TransactionTable
-            transactions={filteredTransactions}
-            deleteTransaction={handleDeleteTransaction}
-          />
-        </div>
-      )}
+      <div className="card border-0 shadow-sm p-3">
+        <TransactionTable
+          transactions={filteredTransactions}
+          deleteTransaction={handleDeleteTransaction}
+        />
+      </div>
     </div>
   );
 }

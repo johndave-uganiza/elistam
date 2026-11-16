@@ -3,7 +3,7 @@ import TransactionModal from "./TransactionModal";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
 import helperFunctions from "@/utilities/helperFunctions";
-import EmptyTransactionTable from "./EmptyTransactionTable";
+import EmptyTableState from "../common/EmptyTableState";
 
 function TransactionTable({ transactions, deleteTransaction }) {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -72,24 +72,12 @@ function TransactionTable({ transactions, deleteTransaction }) {
         {/* =====================================================
             DESKTOP / TABLET TABLE
         ====================================================== */}
-        <div
-          className="d-none d-md-block table-responsive"
-          style={{
-            maxHeight: "calc(100vh - 300px)",
-            minHeight: "300px",
-            overflowY: "auto",
-          }}
-        >
-          <table className="table table-hover align-middle mb-0">
+        <div className="d-none d-md-block table-responsive">
+          <table
+            className={`table ${sortedTransactions.length > 0 ? "table-hover" : ""} align-middle mb-0`}
+          >
             {/* Header */}
-            <thead
-              className="table-light"
-              style={{
-                position: "sticky",
-                top: 0,
-                zIndex: 2,
-              }}
-            >
+            <thead className="table-light">
               <tr>
                 <SortHeader
                   label="Transaction #"
@@ -271,8 +259,12 @@ function TransactionTable({ transactions, deleteTransaction }) {
                 })
               ) : (
                 <tr>
-                  <td colSpan="7" className="border-0">
-                    <EmptyTransactionTable />
+                  <td colSpan="8" className="border-0">
+                    <EmptyTableState
+                      icon="bi-receipt"
+                      title="No transactions yet"
+                      description="Completed orders will appear here so you can review your sales history."
+                    />
                   </td>
                 </tr>
               )}
@@ -330,13 +322,7 @@ function TransactionTable({ transactions, deleteTransaction }) {
           </div>
 
           {/* Compact Transaction List */}
-          <div
-            style={{
-              maxHeight: "calc(100vh - 260px)",
-              minHeight: "200px",
-              overflowY: "auto",
-            }}
-          >
+          <div>
             {sortedTransactions.length > 0 ? (
               <div>
                 {sortedTransactions.map((tran) => {
@@ -483,23 +469,14 @@ function TransactionTable({ transactions, deleteTransaction }) {
                 })}
               </div>
             ) : (
-              <EmptyTransactionTable />
+              <EmptyTableState
+                icon="bi-receipt"
+                title="No transactions yet"
+                description="Completed orders will appear here so you can review your sales history."
+              />
             )}
           </div>
         </div>
-
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
-        {sortedTransactions.length > 0 && (
-          <div className="border-top bg-light px-3 py-2">
-            <small className="text-muted">
-              <i className="bi bi-receipt me-1"></i>
-              {sortedTransactions.length} transaction
-              {sortedTransactions.length !== 1 ? "s" : ""}
-            </small>
-          </div>
-        )}
       </div>
 
       {/* Transaction Modal */}

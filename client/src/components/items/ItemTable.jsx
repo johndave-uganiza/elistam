@@ -2,7 +2,7 @@ import { IMAGE_PLACEHOLDER_URL } from "../../utilities/constants";
 import { API_BASE_URL } from "../../config/api";
 import useTableColumnSort from "../../hooks/useTableColumnSort";
 import SortHeader from "../common/SortHeader";
-import EmptyItemTable from "./EmptyItemTable";
+import EmptyTableState from "../common/EmptyTableState";
 import helperFunctions from "../../utilities/helperFunctions";
 
 function ItemTable({ items, onEdit, onDelete }) {
@@ -92,24 +92,12 @@ function ItemTable({ items, onEdit, onDelete }) {
       {/* =====================================================
           DESKTOP / TABLET TABLE
       ====================================================== */}
-      <div
-        className="d-none d-md-block table-responsive"
-        style={{
-          maxHeight: "calc(100vh - 300px)",
-          minHeight: "300px",
-          overflowY: "auto",
-        }}
-      >
-        <table className="table table-hover align-middle mb-0">
+      <div className="d-none d-md-block table-responsive">
+        <table
+          className={`table ${sortedItems.length > 0 ? "table-hover" : ""} align-middle mb-0`}
+        >
           {/* Header */}
-          <thead
-            className="table-light"
-            style={{
-              position: "sticky",
-              top: 0,
-              zIndex: 2,
-            }}
-          >
+          <thead className="table-light">
             <tr>
               <SortHeader
                 label="Item"
@@ -313,8 +301,12 @@ function ItemTable({ items, onEdit, onDelete }) {
               })
             ) : (
               <tr>
-                <td colSpan="6" className="border-0">
-                  <EmptyItemTable />
+                <td colSpan="7" className="border-0">
+                  <EmptyTableState
+                    icon="bi-box-seam"
+                    title="No items yet"
+                    description="Add an item to start managing your inventory, stock, and expiration dates."
+                  />
                 </td>
               </tr>
             )}
@@ -368,13 +360,7 @@ function ItemTable({ items, onEdit, onDelete }) {
         </div>
 
         {/* Compact Item List */}
-        <div
-          style={{
-            maxHeight: "calc(100vh - 260px)",
-            minHeight: "200px",
-            overflowY: "auto",
-          }}
-        >
+        <div>
           {sortedItems.length > 0 ? (
             <div>
               {sortedItems.map((item) => {
@@ -507,22 +493,14 @@ function ItemTable({ items, onEdit, onDelete }) {
               })}
             </div>
           ) : (
-            <EmptyItemTable />
+            <EmptyTableState
+              icon="bi-box-seam"
+              title="No items yet"
+              description="Add an item to start managing your inventory, stock, and expiration dates."
+            />
           )}
         </div>
       </div>
-
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
-      {sortedItems.length > 0 && (
-        <div className="border-top bg-light px-3 py-2">
-          <small className="text-muted">
-            <i className="bi bi-box-seam me-1"></i>
-            {sortedItems.length} {sortedItems.length !== 1 ? "items" : "item"}
-          </small>
-        </div>
-      )}
     </div>
   );
 }
