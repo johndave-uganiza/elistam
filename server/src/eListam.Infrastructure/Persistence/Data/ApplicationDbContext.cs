@@ -83,7 +83,7 @@ namespace eListam.Infrastructure.Persistence.Data
                 e.Property(p => p.COGS).HasPrecision(_PRECISION, _PRICE_SCALE);
                 e.Property(p => p.Gross).HasPrecision(_PRECISION, _PRICE_SCALE);
                 e.Property(p => p.Net).HasPrecision(_PRECISION, _PRICE_SCALE);
-                
+                e.Property(p => p.OperatingExpenses).HasPrecision(_PRECISION, _PRICE_SCALE);
             });
             #endregion
 

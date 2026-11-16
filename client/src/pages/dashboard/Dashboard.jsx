@@ -3,6 +3,43 @@ import BarChart from "../../components/dashboard/BarChart";
 import { DashboardContext } from "../../context/DashboardContext";
 import helperFunctions from "@/utilities/helperFunctions";
 
+const stockAlertPresentations = {
+  LowStock: {
+    color: "warning",
+    icon: "bi-exclamation-triangle-fill",
+    label: "Low stock",
+  },
+  OutOfStock: {
+    color: "info",
+    icon: "bi-x-lg",
+    label: "Out of stock",
+  },
+  Expired: {
+    color: "danger",
+    icon: "bi-calendar-x-fill",
+    label: "Expired",
+  },
+  ExpiringSoon: {
+    color: "danger",
+    icon: "bi-calendar-event-fill",
+    label: "Expiring soon",
+  },
+};
+
+function getStockAlertDetails(alert, label) {
+  const details = [label, `${alert.stock} in stock`];
+
+  if (alert.expirationDate) {
+    const expirationLabel =
+      alert.alertType === "Expired" ? "Expired" : "Expires";
+    details.push(
+      `${expirationLabel} ${helperFunctions.formatDate(alert.expirationDate)}`,
+    );
+  }
+
+  return details.join(" · ");
+}
+
 function Dashboard() {
   const [metrics, setMetrics] = useState({
     revenue: 0,
@@ -12,15 +49,17 @@ function Dashboard() {
     operatingExpenses: 0,
     stockAmount: 0,
   });
+  const [monthlyFinancials, setMonthlyFinancials] = useState([]);
+  const [stockAlerts, setStockAlerts] = useState([]);
+  const [year, setYear] = useState(new Date().getFullYear());
 
-  const { getDashboardMetrics } = useContext(DashboardContext);
+  const { getDashboardMetrics, isLoading } = useContext(DashboardContext);
 
   useEffect(() => {
     const fetchDashboardMetrics = async () => {
       try {
         const response = await getDashboardMetrics();
 
-        // Supports an Axios response or a direct data object.
         const data = response?.data ?? response ?? {};
 
         setMetrics({
@@ -31,6 +70,9 @@ function Dashboard() {
           operatingExpenses: Number(data.operatingExpenses) || 0,
           stockAmount: Number(data.stockAmount) || 0,
         });
+        setMonthlyFinancials(data.monthlyFinancials ?? []);
+        setStockAlerts(data.stockAlerts ?? []);
+        setYear(Number(data.year) || new Date().getFullYear());
       } catch (error) {
         console.error(error);
       }
@@ -78,27 +120,6 @@ function Dashboard() {
     },
   ];
 
-  // const stockAlerts = [
-  //   {
-  //     item: "Item-1",
-  //     status: "Quantity is below 10 units",
-  //     type: "warning",
-  //     icon: "bi-exclamation-triangle-fill",
-  //   },
-  //   {
-  //     item: "Item-2",
-  //     status: "Expires in 6 months",
-  //     type: "info",
-  //     icon: "bi-calendar-event-fill",
-  //   },
-  //   {
-  //     item: "Item-3",
-  //     status: "Out of stock",
-  //     type: "danger",
-  //     icon: "bi-x-circle-fill",
-  //   },
-  // ];
-
   return (
     <div className="container px-3 px-md-4 py-2">
       {/* Header */}
@@ -112,9 +133,17 @@ function Dashboard() {
         </div>
 
         <div className="mt-2 mt-md-0">
-          <div className="alert alert-success border-0 shadow-sm mb-0 py-1 px-3 d-flex align-items-center">
-            <i className="bi bi-check-circle-fill me-2"></i>
-            <span className="small fw-medium">Everything is looking good!</span>
+          <div
+            className={`alert ${stockAlerts.length ? "alert-warning" : "alert-success"} border-0 shadow-sm mb-0 py-1 px-3 d-flex align-items-center`}
+          >
+            <i
+              className={`bi ${stockAlerts.length ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill"} me-2`}
+            ></i>
+            <span className="small fw-medium">
+              {stockAlerts.length
+                ? `${stockAlerts.length} item${stockAlerts.length === 1 ? "" : "s"} need attention`
+                : "Everything is looking good!"}
+            </span>
           </div>
         </div>
       </div>
@@ -178,7 +207,7 @@ function Dashboard() {
                   <h6 className="fw-bold mb-1">Financial Overview</h6>
 
                   <p className="text-muted small mb-0">
-                    Revenue, cogs and operating expenses
+                    Monthly revenue, COGS, and operating expenses for {year}
                   </p>
                 </div>
 
@@ -194,42 +223,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Financial Overview */}
-            <div className="card-body px-3 px-md-4 pt-2 pb-3">
-              <div
-                className="d-flex flex-column align-items-center justify-content-center text-center bg-light rounded-3 border px-3"
-                style={{
-                  height: "38vh",
-                  minHeight: "250px",
-                }}
-              >
-                <div
-                  className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3"
-                  style={{
-                    width: "64px",
-                    height: "64px",
-                  }}
-                >
-                  <i className="bi bi-bar-chart-line fs-3"></i>
-                </div>
-
-                <h6 className="fw-bold mb-2">Financial Overview</h6>
-
-                <p
-                  className="text-muted small mb-3"
-                  style={{ maxWidth: "360px" }}
-                >
-                  Visualize revenue, cost of goods sold, and operating expenses.
-                </p>
-
-                <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
-                  <i className="bi bi-clock-history me-1"></i>
-                  Coming Soon
-                </span>
-              </div>
-            </div>
-
-            {/*
             <div className="card-body px-2 px-md-3 pt-2 pb-3">
               <div
                 className="w-100"
@@ -237,10 +230,9 @@ function Dashboard() {
                   height: "38vh",
                 }}
               >
-                <BarChart />
+                <BarChart monthlyFinancials={monthlyFinancials} />
               </div>
             </div>
-            */}
           </div>
         </div>
 
@@ -253,71 +245,62 @@ function Dashboard() {
                   <h6 className="fw-bold mb-1">Stock Alerts</h6>
 
                   <p className="text-muted small mb-0">
-                    Items needing attention
+                    Low stock, out of stock, and expiration alerts
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="card-body p-3 px-md-4">
-              <div
-                className="p-3 d-flex flex-column align-items-center justify-content-center text-center bg-light rounded-3 border px-3"
-                style={{ minHeight: "200px" }}
-              >
+              {isLoading ? (
+                <div className="text-center py-4">
+                  <span
+                    className="spinner-border spinner-border-sm text-primary"
+                    role="status"
+                  />
+                  <span className="visually-hidden">Loading stock alerts</span>
+                </div>
+              ) : stockAlerts.length > 0 ? (
                 <div
-                  className="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center mb-3"
+                  className="d-flex flex-column gap-2 overflow-auto"
                   style={{
-                    width: "60px",
-                    height: "60px",
+                    maxHeight: "264px",
+                    overflowX: "hidden",
                   }}
                 >
-                  <i className="bi bi-bell fs-3"></i>
-                </div>
+                  {stockAlerts.map((alert) => {
+                    const presentation =
+                      stockAlertPresentations[alert.alertType] ??
+                      stockAlertPresentations.ExpiringSoon;
 
-                <h6 className="fw-bold mb-2">Stock Alerts</h6>
-
-                <p className="text-muted small mb-3">
-                  Get notified about low stock, expiring products, and
-                  out-of-stock items.
-                </p>
-
-                <span className="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
-                  <i className="bi bi-clock-history me-1"></i>
-                  Coming Soon
-                </span>
-              </div>
-            </div>
-
-            {/*
-            <div className="card-body p-3 px-md-4">
-              {stockAlerts.length > 0 ? (
-                <div className="d-flex flex-column gap-2">
-                  {stockAlerts.map((alert) => (
-                    <div
-                      key={alert.item}
-                      className="d-flex align-items-center p-2 rounded-3 bg-light"
-                    >
+                    return (
                       <div
-                        className={`rounded-circle bg-${alert.type}-subtle text-${alert.type} d-flex align-items-center justify-content-center flex-shrink-0`}
-                        style={{
-                          width: "38px",
-                          height: "38px",
-                        }}
+                        key={alert.itemId}
+                        className="d-flex align-items-center p-2 rounded-3 bg-light overflow-hidden flex-shrink-0"
+                        style={{ height: "60px" }}
                       >
-                        <i className={`bi ${alert.icon} small`}></i>
-                      </div>
-
-                      <div className="ms-2 min-width-0">
-                        <div className="fw-semibold text-dark small">
-                          {alert.item}
+                        <div
+                          className={`rounded-circle bg-${presentation.color}-subtle text-${presentation.color} d-flex align-items-center justify-content-center flex-shrink-0`}
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                          }}
+                        >
+                          <i className={`bi ${presentation.icon} small`}></i>
                         </div>
 
-                        <div className="text-muted small text-truncate">
-                          {alert.status}
+                        <div className="ms-2 min-width-0">
+                          <div className="fw-semibold text-dark small text-truncate">
+                            {alert.itemName}
+                          </div>
+
+                          <div className="text-muted small text-truncate">
+                            {getStockAlertDetails(alert, presentation.label)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-4">
@@ -328,23 +311,11 @@ function Dashboard() {
                   </p>
 
                   <p className="text-muted small mb-0">
-                    No stock alerts at the moment.
+                    No items match the stock alert criteria.
                   </p>
                 </div>
               )}
             </div>
-            */}
-
-            {/* Current Stock Value — remains active */}
-            {/* <div className="border-top px-3 px-md-4 py-3 mt-auto">
-              <div className="d-flex justify-content-between align-items-center gap-3">
-                <span className="text-muted small">Current stock value</span>
-
-                <span className="fw-bold text-dark text-nowrap">
-                  {helperFunctions.formatCurrencyToPHP(metrics.stockAmount)}
-                </span>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>

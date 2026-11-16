@@ -19,7 +19,7 @@ ChartJS.register(
   Legend,
 );
 
-function BarChart() {
+function BarChart({ monthlyFinancials = [] }) {
   const months = [
     "Jan",
     "Feb",
@@ -35,20 +35,16 @@ function BarChart() {
     "Dec",
   ];
 
-  const revenue = [
-    45000, 52000, 48000, 60000, 65000, 58000, 72000, 68000, 75000, 80000, 85000,
-    92000,
-  ];
-
-  const cogs = [
-    22000, 26000, 24000, 30000, 32000, 29000, 36000, 34000, 37000, 40000, 42000,
-    45000,
-  ];
-
-  const opex = [
-    10000, 11000, 10500, 12000, 13000, 12500, 14000, 13500, 15000, 15500, 16000,
-    17000,
-  ];
+  const monthlyData = new Map(
+    monthlyFinancials.map((financial) => [financial.month, financial]),
+  );
+  const revenue = months.map(
+    (_, index) => monthlyData.get(index + 1)?.revenue ?? 0,
+  );
+  const cogs = months.map((_, index) => monthlyData.get(index + 1)?.cogs ?? 0);
+  const opex = months.map(
+    (_, index) => monthlyData.get(index + 1)?.operatingExpenses ?? 0,
+  );
 
   const data = {
     labels: months,
@@ -185,8 +181,6 @@ function BarChart() {
         },
       },
 
-      // The dashboard already has a card header,
-      // so don't render another Chart.js title.
       title: {
         display: false,
       },
@@ -208,9 +202,9 @@ function BarChart() {
 
             const index = items[0].dataIndex;
 
-            const monthlyRevenue = revenue[index];
-            const monthlyCogs = cogs[index];
-            const monthlyOpex = opex[index];
+            const monthlyRevenue = Number(data.datasets[0].data[index]) || 0;
+            const monthlyCogs = Number(data.datasets[1].data[index]) || 0;
+            const monthlyOpex = Number(data.datasets[2].data[index]) || 0;
 
             const grossProfit = monthlyRevenue - monthlyCogs;
 

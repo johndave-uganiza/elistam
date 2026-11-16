@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import { API_BASE_URL } from "../config/api";
 
 const DashboardContext = createContext(null);
@@ -7,7 +7,7 @@ function DashboardProvider({ children }) {
   const token = localStorage.getItem("token");
   const [isLoading, setIsLoading] = useState(false);
 
-  const getDashboardMetrics = async () => {
+  const getDashboardMetrics = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
@@ -17,16 +17,15 @@ function DashboardProvider({ children }) {
         },
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        return result;
+      if (!response.ok) {
+        throw new Error(`Dashboard request failed (${response.status})`);
       }
-    } catch (error) {
-      console.error(error);
+
+      return await response.json();
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
   return (
     <DashboardContext.Provider value={{ getDashboardMetrics, isLoading }}>

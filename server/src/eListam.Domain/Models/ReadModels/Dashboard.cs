@@ -3,9 +3,11 @@
     public class Dashboard
     {
         public int Year { get; set; }
+        public int Month { get; set; }
         public decimal Revenue { get; set; }
         public decimal COGS { get; set; }
         public decimal Gross { get; set; }
         public decimal Net { get; set; }
+        public decimal OperatingExpenses { get; set; }
     }
 }
