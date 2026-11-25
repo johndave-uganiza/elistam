@@ -1,0 +1,115 @@
+.attribution-section {
+  width: 100%;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  color: #64748b;
+}
+
+.attribution-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.attribution-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #059669;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.attribution-copy {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.attribution-copy a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.attribution-copy a:hover,
+.attribution-copy a:focus-visible {
+  color: #047857;
+}
+
+.attribution-section--footer {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #475569;
+}
+
+.attribution-section--footer .attribution-inner {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.attribution-section--footer .attribution-label {
+  display: inline;
+  margin: 0 0.4rem 0 0;
+}
+
+.attribution-section--hero {
+  max-width: 760px;
+  width: calc(100% - 2rem);
+  margin-top: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 12px;
+  background: rgba(3, 46, 35, 0.92);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.attribution-section--hero .attribution-inner {
+  padding: 0.75rem 1rem;
+}
+
+.attribution-section--hero .attribution-label {
+  display: inline;
+  margin-right: 0.4rem;
+  color: #a7f3d0;
+  font-size: 0.72rem;
+}
+
+.attribution-section--hero .attribution-copy {
+  display: inline;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.attribution-section--hero .attribution-copy a {
+  color: #fff;
+}
+
+.attribution-section--hero .attribution-copy a:hover,
+.attribution-section--hero .attribution-copy a:focus-visible {
+  color: #a7f3d0;
+}
+
+@media (max-width: 575.98px) {
+  .attribution-inner {
+    padding-inline: 1rem;
+  }
+
+  .attribution-section--hero {
+    width: 100%;
+  }
+
+  .attribution-section--hero .attribution-label {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 0.2rem;
+  }
+}

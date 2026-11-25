@@ -525,6 +525,122 @@ html {
 }
 
 /* ========================================
+   CONTACT SECTION
+======================================== */
+
+.contact-section {
+    background-color: #f8fafc;
+}
+
+.contact-panel {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 24px;
+    background:
+        radial-gradient(ellipse at top right,
+            rgba(5, 150, 105, 0.1),
+            transparent 55%),
+        #fff;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.contact-description {
+    max-width: 620px;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.contact-form {
+    max-width: 680px;
+}
+
+.contact-form .form-label {
+    color: #334155;
+}
+
+.contact-form .form-control {
+    border-color: #cbd5e1;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.contact-form .form-control:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.16);
+}
+
+.contact-message {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.contact-status {
+    min-height: 1.5em;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.contact-button {
+    padding: 0.8rem 1.25rem;
+    border: 1px solid #047857;
+    border-radius: 12px;
+    background-color: #047857;
+    color: #fff;
+    font-weight: 700;
+    transition:
+        transform 0.3s ease,
+        background-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.contact-button:hover,
+.contact-button:focus-visible {
+    transform: translateY(-2px);
+    background-color: #065f46;
+    border-color: #065f46;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(4, 120, 87, 0.2);
+}
+
+.contact-button:focus-visible,
+.scroll-to-top:focus-visible {
+    outline: 3px solid #fbbf24;
+    outline-offset: 4px;
+}
+
+/* ========================================
+   SCROLL CONTROL
+======================================== */
+
+.scroll-to-top {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    z-index: 1030;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background-color: #047857;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+    font-size: 1.25rem;
+
+    transition:
+        transform 0.25s ease,
+        background-color 0.25s ease;
+}
+
+.scroll-to-top:hover {
+    transform: translateY(-3px);
+    background-color: #065f46;
+}
+
+/* ========================================
    SCROLL REVEAL
 ======================================== */
 
@@ -720,7 +836,9 @@ html {
 
     .feature-card:hover,
     .tech-card:hover,
-    .hero-card:hover {
+    .hero-card:hover,
+    .contact-button:hover,
+    .scroll-to-top:hover {
         transform: none;
     }
 }

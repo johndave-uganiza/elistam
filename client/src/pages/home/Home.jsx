@@ -1,8 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Background from "../../components/common/Background";
+import Attribution from "../../components/common/Attribution";
 import "@/assets/css/pages/Home.css";
 
 function Home() {
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactStatus, setContactStatus] = useState("");
+
   useEffect(() => {
     const elements = document.querySelectorAll(".reveal-on-scroll");
 
@@ -46,6 +53,32 @@ function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const updateScrollControl = () => {
+      setShowScrollToTop(window.scrollY > 160);
+    };
+
+    updateScrollControl();
+    window.addEventListener("scroll", updateScrollControl, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollControl);
+    };
+  }, []);
+
+  function scrollToContact(event) {
+    event.preventDefault();
+    document.getElementById("contact")?.scrollIntoView();
+  }
+
+  function handleContactSubmit(event) {
+    event.preventDefault();
+    setContactMessage("");
+    setContactStatus(
+      "Message cleared. Message delivery is not connected yet.",
+    );
+  }
+
   return (
     <>
       {/* Hero Section */}
@@ -78,7 +111,8 @@ function Home() {
                   {/* Hero Action Buttons */}
                   <div className="hero-actions d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center mt-4">
                     <a
-                      href="#how-elistam-works"
+                      href="#contact"
+                      onClick={scrollToContact}
                       className="btn hero-btn hero-btn-primary"
                     >
                       <i className="bi bi-rocket-takeoff" aria-hidden="true" />
@@ -89,8 +123,8 @@ function Home() {
                       />
                     </a>
 
-                    <a
-                      href="/login"
+                    <Link
+                      to="/login"
                       className="btn hero-btn hero-btn-secondary"
                     >
                       <i
@@ -98,7 +132,7 @@ function Home() {
                         aria-hidden="true"
                       />
                       <span>Login</span>
-                    </a>
+                    </Link>
 
                     {/* <a
                       href="/register"
@@ -108,6 +142,8 @@ function Home() {
                       <span>Register</span>
                     </a> */}
                   </div>
+
+                  <Attribution variant="hero" />
                 </div>
               </div>
             </div>
@@ -271,6 +307,80 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <section className="contact-section pb-5" id="contact">
+        <div className="container pb-4">
+          <div className="contact-panel text-center p-4 p-md-5 reveal-on-scroll">
+            <span className="section-eyebrow">GET IN TOUCH</span>
+            <h2 className="display-6 fw-bold mb-3">Contact the eListam Team</h2>
+            <p className="contact-description mx-auto mb-4">
+              Have a question, suggestion, or interested in the project? Reach
+              out by sending a message.
+            </p>
+            <form className="contact-form mx-auto" onSubmit={handleContactSubmit}>
+              <div className="mb-3 text-start">
+                <label htmlFor="contact-email" className="form-label fw-semibold">
+                  Your email
+                </label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="email"
+                  className="form-control"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={contactEmail}
+                  onChange={(event) => {
+                    setContactEmail(event.target.value);
+                    setContactStatus("");
+                  }}
+                  required
+                />
+              </div>
+              <div className="mb-3 text-start">
+                <label
+                  htmlFor="contact-message"
+                  className="form-label fw-semibold"
+                >
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  className="form-control contact-message"
+                  placeholder="Write your message..."
+                  value={contactMessage}
+                  onChange={(event) => {
+                    setContactMessage(event.target.value);
+                    setContactStatus("");
+                  }}
+                  rows="5"
+                  required
+                />
+              </div>
+              <button type="submit" className="btn contact-button">
+                <i className="bi bi-send me-2" aria-hidden="true" />
+                Send message
+              </button>
+              <p className="contact-status mt-3 mb-0" role="status">
+                {contactStatus}
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {showScrollToTop && (
+        <button
+          type="button"
+          className="scroll-to-top"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          <i className="bi bi-arrow-up" aria-hidden="true" />
+        </button>
+      )}
     </>
   );
 }

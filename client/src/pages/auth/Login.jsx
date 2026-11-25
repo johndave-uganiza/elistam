@@ -33,11 +33,8 @@ function LoginPage() {
 
   return (
     <Background>
-      <div className="container">
-        <div
-          className="row justify-content-center align-items-center"
-          style={{ minHeight: "80vh" }}
-        >
+      <div className="container d-flex flex-column flex-fill py-2">
+        <div className="row flex-grow-1 justify-content-center align-items-center py-2">
           <div className="col-11 col-sm-9 col-md-7 col-lg-5 col-xl-4">
             <div
               className="card border-0 shadow-lg text-dark"
@@ -50,14 +47,14 @@ function LoginPage() {
                 boxShadow: "0 20px 50px rgba(0,0,0,.18)",
               }}
             >
-              <div className="card-body p-4">
+              <div className="card-body p-3 p-sm-4">
                 {/* Header */}
-                <div className="text-center mb-4">
+                <div className="text-center mb-3">
                   <div
                     className="d-flex align-items-center justify-content-center mx-auto mb-3"
                     style={{
-                      width: "64px",
-                      height: "64px",
+                      width: "56px",
+                      height: "56px",
                       borderRadius: "18px",
                       background: "linear-gradient(135deg, #198754, #20c997)",
                       boxShadow: "0 8px 20px rgba(25,135,84,.25)",
@@ -65,7 +62,7 @@ function LoginPage() {
                   >
                     <i
                       className="bi bi-box-seam text-white"
-                      style={{ fontSize: "30px" }}
+                      style={{ fontSize: "27px" }}
                     ></i>
                   </div>
 
@@ -111,7 +108,7 @@ function LoginPage() {
                   </div>
 
                   {/* Password */}
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <label
                       htmlFor="password"
                       className="form-label fw-semibold"
@@ -162,7 +159,7 @@ function LoginPage() {
                 </form>
 
                 {/* Footer */}
-                <div className="text-center mt-4">
+                <div className="text-center mt-3">
                   <small className="text-secondary">Demo eListam account</small>
                 </div>
               </div>
