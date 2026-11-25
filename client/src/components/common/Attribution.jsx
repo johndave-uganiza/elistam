@@ -10,7 +10,7 @@ function Attribution({ variant = "default" }) {
         <span className="attribution-label">ATTRIBUTION</span>
         <p className="attribution-copy mb-0">
           Background image is{" "}
-          <a href="www.magnific.com" target="_blank" rel="noreferrer">
+          <a href="https://www.magnific.com" target="_blank" rel="noreferrer">
             Designed by Magnific
           </a>
         </p>
